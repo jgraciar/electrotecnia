@@ -53,5 +53,26 @@ try {
       console.log(meta.id,measure.label,"teoría",measure.value,"medido",actual);
     }
   }
+  // Comprobar importación y exportación nativas con el motor real del iframe.
+  const roundtrip=await page.evaluate(()=>{
+    const frame=document.getElementById("circuit-frame");
+    const api=frame?.contentWindow?.CircuitJS1;
+    const before=Array.from(api?.getElements?.()||[]).map(el=>el.getType());
+    const exported=window.LabCircuit.exportNativeCircuit();
+    if(!exported.ok)return {exported,typesBefore:before};
+    const imported=window.LabCircuit.importNativeCircuit("PN-roundtrip",exported.dump);
+    const after=Array.from(api.getElements()).map(el=>el.getType());
+    const again=window.LabCircuit.exportNativeCircuit();
+    return {exported:{ok:exported.ok,format:exported.format,header:exported.dump.slice(0,2)},
+      imported,again:{ok:again.ok,header:again.dump?.slice(0,2)},
+      typesBefore:before,typesAfter:after};
+  });
+  assert(roundtrip.exported.ok,"Exportación nativa fallida: "+JSON.stringify(roundtrip));
+  assert.equal(roundtrip.exported.format,"circuitjs-text");
+  assert.equal(roundtrip.exported.header,"$ ");
+  assert(roundtrip.imported?.ok,"Importación nativa fallida: "+JSON.stringify(roundtrip));
+  assert(roundtrip.again?.ok && roundtrip.again.header==="$ ","Reexportación fallida");
+  assert.deepEqual(roundtrip.typesAfter,roundtrip.typesBefore,"El circuito cambió al reimportarlo");
+  console.log("IMPORTACIÓN/EXPORTACIÓN NATIVA CIRCUITJS CONTRASTADA CON MOTOR REAL");
   console.log("OCHO ACTIVIDADES CONTRASTADAS CON MOTOR REAL CIRCUITJS");
 }finally{await browser.close();}
