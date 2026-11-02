@@ -95,6 +95,19 @@ try {
   if(!fullCrossStructure.equal)
     throw new Error('Wulflemm changes circuit structure when importing lab-edited XML');
 
+  const electricalProbe=await page.evaluate(async ()=>{
+    const api=window.CircuitJS1;
+    const start=api.getTime?.();
+    await new Promise(resolve=>setTimeout(resolve,1400));
+    const end=api.getTime?.();
+    const svg=api.getCircuitAsSVG ? typeof api.getCircuitAsSVG : 'missing';
+    return {start,end,advancing:Number.isFinite(start)&&Number.isFinite(end)&&end>start,svg};
+  });
+  console.log('WULFLEMM IMPORTED CIRCUIT SIMULATION CLOCK',JSON.stringify(electricalProbe));
+  if(!electricalProbe.advancing)
+    throw new Error('Original Wulflemm simulation did not advance after laboratory XML import');
+
+
   if(importedFromLab.first.resistor!=='1137' ||
       importedFromLab.first.resistors!==3 ||
       JSON.stringify(importedFromLab.first.wattmeters)!==JSON.stringify(['0','1']) ||
