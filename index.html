@@ -135,9 +135,9 @@
       <label>Magnitud visualizada<select id="elementQuantity"><option value="voltage">Tensión en el componente (V)</option><option value="current">Corriente en el componente (A)</option></select></label>
       <label>Ventana de adquisición · ms<input id="sampleWindow" type="number" min="1" max="10000" step="10" value="100"></label>
     </div>
-    <div class="actions"><a href="./circuitjs/circuitjs.html" target="_blank" rel="noopener noreferrer" class="button-link">Abrir Falstad</a></div>
+    <div class="actions"><a href="./?abrir-falstad=1" target="_blank" rel="noopener noreferrer" class="button-link">Abrir Falstad</a></div>
     <div class="controls bridge-controls">
-      <label>Archivo XML de wulflemm<input id="wulflemmXmlFile" type="file" accept=".xml,application/xml,text/xml"></label>
+      <label>Archivo XML de wulflemm<input id="wulflemmXmlFile" type="file" accept=".xml,.txt,application/xml,text/xml,text/plain"></label>
       <button id="wulflemmXmlSave" type="button" disabled>Exportar XML conservado</button>
     </div>
     <div class="controls bridge-controls">
@@ -146,7 +146,7 @@
       <label>Valor<input id="wulflemmValue" type="text" placeholder="Nuevo valor"></label>
       <button id="wulflemmApply" type="button" disabled>Modificar XML</button>
     </div>
-    <p class="hint" id="wulflemmXmlStatus" role="status">Intercambio documental XML. No importa ni exporta circuitos eléctricos editables en CircuitJS.</p>
+    <p class="hint" id="wulflemmXmlStatus" role="status">Importa archivos XML de Wulflemm o CircuitJS, incluidos los guardados con extensión .txt.</p>
     <iframe title="Simulador CircuitJS de Falstad" id="circuit-frame" loading="lazy"></iframe>
     <p class="hint">Las señales mostradas proceden del motor CircuitJS cuando está alojado en este mismo dominio. En modo externo solo se puede editar el circuito: el navegador impide leer sus señales por motivos de seguridad.</p>
   </section>
