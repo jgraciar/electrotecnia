@@ -468,6 +468,44 @@ try {
     return {opened,fields,dialogText:opened?body.slice(-700):null};
   });
   console.log("EDITOR VATÍMETRO WULFLEMM",JSON.stringify(wattmeterGui));
+
+  const wattmeterModeRoundtrip=await page.evaluate(()=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    const api=d.defaultView.CircuitJS1;
+    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const r=canvas.getBoundingClientRect(),x=430,y=30;
+    canvas.dispatchEvent(new MouseEvent("mousemove",{bubbles:true,view:d.defaultView,
+      clientX:r.x+x,clientY:r.y+y}));
+    canvas.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,
+      view:d.defaultView,clientX:r.x+x,clientY:r.y+y,button:0,detail:2}));
+    const select=Array.from(d.querySelectorAll("select")).find(e=>
+      e.getBoundingClientRect().width>10&&Array.from(e.options).some(o=>o.text.includes("Instantaneous Power")));
+    if(!select)return {error:"Wattmeter mode selector not found"};
+    const options=Array.from(select.options).map(o=>({value:o.value,text:o.text}));
+    const instant=Array.from(select.options).find(o=>o.text.includes("Instantaneous Power"));
+    select.value=instant.value;
+    select.dispatchEvent(new Event("change",{bubbles:true}));
+    const ok=Array.from(d.querySelectorAll("button")).find(e=>
+      e.textContent?.trim()==="OK"&&e.getBoundingClientRect().width>0);
+    if(!ok)return {error:"OK button missing",options};
+    ok.click();
+    const read=()=>{
+      const xml=api.exportCircuit();
+      const doc=new DOMParser().parseFromString(xml,"application/xml");
+      return Array.from(doc.querySelectorAll("WattmeterTrue")).map(e=>({
+        x:e.getAttribute("x"),meter:e.getAttribute("meter"),w:e.getAttribute("w")}));
+    };
+    const before=read(),xml=api.exportCircuit();
+    api.importCircuit(xml);
+    const after=read();
+    return {options,before,after};
+  });
+  console.log("ROUNDTRIP MODO VATÍMETRO GUI",JSON.stringify(wattmeterModeRoundtrip));
+  if(wattmeterModeRoundtrip.error||
+    JSON.stringify(wattmeterModeRoundtrip.before)!==JSON.stringify(wattmeterModeRoundtrip.after)||
+    wattmeterModeRoundtrip.before?.length!==2)
+    throw new Error("No se ha conservado el modo del vatímetro tras reimportar XML");
+
   if(!wattmeterGui.opened)throw new Error("No se ha abierto el editor gráfico del vatímetro");
 
   if(guiRoundtrip.before!=="1137"||guiRoundtrip.after!=="1137"||
