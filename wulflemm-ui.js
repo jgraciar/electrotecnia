@@ -13,11 +13,14 @@
     if(!selected)return;
     if(selected.size>2_000_000){status.textContent="Archivo demasiado grande (máximo 2 MB).";return;}
     try{
-      const result=window.LabCircuit?.importWulflemmXml(await selected.text());
+      const source=await selected.text();
+      const result=source.trimStart().startsWith("$ ")
+        ? window.LabCircuit?.importNativeCircuit(selected.name,source)
+        : window.LabCircuit?.importWulflemmXml(source);
       if(!result?.ok){status.textContent=result?.message||"No se pudo leer el XML.";return;}
-      status.textContent="XML conservado: "+result.wattmeters+" vatímetros. No se ha cargado en el simulador.";
-      save.disabled=false;
-      if(component){
+      status.textContent="Circuito cargado en el simulador: "+selected.name+".";
+      save.disabled=result.format!=="wulflemm-xml";
+      if(component && result.format==="wulflemm-xml"){
         component.replaceChildren();
         for(const el of window.LabCircuit.getWulflemmComponents()){
           const option=document.createElement("option");option.value=String(el.index);
@@ -39,6 +42,6 @@
     link.href=url;link.download="circuito-wulflemm.xml";
     link.click();
     setTimeout(()=>URL.revokeObjectURL(url),1000);
-    status.textContent="XML conservado exportado. No incluye cambios hechos en el motor CircuitJS.";
+    status.textContent="XML exportado desde el estado actual del simulador.";
   });
 })();
