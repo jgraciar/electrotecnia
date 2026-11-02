@@ -156,7 +156,7 @@
     if(!Number.isFinite(time))return null;
     const get=type=>elements.find(el=>{try{return el.getType()===type;}catch(_){return false;}});
     const ammeter=get("AmmeterElm"),voltmeter=get("ProbeElm"),
-      wattmeter=get("WattmeterElm");
+      wattmeter=get("WattmeterTrueElm") || get("WattmeterElm");
     let current=NaN,voltage=NaN,power=NaN;
     try{if(ammeter)current=ammeter.getCurrent();}catch(_){}
     try{if(voltmeter)voltage=voltmeter.getVoltageDiff();}catch(_){}
