@@ -155,6 +155,16 @@
   // Navegar a una plantilla del catálogo incluido en CircuitJS reinicia
   // la simulación y los datos medidos; no altera otros circuitos guardados.
   function importModel(filename,dump){
+    // CircuitJS importCircuit recibe un volcado textual, no el XML de wulflemm.
+    // Rechazarlo antes de modificar el circuito actualmente abierto.
+    if(typeof dump!=="string" || !dump.trimStart().startsWith("$ ")){
+      const xml=typeof dump==="string" && /^<cir(?:\\s|>)/.test(dump.trimStart());
+      const reason=xml
+        ? "El archivo XML de wulflemm necesita un importador compatible; no se puede pasar directamente a importCircuit."
+        : "El modelo no tiene el formato de texto de CircuitJS (cabecera $).";
+      message(reason);
+      return {ok:false,message:reason};
+    }
     if(!sim){
       pendingModel={filename,dump};
       message("CircuitJS está inicializando; el modelo se cargará automáticamente.");
