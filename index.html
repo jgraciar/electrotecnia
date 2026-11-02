@@ -36,7 +36,7 @@
   <nav class="tabs" aria-label="Módulos">
     <button class="tab active" type="button" data-mode="generator" aria-pressed="true">Generador</button>
     <button class="tab" type="button" data-mode="threephase" aria-pressed="false">Trifásica</button>
-    <button class="tab" type="button" data-mode="falstad" aria-pressed="false">CircuitJS</button>
+    <button class="tab" type="button" data-mode="falstad" aria-pressed="false">Falstad</button>
     <button class="tab" type="button" data-mode="publications" aria-pressed="false">Publicaciones</button>
   </nav>
   <section class="panel" id="generator-controls">
@@ -133,7 +133,7 @@
       <label>Magnitud visualizada<select id="elementQuantity"><option value="voltage">Tensión en el componente (V)</option><option value="current">Corriente en el componente (A)</option></select></label>
       <label>Ventana de adquisición · ms<input id="sampleWindow" type="number" min="1" max="10000" step="10" value="100"></label>
     </div>
-    <div class="actions"><a href="https://www.falstad.com/circuit/" target="_blank" rel="noopener noreferrer" class="button-link">Abrir Falstad oficial ↗</a></div>
+    <div class="actions"><a href="./circuitjs/circuitjs.html" target="_blank" rel="noopener noreferrer" class="button-link">Abrir Falstad</a></div>
     <iframe title="Simulador CircuitJS de Falstad" id="circuit-frame" loading="lazy"></iframe>
     <p class="hint">Las señales mostradas proceden del motor CircuitJS cuando está alojado en este mismo dominio. En modo externo solo se puede editar el circuito: el navegador impide leer sus señales por motivos de seguridad.</p>
   </section>
