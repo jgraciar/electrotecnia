@@ -19,7 +19,9 @@
   let wattmeters=[];
   const WATT_WINDOW_S=0.1;
   function wattPowerInstant(element){
-    if(!element || element.getPostCount()<4 || typeof element.getVoltage!=="function")return NaN;
+    if(!element || element.getPostCount()<4)return NaN;
+    if(element.getType()==="WattmeterElm")return element.getVoltageDiff()*element.getCurrent();
+    if(typeof element.getVoltage!=="function")return NaN;
     const voltage=element.getVoltage(2)-element.getVoltage(3);
     const current=element.getCurrent();
     return Number.isFinite(voltage) && Number.isFinite(current) ? voltage*current : NaN;
@@ -63,7 +65,7 @@
     if(!sim)return;
     let elements=[];
     try{elements=Array.from(sim.getElements()||[]);}catch(err){message("Error al consultar los componentes: "+err.message);return;}
-    wattmeters=elements.filter(el=>{try{return el.getType()==="WattmeterTrueElm";}catch(_){return false;}}).map(element=>({element,samples:[]}));
+    wattmeters=elements.filter(el=>{try{return ["WattmeterTrueElm","WattmeterElm"].includes(el.getType());}catch(_){return false;}}).map(element=>({element,samples:[]}));
     measuredWattmeter=wattmeters[0]?.element || null;
     wattSamples=[];
     eligible=elements.filter(el=>{
