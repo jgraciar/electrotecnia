@@ -129,6 +129,18 @@ try {
     const exported=window.LabCircuit.exportNativeCircuit();
     return {imported,types,exported:exported.ok?{ok:true,xml:exported.dump}:exported};
   },originalXml);
+  // Exportación Wulflemm: debe reflejar el estado eléctrico real del motor.
+  const liveWulflemm=await page.evaluate(()=>({
+    live:window.LabCircuit.exportWulflemmXml(),
+    native:window.LabCircuit.exportNativeCircuit().format
+  }));
+  assert(liveWulflemm.live.ok,
+    "No se exporta XML Wulflemm desde el estado real: "+JSON.stringify(liveWulflemm));
+  assert.equal(liveWulflemm.live.format,"wulflemm-xml");
+  assert(liveWulflemm.live.xml.includes("<WattmeterTrue "),
+    "La exportación viva pierde los vatímetros");
+  console.log("EXPORTACIÓN WULFLEMM DESDE MOTOR REAL",JSON.stringify({
+    format:liveWulflemm.native,bytes:liveWulflemm.live.xml.length}));
   assert(originalCross.imported.ok && originalCross.imported.simulated,
     "El circuito original Wulflemm no se ha cargado eléctricamente: "+JSON.stringify(originalCross.imported));
   assert.equal(originalCross.types.filter(t=>/Wattmeter/.test(t)).length,2,
