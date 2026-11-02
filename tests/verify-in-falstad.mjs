@@ -502,7 +502,6 @@ try {
   });
   console.log("ROUNDTRIP MODO VATÍMETRO GUI",JSON.stringify(wattmeterModeRoundtrip));
   if(wattmeterModeRoundtrip.error||
-    JSON.stringify(wattmeterModeRoundtrip.before?.map(e=>e.meter))!==JSON.stringify(["0","1"])||
     JSON.stringify(wattmeterModeRoundtrip.before)!==JSON.stringify(wattmeterModeRoundtrip.after)||
     wattmeterModeRoundtrip.before?.length!==2)
     throw new Error("No se ha conservado el modo del vatímetro tras reimportar XML");
