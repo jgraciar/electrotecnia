@@ -117,7 +117,36 @@
       "w 688 352 496 352 0","w 496 352 304 352 0",
       "w 304 352 96 352 0","g 96 352 96 376 0"].join("\n")+"\n";
   }
+  function mixedCircuit(v,r1,r2,r3){
+    const i=v/(r1+r2*r3/(r2+r3));
+    return [HEADER,"v 96 352 96 96 0 0 40 "+decimal(v)+" 0",
+      "w 96 96 144 96 0","370 144 96 208 96 3 0 "+meterScale(i),
+      "w 208 96 304 96 0","r 304 96 432 96 0 "+decimal(r1),
+      "w 432 96 496 96 0","w 496 96 688 96 0",
+      "r 496 96 496 352 0 "+decimal(r2),
+      "r 688 96 688 352 0 "+decimal(r3),
+      "w 688 352 496 352 0","w 496 352 96 352 0",
+      "g 96 352 96 376 0"].join("\n")+"\n";
+  }
   const entries=[
+    ref(6,9,"Circuito mixto: serie y paralelo",
+      "Una resistencia de 10 Ω está en serie con dos resistencias en paralelo de 6 Ω y 4 Ω. La tensión total es 24,8 V. Determina tensiones, corrientes y potencias de cada resistencia.",
+      [q("Equivalente paralelo",2.4,"Ω","R23=6·4/(6+4)=2,4 Ω"),
+       q("Equivalente total",12.4,"Ω","Req=10+2,4=12,4 Ω"),
+       q("Corriente total",2,"A","It=24,8/12,4=2 A"),
+       q("Tensión en R1",20,"V","U1=10·2=20 V"),
+       q("Tensión en paralelo",4.8,"V","U23=2,4·2=4,8 V"),
+       q("Corriente en R2",0.8,"A","I2=4,8/6=0,8 A"),
+       q("Corriente en R3",1.2,"A","I3=4,8/4=1,2 A"),
+       q("Potencia R1",40,"W","P1=20·2=40 W"),
+       q("Potencia R2",3.84,"W","P2=4,8·0,8=3,84 W"),
+       q("Potencia R3",5.76,"W","P3=4,8·1,2=5,76 W"),
+       q("Potencia total",49.6,"W","P=24,8·2=49,6 W")],
+      {page:83,circuit:mixedCircuit(24.8,10,6,4),
+       meterScales:{current:"A",voltage:"V",power:"W"},
+       measured:[{label:"Amperímetro total",type:"current",value:2,unit:"A"}],
+       scope:"R1 en serie con R2 y R3 en paralelo; comprobación por reducción de resistencias."}),
+
     ref(6,8,"Tres receptores conectados en paralelo",
       "Una línea de 230 V alimenta en paralelo una lámpara de 60 W, una cocina de 3 kW y una estufa de 1 kW. Calcula la intensidad y resistencia de cada receptor y la resistencia equivalente.",
       [q("Intensidad de lámpara",60/230,"A","I1=60/230≈0,26087 A"),
