@@ -152,11 +152,33 @@ try {
     "La importación/exportación Wulflemm modifica componentes o conexiones");
   // Comprobar que los dos vatímetros producen potencia finita y que
   // la suma coincide con la potencia activa de las tres resistencias.
-  await page.waitForFunction(()=>{
-    const r=window.LabCircuit.getAronReadings();
-    const api=document.getElementById("circuit-frame")?.contentWindow?.CircuitJS1;
-    return r?.valid && api?.getTime?.()>0.2;
-  },null,{timeout:30000});
+  try {
+    await page.waitForFunction(()=>{
+      const r=window.LabCircuit.getAronReadings();
+      const api=document.getElementById("circuit-frame")?.contentWindow?.CircuitJS1;
+      return r?.valid && api?.getTime?.()>0.2;
+    },null,{timeout:12000});
+  } catch(error) {
+    const diagnostic=await page.evaluate(()=>{
+      const api=document.getElementById("circuit-frame")?.contentWindow?.CircuitJS1;
+      const elements=Array.from(api?.getElements?.()||[]);
+      return {
+        time:api?.getTime?.(),
+        status:document.getElementById("bridge-status")?.textContent,
+        aron:window.LabCircuit.getAronReadings(),
+        meters:elements.filter(e=>/Wattmeter/.test(e.getType())).map(e=>({
+          type:e.getType(),posts:e.getPostCount?.(),
+          current:e.getCurrent?.(),voltageDiff:e.getVoltageDiff?.(),
+          voltage2:e.getVoltage?.(2),voltage3:e.getVoltage?.(3)
+        })),
+        resistors:elements.filter(e=>e.getType()==="ResistorElm").map(e=>({
+          current:e.getCurrent?.(),voltage:e.getVoltageDiff?.()
+        }))
+      };
+    });
+    console.error("DIAGNÓSTICO ARON",JSON.stringify(diagnostic));
+    throw error;
+  }
   const aron=await page.evaluate(()=>{
     const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
     const elements=Array.from(api.getElements());
