@@ -50,6 +50,23 @@
       }
     }
   }
+  // Correspondencias de actividades resueltas de UD06, contrastadas con
+  // Unidad 06 - Circuitos serie, paralelo y mixto - CE_optativos.pdf.
+  // Catalogación curricular: NO implica que exista una simulación funcional.
+  const u6={
+    1:["1d","1g","1h"],2:["1d","1h"],3:["1d","1g","1h"],
+    4:["1d","1h"],5:["1d","1g","1h"],6:["1d","1g","1h"],
+    7:["1h"],8:["1g","1h"],9:["1d","1g","1h"],
+    10:["1d","1g","1h"],11:["1d","1g","1h"],12:["1d","1g","1h"]
+  };
+  for(const [number,ce] of Object.entries(u6)){
+    const activity=original.get("Actividad resuelta 6."+number);
+    if(activity){
+      activity.ce=ce;
+      activity.curriculumCharacter="Necesario";
+      activity.curriculumStatus="CE contrastados con UD06 CE_optativos; circuito no implementado";
+    }
+  }
   const sortType={resuelta:0,propuesta:1,experimental:2,practica:3,comprobacion:4,evaluacion:5,ampliacion:6};
   book.numberedActivities=[...original.values()].sort((a,b)=>
     a.unit-b.unit||(sortType[a.kind]??8)-(sortType[b.kind]??8)||a.number-b.number);
