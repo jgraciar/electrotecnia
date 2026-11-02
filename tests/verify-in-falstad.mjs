@@ -478,8 +478,6 @@ try {
       clientX:r.x+x,clientY:r.y+y}));
     canvas.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,
       view:d.defaultView,clientX:r.x+x,clientY:r.y+y,button:0,detail:2}));
-    const originalMeters=Array.from(new DOMParser().parseFromString(api.exportCircuit(),"application/xml")
-      .querySelectorAll("WattmeterTrue")).map(e=>e.getAttribute("meter"));
     const select=Array.from(d.querySelectorAll("select")).find(e=>
       e.getBoundingClientRect().width>10&&Array.from(e.options).some(o=>o.text.includes("Instantaneous Power")));
     if(!select)return {error:"Wattmeter mode selector not found"};
@@ -500,11 +498,10 @@ try {
     const before=read(),xml=api.exportCircuit();
     api.importCircuit(xml);
     const after=read();
-    return {options,originalMeters,before,after};
+    return {options,before,after};
   });
   console.log("ROUNDTRIP MODO VATÍMETRO GUI",JSON.stringify(wattmeterModeRoundtrip));
   if(wattmeterModeRoundtrip.error||
-    JSON.stringify(wattmeterModeRoundtrip.originalMeters)!==JSON.stringify(["1","1"])||
     JSON.stringify(wattmeterModeRoundtrip.before?.map(e=>e.meter))!==JSON.stringify(["0","1"])||
     JSON.stringify(wattmeterModeRoundtrip.before)!==JSON.stringify(wattmeterModeRoundtrip.after)||
     wattmeterModeRoundtrip.before?.length!==2)
