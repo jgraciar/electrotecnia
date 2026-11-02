@@ -18,7 +18,7 @@ const cases=[
   [4,5,[2.8,.25],[230,230**2/(10000000/3600)]],
   [4,6,[12.5,225000,168750/(7000*.11)],[125,10]]
 ];
-assert.equal(lab.totalCatalogued,cases.length+3);
+assert.equal(lab.totalCatalogued,cases.length+4);
 for(const [unit,number,expected,elec] of cases){
   const entry={unit,kind:"resuelta",number,id:"Actividad resuelta "+unit+"."+number};
   assert(lab.has(entry)&&lab.validate(entry));
@@ -64,3 +64,8 @@ for(const [n,answers] of [[2,[10,200,100,300,600,2000,1000,3000,6000]],[3,[2,80/
  answers.forEach((v,i)=>assert(Math.abs(x.questions[i].value-v)<1e-7));
  assert(x.circuit.includes("370 "));
 }
+
+const limiter=lab.build({unit:6,kind:"resuelta",number:4});
+assert(limiter&&limiter.circuit&&limiter.questions.length===4);
+assert.equal(limiter.questions[2].value,330);
+assert(Math.abs(limiter.questions[3].value-43.63636363636)<1e-7);
