@@ -389,5 +389,5 @@
     setMode
   };
   window.addEventListener("resize",draw);
-  setMode("generator");
+  setMode(new URLSearchParams(location.search).has("abrir-falstad") ? "falstad" : "generator");
 })();
