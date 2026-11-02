@@ -1,0 +1,52 @@
+name: Validar vatimetro CircuitJS (rama de pruebas)
+on:
+  push:
+    branches:
+      - test/wattmeter-wulflemm
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener laboratorio
+        uses: actions/checkout@v4
+        with:
+          path: laboratorio
+      - name: Obtener CircuitJS version fijada
+        uses: actions/checkout@v4
+        with:
+          repository: pfalstad/circuitjs1
+          ref: 8ac55f22a03606579b822b3dccd4dc10de1ddc5b
+          path: circuitjs-src
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Comprobar modelo e importador XML
+        run: |
+          find circuitjs-src/src -name '*Wattmeter*' -o -name '*XMLDeserializer*'
+          test -f circuitjs-src/src/com/lushprojects/circuitjs1/client/WattmeterTrueElm.java
+          test -f circuitjs-src/src/com/lushprojects/circuitjs1/client/XMLDeserializer.java
+          node --check laboratorio/bridge.js
+          node laboratorio/tests/wattmeter-average.test.js
+          node laboratorio/tests/wulflemm-structure.test.js
+      - name: Compilar CircuitJS con Gradle
+        working-directory: circuitjs-src
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon compileGwt makeSite --console plain
+          test -f site/circuitjs.html
+          test -f site/circuitjs1/circuitjs1.nocache.js
+      - name: Conservar artefactos compilados
+        uses: actions/upload-artifact@v4
+        with:
+          name: circuitjs-vatimetro-pruebas
+          path: circuitjs-src/site/
+          retention-days: 7
