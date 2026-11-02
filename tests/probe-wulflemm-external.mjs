@@ -150,6 +150,11 @@ try {
     const duration=samples.length>1?samples.at(-1).t-samples[0].t:0;
     return {samples:samples.length,duration,watts:duration>0?energy/duration:NaN};
   });
+  // Measure both wattmeters separately, retaining the Aron sign convention.
+  // The sum is compared with the independent RLC theoretical power below.
+  console.log('WULFLEMM ARON POWER MEASUREMENT WINDOW',JSON.stringify({
+    samples:averageProbe.samples,duration:averageProbe.duration
+  }));
   const reactance=2*Math.PI*60-1/(2*Math.PI*60*10e-6);
   const expectedWatts=3*120**2*1000/(1000**2+reactance**2);
   const error=Math.abs(averageProbe.watts-expectedWatts)/expectedWatts;
