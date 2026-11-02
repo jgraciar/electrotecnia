@@ -45,7 +45,7 @@
   function updateAttribute(nodes,index,key,value){
     if(!Array.isArray(nodes)||!Number.isInteger(index)||index<1||index>=nodes.length)
       throw Error("Índice de componente incorrecto");
-    if(!/^[A-Za-z_][\\w-]*$/.test(key))throw Error("Nombre de atributo incorrecto");
+    if(!/^[A-Za-z_][\w-]*$/.test(key))throw Error("Nombre de atributo incorrecto");
     if(value===undefined||value===null)throw Error("Valor de atributo obligatorio");
     const next=nodes.map(n=>({name:n.name,depth:n.depth,attrs:{...n.attrs}}));
     next[index].attrs[key]=String(value);
