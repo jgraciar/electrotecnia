@@ -31,9 +31,18 @@ jobs:
           node-version: '22'
       - name: Comprobar modelo e importador XML
         run: |
-          find circuitjs-src/src -name '*Wattmeter*' -o -name '*XMLDeserializer*'
-          test -f circuitjs-src/src/com/lushprojects/circuitjs1/client/WattmeterTrueElm.java
-          test -f circuitjs-src/src/com/lushprojects/circuitjs1/client/XMLDeserializer.java
+          find circuitjs-src -type f \( -name '*Wattmeter*' -o -name '*XMLDeserializer*' \) -print
+          test -n "$(find circuitjs-src -type f -name 'WattmeterTrueElm.java' -print -quit)"
+          test -n "$(find circuitjs-src -type f -name 'XMLDeserializer.java' -print -quit)"
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          root=ET.parse('laboratorio/tests/fixtures/wulflemm-aron.xml').getroot()
+          assert root.tag == 'cir'
+          assert len(root.findall('WattmeterTrue')) == 2
+          assert len(root.findall('v')) == 3
+          assert len(root.findall('o')) == 3
+          print('XML bien formado; instrumentos y oscilogramas preservados')
+          PY
           node --check laboratorio/bridge.js
           node laboratorio/tests/wattmeter-average.test.js
           node laboratorio/tests/wulflemm-structure.test.js
