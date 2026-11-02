@@ -329,6 +329,37 @@ try {
   });
   console.log("DOBLE CLIC EN POSICIÓN SVG",JSON.stringify(transformedClick));
 
+  // El editor abierto corresponde a una bobina. Cerrar sin modificar y
+  // probar la resistencia con la misma transformación SVG.
+  const resistorClick=await page.evaluate(()=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    const cancel=Array.from(d.querySelectorAll("button")).find(e=>
+      e.textContent?.trim()==="Cancel"&&e.getBoundingClientRect().width>0);
+    cancel?.click();
+    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const rect=canvas.getBoundingClientRect();
+    // Resistencia XML: (752,304)-(720,352), transformada SVG (-10,-238).
+    // El centro cae en (726,90), ocupado por una bobina: barrer alrededor
+    // de la segunda resistencia en vez de asumir equivalencia SVG/canvas.
+    const attempts=[];
+    for(const [x,y] of [[726,90],[726,140],[710,180],[690,220],[650,260]]){
+      for(const type of ["mousemove","mousedown","mouseup","click","mousemove","mousedown","mouseup","click","dblclick"])
+        canvas.dispatchEvent(new MouseEvent(type,{bubbles:true,cancelable:true,view:d.defaultView,
+          clientX:rect.x+x,clientY:rect.y+y,button:0,
+          buttons:type==="mousedown"?1:0,detail:type==="dblclick"?2:1}));
+      const text=d.body.innerText;
+      const match=text.match(/Edit (Resistor|Inductor|Capacitor|Wattmeter|Voltage Source)/);
+      attempts.push({x,y,editor:match?.[0]||null});
+      const close=Array.from(d.querySelectorAll("button")).find(e=>
+        e.textContent?.trim()==="Cancel"&&e.getBoundingClientRect().width>0);
+      close?.click();
+      if(match?.[1]==="Resistor")break;
+    }
+    return attempts;
+  });
+  console.log("LOCALIZACIÓN EDITOR RESISTENCIA",JSON.stringify(resistorClick));
+
+
 
 
 
