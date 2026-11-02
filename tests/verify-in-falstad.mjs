@@ -119,6 +119,38 @@ try {
   assert.deepEqual(structure.after,structure.before,
     "Se han modificado parámetros, conexiones o estructura XML durante la importación");
   console.log("ESTRUCTURA Y ATRIBUTOS XML CONSERVADOS TRAS IMPORTACIÓN ELÉCTRICA");
+  // Fichero Wulflemm original: comprobar carga eléctrica real y dos vatímetros.
+  const originalXml=await (await fetch("http://127.0.0.1:8765/tests/fixtures/wulflemm-aron.xml")).text();
+  assert(originalXml.includes("<WattmeterTrue "),"Falta el circuito Wulflemm de referencia");
+  const originalCross=await page.evaluate(xml=>{
+    const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
+    const imported=window.LabCircuit.importWulflemmXml(xml);
+    const types=Array.from(api.getElements()).map(e=>e.getType());
+    const exported=window.LabCircuit.exportNativeCircuit();
+    return {imported,types,exported:exported.ok?{ok:true,xml:exported.dump}:exported};
+  },originalXml);
+  assert(originalCross.imported.ok && originalCross.imported.simulated,
+    "El circuito original Wulflemm no se ha cargado eléctricamente: "+JSON.stringify(originalCross.imported));
+  assert.equal(originalCross.types.filter(t=>/Wattmeter/.test(t)).length,2,
+    "El motor no conserva los dos vatímetros Wulflemm");
+  assert(originalCross.exported.ok,"No se puede exportar el circuito Wulflemm original");
+  const exportedXml=originalCross.exported.xml;
+  const compare=await page.evaluate(({original,exported})=>{
+    const normalize=xml=>{
+      const d=new DOMParser().parseFromString(xml,"application/xml");
+      if(d.querySelector("parsererror"))throw Error("XML mal formado");
+      return Array.from(d.documentElement.children).filter(e=>e.tagName!=="o").map(e=>({
+        tag:e.tagName,
+        attrs:Object.fromEntries(Array.from(e.attributes)
+          .filter(a=>!["i","vd"].includes(a.name))
+          .map(a=>[a.name,a.value]).sort((a,b)=>a[0].localeCompare(b[0])))
+      }));
+    };
+    return {before:normalize(original),after:normalize(exported)};
+  },{original:originalXml,exported:exportedXml});
+  assert.deepEqual(compare.after,compare.before,
+    "La importación/exportación Wulflemm modifica componentes o conexiones");
+  console.log("ARCHIVO ORIGINAL WULFLEMM: DOS VATÍMETROS Y TOPOLOGÍA CONSERVADOS");
   console.log("INTERCAMBIO XML ENTRE IMPORTADOR WULFLEMM Y MOTOR CIRCUITJS VALIDADO");
   console.log("IMPORTACIÓN/EXPORTACIÓN NATIVA CIRCUITJS CONTRASTADA CON MOTOR REAL");
   console.log("OCHO ACTIVIDADES CONTRASTADAS CON MOTOR REAL CIRCUITJS");
