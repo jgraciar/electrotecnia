@@ -293,7 +293,16 @@ try {
       api.onsvgrendered=(_api,svg)=>{source=svg;};
       try { api.getCircuitAsSVG(); } finally { api.onsvgrendered=previous; }
       return {available:typeof source==="string",length:source?.length||0,
-        head:source?.slice(0,550)||"",resistorLabels:(source?.match(/1000/g)||[]).length};
+        head:source?.slice(0,550)||"",resistorLabels:(source?.match(/1000/g)||[]).length,
+        geometry:(()=>{if(!source)return null;
+          const doc=new DOMParser().parseFromString(source,"image/svg+xml");
+          const nodes=Array.from(doc.querySelectorAll("g,rect,path,line,text"));
+          return {root:doc.documentElement.outerHTML.slice(0,220),
+            transforms:nodes.filter(n=>n.hasAttribute("transform")).slice(0,12)
+              .map(n=>({tag:n.tagName,transform:n.getAttribute("transform")})),
+            labels:nodes.filter(n=>n.tagName==="text").slice(0,18)
+              .map(n=>({x:n.getAttribute("x"),y:n.getAttribute("y"),text:n.textContent}))};
+        })()}};
     } catch(error){return {available:false,error:String(error)};}
   });
   console.log("EXPORTACIÓN SVG CIRCUITJS",JSON.stringify(svgProbe));
