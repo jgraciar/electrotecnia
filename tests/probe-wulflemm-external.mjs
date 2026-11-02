@@ -107,6 +107,29 @@ try {
   if(!electricalProbe.advancing)
     throw new Error('Original Wulflemm simulation did not advance after laboratory XML import');
 
+  const meterProbe=await page.evaluate(()=>{
+    const api=window.CircuitJS1;
+    const elements=Array.from(api.getElements?.()||[]);
+    const meters=elements.filter(e=>e.getType?.()==='WattmeterTrueElm');
+    const resistors=elements.filter(e=>e.getType?.()==='ResistorElm');
+    return {
+      meterCount:meters.length,
+      meters:meters.map(e=>({
+        voltage:e.getVoltageDiff?.(),
+        current:e.getCurrent?.(),
+        instantaneousPower:e.getVoltageDiff?.()*e.getCurrent?.()
+      })),
+      resistorCount:resistors.length,
+      resistorPower:resistors.map(e=>e.getVoltageDiff?.()*e.getCurrent?.())
+    };
+  });
+  console.log('WULFLEMM IMPORTED CIRCUIT ELECTRICAL READINGS',JSON.stringify(meterProbe));
+  if(meterProbe.meterCount!==2 || meterProbe.resistorCount!==3 ||
+      meterProbe.meters.some(e=>!Number.isFinite(e.instantaneousPower)) ||
+      meterProbe.resistorPower.some(p=>!Number.isFinite(p)))
+    throw new Error('Wulflemm imported circuit returned invalid electrical readings');
+
+
 
   if(importedFromLab.first.resistor!=='1137' ||
       importedFromLab.first.resistors!==3 ||
