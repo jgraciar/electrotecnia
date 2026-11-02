@@ -22,7 +22,9 @@
     if(!element || element.getPostCount()<4)return NaN;
     if(element.getType()==="WattmeterElm")return element.getVoltageDiff()*element.getCurrent();
     if(typeof element.getVoltage!=="function")return NaN;
-    const voltage=element.getVoltage(2)-element.getVoltage(3);
+    // WattmeterTrueElm: bobina voltimétrica en 0-1; bobina amperimétrica en 2-3.
+    // El motor define getVoltageDiff() como V1-V0 y getCurrent() como corriente de la bobina.
+    const voltage=element.getVoltageDiff();
     const current=element.getCurrent();
     return Number.isFinite(voltage) && Number.isFinite(current) ? voltage*current : NaN;
   }
