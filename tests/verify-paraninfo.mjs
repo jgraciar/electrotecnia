@@ -18,7 +18,7 @@ const cases=[
   [4,5,[2.8,.25],[230,230**2/(10000000/3600)]],
   [4,6,[12.5,225000,168750/(7000*.11)],[125,10]]
 ];
-assert.equal(lab.totalCatalogued,cases.length);
+assert.equal(lab.totalCatalogued,cases.length+1);
 for(const [unit,number,expected,elec] of cases){
   const entry={unit,kind:"resuelta",number,id:"Actividad resuelta "+unit+"."+number};
   assert(lab.has(entry)&&lab.validate(entry));
@@ -50,5 +50,10 @@ for(const [unit,number,expected,elec] of cases){
   }else assert.equal(x.circuit,null);
   console.log("Comprobación matemática y esquema: AR "+unit+"."+number+" OK");
 }
-assert(!lab.has({unit:6,kind:"resuelta",number:1}));
+assert(lab.has({unit:6,kind:"resuelta",number:1}));
 console.log("Actividades originales:",cases.length);
+
+const series=lab.build({unit:6,kind:"resuelta",number:1});
+assert(series&&series.circuit&&series.questions.length===7);
+assert.equal(series.questions[1].value,0.8);
+assert.equal(series.questions[6].value,19.2);
