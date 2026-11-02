@@ -150,6 +150,35 @@ try {
   },{original:originalXml,exported:exportedXml});
   assert.deepEqual(compare.after,compare.before,
     "La importación/exportación Wulflemm modifica componentes o conexiones");
+  // Comprobar que los dos vatímetros producen potencia finita y que
+  // la suma coincide con la potencia activa de las tres resistencias.
+  await page.waitForFunction(()=>{
+    const r=window.LabCircuit.getAronReadings();
+    const api=document.getElementById("circuit-frame")?.contentWindow?.CircuitJS1;
+    return r?.valid && api?.getTime?.()>0.2;
+  },null,{timeout:30000});
+  const aron=await page.evaluate(()=>{
+    const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
+    const elements=Array.from(api.getElements());
+    const readings=window.LabCircuit.getAronReadings();
+    const resistors=elements.filter(e=>e.getType()==="ResistorElm").map(e=>({
+      voltage:e.getVoltageDiff(),current:e.getCurrent()
+    }));
+    return {readings,resistors,time:api.getTime()};
+  });
+  assert.equal(aron.resistors.length,3,"El circuito Aron debe tener tres resistencias");
+  const resistorPower=aron.resistors.reduce((sum,r)=>sum+r.voltage*r.current,0);
+  assert(Number.isFinite(aron.readings.w1)&&Number.isFinite(aron.readings.w2),
+    "Lecturas de vatímetros no finitas");
+  assert(Math.abs(aron.readings.total-(aron.readings.w1+aron.readings.w2))<1e-8,
+    "La suma de vatímetros Aron no coincide");
+  // La carga RLC consume potencia activa en las resistencias ideales.
+  // El margen incluye la integración temporal de 100 ms y el régimen transitorio.
+  const tolerance=Math.max(0.2,Math.abs(resistorPower)*0.05);
+  assert(Math.abs(aron.readings.total-resistorPower)<=tolerance,
+    "Potencia Aron "+aron.readings.total+" W, resistencias "+resistorPower+" W");
+  console.log("ARON: W1",aron.readings.w1,"W; W2",aron.readings.w2,
+    "W; suma",aron.readings.total,"W; resistencias",resistorPower,"W");
   console.log("ARCHIVO ORIGINAL WULFLEMM: DOS VATÍMETROS Y TOPOLOGÍA CONSERVADOS");
   console.log("INTERCAMBIO XML ENTRE IMPORTADOR WULFLEMM Y MOTOR CIRCUITJS VALIDADO");
   console.log("IMPORTACIÓN/EXPORTACIÓN NATIVA CIRCUITJS CONTRASTADA CON MOTOR REAL");
