@@ -63,6 +63,12 @@
       const pdf=element("small","","Página del PDF del docente: "+(act.page+b.printedToPdfOffset));
       const label=element("p","",window.LabTextbookExercises.build(act)?.statement||act.theme);
       card.append(head,label,pdf);
+      const relation=window.LabTextbookActivityCurriculum?.[act.unit+"."+act.number];
+      if(relation){
+        const ce=relation.ce.length?"CE "+relation.ce.join(", "):"Sin CE directamente acreditable";
+        card.append(element("p","publication-muted",
+          "Revisión curricular: "+ce+" · "+relation.character));
+      }
       if(window.LabTextbookUI?.open){
         const own=element("button","toolbtn","Abrir actividad original y circuito");
         own.type="button";
