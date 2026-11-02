@@ -101,6 +101,12 @@ try {
       assert(Math.abs(balance.total-expectedPower.value)<=Math.max(.001,Math.abs(expectedPower.value)*.005),
         meta.id+": potencia simulada "+balance.total+"; esperada "+expectedPower.value);
     }
+    assert(Array.isArray(readings.resistorReadings)&&readings.resistorReadings.length>0,
+      meta.id+": faltan medidas por resistencia");
+    for(const resistor of readings.resistorReadings){
+      assert(Number.isFinite(resistor.voltage)&&Number.isFinite(resistor.current)&&Number.isFinite(resistor.power),
+        meta.id+": R"+resistor.index+" sin lectura válida de U/I/P");
+    }
     assert(Array.isArray(readings.probeVoltages),meta.id+": faltan lecturas individuales de sondas");
     const volts=readings.probeVoltages.map(p=>Math.abs(p.value));
     assert(volts.every(Number.isFinite),meta.id+": sonda con tensión no numérica");
