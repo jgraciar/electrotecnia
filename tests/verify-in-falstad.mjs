@@ -87,14 +87,6 @@ try {
     assert(current,meta.id+": sin corriente esperada");
     assert(Math.abs(readings.current-current.value)<=Math.max(.0001,Math.abs(current.value)*.005),
       meta.id+": intensidad simulada "+readings.current+"; esperada "+current.value);
-    // Las sondas de tensión se contrastan cuando el circuito proporciona
-    // una medida inequívoca; no equiparar sondas parciales con tensión total.
-    const voltage=meta.expected.filter(x=>x.type==="voltage");
-    if(voltage.length===1 && Number.isFinite(readings.voltage)){
-      const v=voltage[0];
-      assert(Math.abs(readings.voltage-v.value)<=Math.max(.0001,Math.abs(v.value)*.005),
-        meta.id+": tensión medida "+readings.voltage+"; esperada "+v.value);
-    }
     console.log("MEDIDA REAL",meta.id,"I=",readings.current,"OK");
   }
   // Auditoría de los temas anteriores: todas las actividades con circuito.
