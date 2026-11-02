@@ -156,7 +156,12 @@
     message("CircuitJS conectado. Los datos se obtienen del simulador, no del hardware.");
     if(pendingModel){
       const model=pendingModel;pendingModel=null;
-      importModel(model.filename,model.dump);
+      // CircuitJS puede restaurar su circuito de demostración después del callback
+      // inicial. Esperar a que termine su arranque antes de importar el XML.
+      setTimeout(()=>{
+        if(sim===instance && selectedExample===null)
+          importModel(model.filename,model.dump);
+      },1200);
     }else{
       document.dispatchEvent(new CustomEvent("lab:circuit-ready",{detail:{example:selectedExample}}));
     }
