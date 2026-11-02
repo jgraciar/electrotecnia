@@ -18,7 +18,7 @@ const injection=`        // Laboratory default: embedded original Aron circuit, 
 ts=ts.replace(anchor,injection+anchor);
 // A startup circuit normally hides the toolbar in upstream CircuitJS.
 // Keep it visible by default in both embedded and standalone views.
-const uiSource=source.replace(/CirSim\\.ts$/, 'UIManager.ts');
+const uiSource=source.replace(/CirSim\.ts$/, 'UIManager.ts');
 let ui=readFileSync(uiSource,'utf8');
 const toolbarStart='        this.menus.toolbarCheckItem.setState(';
 const a=ui.indexOf(toolbarStart);
