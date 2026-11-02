@@ -268,6 +268,23 @@ try {
   });
   console.log("BARRIDO POSICIONES CIRCUITJS",JSON.stringify(canvasProbe));
 
+  // El motor aplica transform[0,3] como escala y transform[4,5] como traslación.
+  // El objeto interno no forma parte de la API pública; buscarlo sin modificarlo.
+  const transformProbe=await page.evaluate(()=>{
+    const w=document.getElementById("circuit-frame").contentWindow;
+    const candidates=[];
+    for(const key of ["sim","cirSim","CirSim","theApp","circuitSim"]){
+      try {
+        const o=w[key];
+        if(o && typeof o==="object")
+          candidates.push({key,transform:Array.isArray(o.transform)?o.transform:null});
+      } catch(e){candidates.push({key,error:String(e)});}
+    }
+    return {candidates};
+  });
+  console.log("TRANSFORMACIÓN INTERNA CIRCUITJS",JSON.stringify(transformProbe));
+
+
   // La edición GUI no está validada: impedir que una ejecución verde se
   // interprete como una prueba superada de doble clic.
   const guiDialogOpened=dialogSnapshot.some(e=>
