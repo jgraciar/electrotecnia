@@ -41,7 +41,16 @@
   function wattPowerAverage(samples=wattSamples){
     if(samples.length<2)return NaN;
     const last=samples[samples.length-1],start=last.t-WATT_WINDOW_S;
-    if(samples[0].t>start)return NaN;
+    if(samples[0].t>start){
+      // En CC estable no es necesario esperar los 100 ms reservados para CA.
+      // Solo se adelanta la lectura cuando TODAS las muestras coinciden.
+      // Una señal variable sigue exigiendo la ventana de integración completa.
+      if(last.t-samples[0].t<0.02)return NaN;
+      const reference=samples[0].power;
+      const tolerance=Math.max(1e-9,Math.abs(reference)*1e-8);
+      return samples.every(s=>Math.abs(s.power-reference)<=tolerance)
+        ? reference : NaN;
+    }
     let area=0;
     for(let i=1;i<samples.length;i++){
       const a=samples[i-1],b=samples[i];
