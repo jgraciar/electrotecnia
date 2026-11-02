@@ -168,8 +168,11 @@ try {
       const elements=Array.from(api?.getElements?.()||[]);
       return {time:api?.getTime?.(),readings:window.LabCircuit.getAronReadings(),
         meters:elements.filter(e=>/Wattmeter/.test(e.getType())).map(e=>({
-          type:e.getType(),current:e.getCurrent?.(),
-          voltage2:e.getVoltage?.(2),voltage3:e.getVoltage?.(3)
+          type:e.getType(),current:e.getCurrent?.(),posts:e.getPostCount?.(),
+          terminals:Array.from({length:e.getPostCount?.()||0},(_,i)=>({
+            index:i,voltage:e.getVoltage?.(i),
+            point:(()=>{try{const p=e.getPost?.(i);return p?{x:p.x,y:p.y}:null;}catch(_){return null;}})()
+          }))
         }))};
     });
     console.error("ARON SIN AVANCE",JSON.stringify(state));
