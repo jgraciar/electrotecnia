@@ -10,7 +10,7 @@
   const quantity=document.getElementById("elementQuantity");
   const scope=window.LabScope;
   if(!frame || !selector || !scope)return;
-  const defaultCircuit="https://www.falstad.com/circuit/circuitjs.html";
+  const defaultCircuit=new URL("./circuitjs/circuitjs.html",location.href).href;
   let sim=null,eligible=[],record=[],lastSample=-Infinity,lastPaint=0;
   let localAvailable=false;
   let selectedExample=null;
@@ -175,9 +175,9 @@
   quantity.addEventListener("change",()=>scope.refresh());
   windowInput.addEventListener("change",clear);
   function openRemote(){
-    message("CircuitJS se carga desde su página oficial. Para leer muestras automáticamente, publica la versión con CircuitJS alojado en esta misma web (GitHub Actions).");
+    message("No se ha detectado la copia local de Falstad. Comprueba la publicación de GitHub Pages y sus archivos de CircuitJS.");
     selector.disabled=true;
-    frame.src=defaultCircuit;
+    frame.removeAttribute("src");
   }
   // Para que las API compartan origen, el sitio desplegado mediante Actions
   // tiene que incluir ./circuitjs/circuitjs.html y sus recursos compilados.
