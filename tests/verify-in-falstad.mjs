@@ -511,6 +511,33 @@ try {
   });
   console.log("ROUNDTRIP XML TRAS EDICIÓN GUI",JSON.stringify(guiRoundtrip));
 
+  const combinedRoundtrip=await page.evaluate(()=>{
+    const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
+    const extract=()=>{
+      const xml=api.exportCircuit();
+      const d=new DOMParser().parseFromString(xml,"application/xml");
+      return {
+        resistor:Array.from(d.querySelectorAll("r")).find(e=>
+          e.getAttribute("x")==="752 304 720 352")?.getAttribute("r"),
+        wattmeters:Array.from(d.querySelectorAll("WattmeterTrue")).map(e=>
+          ({x:e.getAttribute("x"),meter:e.getAttribute("meter")})),
+        resistors:d.querySelectorAll("r").length
+      };
+    };
+    const before=extract();
+    const xml=api.exportCircuit();
+    api.importCircuit(xml);
+    return {before,after:extract()};
+  });
+  console.log("ROUNDTRIP CONJUNTO VATÍMETROS Y RESISTENCIA",JSON.stringify(combinedRoundtrip));
+  if(combinedRoundtrip.before.resistor!=="1137"||
+     combinedRoundtrip.after.resistor!=="1137"||
+     JSON.stringify(combinedRoundtrip.before.wattmeters.map(e=>e.meter))!==JSON.stringify(["0","1"])||
+     JSON.stringify(combinedRoundtrip.before)!==JSON.stringify(combinedRoundtrip.after)||
+     combinedRoundtrip.after.resistors!==3)
+    throw new Error("La exportación/reimportación conjunta no conserva vatímetros y resistencia");
+
+
   if(!wattmeterGui.opened)throw new Error("No se ha abierto el editor gráfico del vatímetro");
 
   if(guiRoundtrip.before!=="1137"||guiRoundtrip.after!=="1137"||
