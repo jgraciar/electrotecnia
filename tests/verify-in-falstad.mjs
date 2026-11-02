@@ -68,10 +68,10 @@ try {
       typesBefore:before,typesAfter:after};
   });
   assert(roundtrip.exported.ok,"Exportación nativa fallida: "+JSON.stringify(roundtrip));
-  assert.equal(roundtrip.exported.format,"circuitjs-text");
-  assert.equal(roundtrip.exported.header,"$ ");
+  assert.equal(roundtrip.exported.format,"circuitjs-xml");
+  assert.equal(roundtrip.exported.header,"<c");
   assert(roundtrip.imported?.ok,"Importación nativa fallida: "+JSON.stringify(roundtrip));
-  assert(roundtrip.again?.ok && roundtrip.again.header==="$ ","Reexportación fallida");
+  assert(roundtrip.again?.ok && roundtrip.again.header==="<c","Reexportación fallida");
   assert.deepEqual(roundtrip.typesAfter,roundtrip.typesBefore,"El circuito cambió al reimportarlo");
   console.log("IMPORTACIÓN/EXPORTACIÓN NATIVA CIRCUITJS CONTRASTADA CON MOTOR REAL");
   console.log("OCHO ACTIVIDADES CONTRASTADAS CON MOTOR REAL CIRCUITJS");
