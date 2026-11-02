@@ -168,7 +168,7 @@
   function importModel(filename,dump){
     // CircuitJS importCircuit recibe un volcado textual, no el XML de wulflemm.
     // Rechazarlo antes de modificar el circuito actualmente abierto.
-    if(typeof dump!=="string" || !dump.trimStart().startsWith("$ ")){
+    if(typeof dump!=="string" || !(dump.trimStart().startsWith("$ ") || /^<cir(?:\s|>)/.test(dump.trimStart()))){
       const xml=typeof dump==="string" && /^<cir(?:\s|>)/.test(dump.trimStart());
       const reason=xml
         ? "El archivo XML de wulflemm necesita un importador compatible; no se puede pasar directamente a importCircuit."
@@ -259,9 +259,9 @@
       return {ok:false,message:"CircuitJS no está inicializado o no expone exportCircuit."};
     try{
       const dump=sim.exportCircuit();
-      if(typeof dump!=="string" || !dump.trimStart().startsWith("$ "))
+      if(typeof dump!=="string" || !(dump.trimStart().startsWith("$ ") || /^<cir(?:\s|>)/.test(dump.trimStart())))
         return {ok:false,message:"El simulador devolvió un formato de exportación inesperado."};
-      return {ok:true,format:"circuitjs-text",dump};
+      return {ok:true,format:dump.trimStart().startsWith("$ ")?"circuitjs-text":"circuitjs-xml",dump};
     }catch(error){
       return {ok:false,message:"Error al exportar: "+error.message};
     }
