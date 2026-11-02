@@ -428,7 +428,7 @@ try {
     return {opened:true,before,editedField:field===visible[0]?0:visible.indexOf(field),
       exportedContains1137:/\\br\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+1137(?:\\s|$)/m.test(exported),
       occurrences1137:(exported.match(/1137/g)||[]).length,
-      snippet:exported.match(/<r\\b[^>]*r="1137"[^>]*\\/>/)?.[0]||null};
+      snippet:exported.slice(exported.indexOf('r="1137"')-35,exported.indexOf('r="1137"')+12)};
   });
   console.log("EDICIÓN REAL RESISTENCIA GUI",JSON.stringify(resistorGui));
 
