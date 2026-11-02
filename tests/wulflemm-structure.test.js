@@ -1,0 +1,15 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const xml = fs.readFileSync(__dirname + '/fixtures/wulflemm-aron.xml', 'utf8');
+const count = tag => xml.split('<' + tag + ' ').length - 1;
+assert.equal(count('WattmeterTrue'), 2);
+assert.equal(count('v'), 3);
+assert.equal(count('r'), 3);
+assert.equal(count('l'), 3);
+assert.equal(count('c'), 3);
+assert.equal(count('o'), 3);
+assert.equal(count('w'), 12);
+assert.ok(xml.includes('fr="60"'));
+assert.ok(xml.includes('phaseShift="2.0943951023931953"'));
+assert.ok(xml.includes('phaseShift="-2.0943951023931953"'));
+console.log('OK: circuito wulflemm original conservado; dos vatímetros y tres fases.');
