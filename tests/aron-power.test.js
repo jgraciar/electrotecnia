@@ -22,4 +22,26 @@ const w1=t=>(phase(t,2*Math.PI/3)-phase(t,0))*current(t,2*Math.PI/3);
 const w2=t=>(phase(t,-2*Math.PI/3)-phase(t,0))*current(t,-2*Math.PI/3);
 check('Aron trifásico equilibrado resistivo',w1,w2,3*V*V/R);
 check('Aron con polaridad invertida',t=>-w1(t),t=>-w2(t),-3*V*V/R);
+
+// Carga equilibrada R-L: potencia total = 3 V I cos(phi).
+const phi=Math.PI/3;
+const lagged=(t,shift)=>Math.SQRT2*I*Math.sin(omega*t+shift-phi);
+check('Aron trifásico equilibrado inductivo',t=>(phase(t,2*Math.PI/3)-phase(t,0))*lagged(t,2*Math.PI/3),
+  t=>(phase(t,-2*Math.PI/3)-phase(t,0))*lagged(t,-2*Math.PI/3),3*V*I*Math.cos(phi));
+// Una lectura debe ser negativa si el desfase de la carga supera 60 grados.
+const phiHigh=75*Math.PI/180;
+const lagHigh=(t,shift)=>Math.SQRT2*I*Math.sin(omega*t+shift-phiHigh);
+const high1=t=>(phase(t,2*Math.PI/3)-phase(t,0))*lagHigh(t,2*Math.PI/3);
+const high2=t=>(phase(t,-2*Math.PI/3)-phase(t,0))*lagHigh(t,-2*Math.PI/3);
+check('Aron con factor de potencia bajo',high1,high2,3*V*I*Math.cos(phiHigh));
+assert.ok(mean(high1)*mean(high2)<0,'Se esperaba un vatímetro con lectura negativa');
+// Caso de tres hilos desequilibrado: iA+iB+iC=0.
+// La suma de los vatímetros debe coincidir con la potencia instantánea de las tres fases.
+const ia=t=>1.3*Math.sin(omega*t-.3);
+const ib=t=>.8*Math.sin(omega*t+2.1);
+const ic=t=>-ia(t)-ib(t);
+const p3=t=>phase(t,0)*ia(t)+phase(t,2*Math.PI/3)*ib(t)+phase(t,-2*Math.PI/3)*ic(t);
+const wa=t=>(phase(t,0)-phase(t,-2*Math.PI/3))*ia(t);
+const wb=t=>(phase(t,2*Math.PI/3)-phase(t,-2*Math.PI/3))*ib(t);
+check('Aron desequilibrado de tres hilos',wa,wb,mean(p3));
 console.log('AVISO: prueba matemática independiente; no acredita funcionamiento del motor CircuitJS.');
