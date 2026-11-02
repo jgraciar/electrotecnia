@@ -402,53 +402,6 @@ try {
   });
   console.log("MAPA EDITORES CIRCUITJS",JSON.stringify(editorGrid));
 
-  const resistorGui=await page.evaluate(()=>{
-    const d=document.getElementById("circuit-frame").contentDocument;
-    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
-    const r=canvas.getBoundingClientRect(),x=760,y=60;
-    canvas.dispatchEvent(new MouseEvent("mousemove",{bubbles:true,view:d.defaultView,
-      clientX:r.x+x,clientY:r.y+y}));
-    canvas.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,
-      view:d.defaultView,clientX:r.x+x,clientY:r.y+y,button:0,detail:2}));
-    const title=d.body.innerText.match(/Edit Resistor/);
-    const visible=Array.from(d.querySelectorAll('input[type="text"]'))
-      .filter(e=>e.getBoundingClientRect().width>10);
-    const before=visible.map(e=>e.value);
-    if(!title||!visible.length)return {opened:!!title,before,error:"Resistor edit field missing"};
-    const field=visible.find(e=>Number(e.value)===1000)||visible[visible.length-1];
-    field.value="1137";
-    field.dispatchEvent(new Event("input",{bubbles:true}));
-    field.dispatchEvent(new Event("change",{bubbles:true}));
-    const ok=Array.from(d.querySelectorAll("button")).find(e=>
-      e.textContent?.trim()==="OK"&&e.getBoundingClientRect().width>0);
-    if(!ok)return {opened:true,before,error:"OK button missing"};
-    ok.click();
-    const api=d.defaultView.CircuitJS1;
-    const exported=api.exportCircuit();
-    return {opened:true,before,editedField:field===visible[0]?0:visible.indexOf(field),
-      exportedContains1137:/\\br\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+1137(?:\\s|$)/m.test(exported),
-      occurrences1137:(exported.match(/1137/g)||[]).length,
-      snippet:exported.slice(exported.indexOf('r="1137"')-35,exported.indexOf('r="1137"')+12)};
-  });
-  console.log("EDICIÓN REAL RESISTENCIA GUI",JSON.stringify(resistorGui));
-
-  const guiRoundtrip=await page.evaluate(()=>{
-    const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
-    const xml=api.exportCircuit();
-    const parsed=new DOMParser().parseFromString(xml,"application/xml");
-    const resistors=Array.from(parsed.querySelectorAll("r"));
-    const target=resistors.find(e=>e.getAttribute("x")==="752 304 720 352");
-    const wattmeters=parsed.querySelectorAll("WattmeterTrue").length;
-    api.importCircuit(xml);
-    const restored=new DOMParser().parseFromString(api.exportCircuit(),"application/xml");
-    const restoredTarget=Array.from(restored.querySelectorAll("r")).find(e=>
-      e.getAttribute("x")==="752 304 720 352");
-    return {before:target?.getAttribute("r"),after:restoredTarget?.getAttribute("r"),
-      wattmetersBefore:wattmeters,wattmetersAfter:restored.querySelectorAll("WattmeterTrue").length,
-      resistorsBefore:resistors.length,resistorsAfter:restored.querySelectorAll("r").length};
-  });
-  console.log("ROUNDTRIP XML TRAS EDICIÓN GUI",JSON.stringify(guiRoundtrip));
-
   const wattmeterGui=await page.evaluate(()=>{
     const d=document.getElementById("circuit-frame").contentDocument;
     const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
@@ -505,6 +458,54 @@ try {
     JSON.stringify(wattmeterModeRoundtrip.before)!==JSON.stringify(wattmeterModeRoundtrip.after)||
     wattmeterModeRoundtrip.before?.length!==2)
     throw new Error("No se ha conservado el modo del vatímetro tras reimportar XML");
+
+
+  const resistorGui=await page.evaluate(()=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const r=canvas.getBoundingClientRect(),x=760,y=60;
+    canvas.dispatchEvent(new MouseEvent("mousemove",{bubbles:true,view:d.defaultView,
+      clientX:r.x+x,clientY:r.y+y}));
+    canvas.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,
+      view:d.defaultView,clientX:r.x+x,clientY:r.y+y,button:0,detail:2}));
+    const title=d.body.innerText.match(/Edit Resistor/);
+    const visible=Array.from(d.querySelectorAll('input[type="text"]'))
+      .filter(e=>e.getBoundingClientRect().width>10);
+    const before=visible.map(e=>e.value);
+    if(!title||!visible.length)return {opened:!!title,before,error:"Resistor edit field missing"};
+    const field=visible.find(e=>Number(e.value)===1000)||visible[visible.length-1];
+    field.value="1137";
+    field.dispatchEvent(new Event("input",{bubbles:true}));
+    field.dispatchEvent(new Event("change",{bubbles:true}));
+    const ok=Array.from(d.querySelectorAll("button")).find(e=>
+      e.textContent?.trim()==="OK"&&e.getBoundingClientRect().width>0);
+    if(!ok)return {opened:true,before,error:"OK button missing"};
+    ok.click();
+    const api=d.defaultView.CircuitJS1;
+    const exported=api.exportCircuit();
+    return {opened:true,before,editedField:field===visible[0]?0:visible.indexOf(field),
+      exportedContains1137:/\\br\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+1137(?:\\s|$)/m.test(exported),
+      occurrences1137:(exported.match(/1137/g)||[]).length,
+      snippet:exported.slice(exported.indexOf('r="1137"')-35,exported.indexOf('r="1137"')+12)};
+  });
+  console.log("EDICIÓN REAL RESISTENCIA GUI",JSON.stringify(resistorGui));
+
+  const guiRoundtrip=await page.evaluate(()=>{
+    const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
+    const xml=api.exportCircuit();
+    const parsed=new DOMParser().parseFromString(xml,"application/xml");
+    const resistors=Array.from(parsed.querySelectorAll("r"));
+    const target=resistors.find(e=>e.getAttribute("x")==="752 304 720 352");
+    const wattmeters=parsed.querySelectorAll("WattmeterTrue").length;
+    api.importCircuit(xml);
+    const restored=new DOMParser().parseFromString(api.exportCircuit(),"application/xml");
+    const restoredTarget=Array.from(restored.querySelectorAll("r")).find(e=>
+      e.getAttribute("x")==="752 304 720 352");
+    return {before:target?.getAttribute("r"),after:restoredTarget?.getAttribute("r"),
+      wattmetersBefore:wattmeters,wattmetersAfter:restored.querySelectorAll("WattmeterTrue").length,
+      resistorsBefore:resistors.length,resistorsAfter:restored.querySelectorAll("r").length};
+  });
+  console.log("ROUNDTRIP XML TRAS EDICIÓN GUI",JSON.stringify(guiRoundtrip));
 
   if(!wattmeterGui.opened)throw new Error("No se ha abierto el editor gráfico del vatímetro");
 
