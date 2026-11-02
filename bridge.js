@@ -250,7 +250,8 @@
     const totalWattmeterPower=wattmeterPowers.length>0 && wattmeterPowers.every(m=>Number.isFinite(m.power))
       ? wattmeterPowers.reduce((sum,m)=>sum+m.power,0):NaN;
     const probeVoltages=probes.map((el,index)=>{let value=NaN;try{value=el.getVoltageDiff();}catch(_){}return {index,value};});
-    return {id:selectedExample,time,current,voltage,probeVoltages,power,wattmeterPowers,totalWattmeterPower,
+    const resistorReadings=elements.filter(el=>{try{return el.getType()==="ResistorElm";}catch(_){return false;}}).map((el,index)=>{let voltage=NaN,current=NaN;try{voltage=el.getVoltageDiff();current=el.getCurrent();}catch(_){}return {index:index+1,voltage,current,power:Math.abs(voltage*current)};});
+    return {id:selectedExample,time,current,voltage,probeVoltages,resistorReadings,power,wattmeterPowers,totalWattmeterPower,
       hasAmmeter:!!ammeter,hasVoltmeter:!!voltmeter,hasWattmeter:!!wattmeter};
   }
   // Lectura independiente de los dos vatímetros del método Aron.
