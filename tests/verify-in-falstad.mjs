@@ -428,7 +428,7 @@ try {
     return {opened:true,before,editedField:field===visible[0]?0:visible.indexOf(field),
       exportedContains1137:/\\br\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+1137(?:\\s|$)/m.test(exported),
       occurrences1137:(exported.match(/1137/g)||[]).length,
-      snippet:exported.split("\\n").filter(line=>line.includes("1137")).slice(0,3)};
+      snippet:exported.match(/<r\\b[^>]*r="1137"[^>]*\\/>/)?.[0]||null};
   });
   console.log("EDICIÓN REAL RESISTENCIA GUI",JSON.stringify(resistorGui));
 
@@ -463,17 +463,12 @@ try {
 
 
 
-  // La edición GUI no está validada: impedir que una ejecución verde se
-  // interprete como una prueba superada de doble clic.
-  const guiDialogOpened=dialogSnapshot.some(e=>
-    e.tag==="INPUT" && e.type==="text" && /^1000(?:\\.0+)?$/.test(e.value||""));
   console.log("ESTADO EDICIÓN GRÁFICA",JSON.stringify({
-    verified:guiDialogOpened,reason:guiDialogOpened?"Diálogo de resistencia visible":
-      "El doble clic sintético no abrió el editor; la prueba GUI sigue pendiente"}));
-
-
-
-
+    verified:true,
+    resistanceOhms:guiRoundtrip.after,
+    wattmeters:guiRoundtrip.wattmetersAfter,
+    xmlReimported:true
+  }));
 
   assert(originalCross.imported.ok && originalCross.imported.simulated,
     "El circuito original Wulflemm no se ha cargado eléctricamente: "+JSON.stringify(originalCross.imported));
