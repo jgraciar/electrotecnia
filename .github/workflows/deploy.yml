@@ -44,6 +44,20 @@ jobs:
           ref: master
           path: circuitjs-src
 
+      - name: Diagnosticar soporte nativo de vatímetros y XML
+        run: |
+          src=circuitjs-src/src/com/lushprojects/circuitjs1/client
+          for class in WattmeterTrueElm WattmeterElm XMLDeserializer XMLSerializer; do
+            if test -f "$src/$class.java"; then
+              echo "PRESENTE: $class"
+            else
+              echo "::warning::AUSENTE: $class en el código oficial compilado"
+            fi
+          done
+          if test -f "$src/WattmeterTrueElm.java"; then
+            grep -nE 'getPostCount|getVoltage|getCurrent|getDumpType' "$src/WattmeterTrueElm.java" || true
+          fi
+
       - name: Preparar Java para compilador GWT
         uses: actions/setup-java@v4
         with:
