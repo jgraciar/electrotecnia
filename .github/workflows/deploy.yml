@@ -64,6 +64,8 @@ jobs:
         run: |
           mkdir -p public/circuitjs
           cp laboratorio/index.html laboratorio/styles.css laboratorio/app.js laboratorio/lab-circuits.js laboratorio/bridge.js laboratorio/wulflemm-xml.js laboratorio/wulflemm-ui.js laboratorio/sce-practices.js laboratorio/curriculum.js laboratorio/networks-solar-curriculum.js laboratorio/networks-solar-practices.js laboratorio/practices.js laboratorio/publications-data.js laboratorio/paraninfo-activities.js laboratorio/textbook-exercises.js laboratorio/textbook-curriculum.js laboratorio/textbook-ui.js laboratorio/publications.js laboratorio/LICENSE public/
+          mkdir -p public/tests/fixtures
+          cp laboratorio/tests/fixtures/wulflemm-aron.xml public/tests/fixtures/
           cp -a circuitjs-src/ts/dist/. public/circuitjs/
           cp circuitjs-src/COPYING.txt public/circuitjs/COPYING.txt
           test -f public/index.html
