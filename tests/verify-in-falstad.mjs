@@ -431,6 +431,28 @@ try {
       snippet:exported.split("\\n").filter(line=>line.includes("1137")).slice(0,3)};
   });
   console.log("EDICIÓN REAL RESISTENCIA GUI",JSON.stringify(resistorGui));
+
+  const guiRoundtrip=await page.evaluate(()=>{
+    const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
+    const xml=api.exportCircuit();
+    const parsed=new DOMParser().parseFromString(xml,"application/xml");
+    const resistors=Array.from(parsed.querySelectorAll("r"));
+    const target=resistors.find(e=>e.getAttribute("x")==="752 304 720 352");
+    const wattmeters=parsed.querySelectorAll("WattmeterTrue").length;
+    api.importCircuit(xml);
+    const restored=new DOMParser().parseFromString(api.exportCircuit(),"application/xml");
+    const restoredTarget=Array.from(restored.querySelectorAll("r")).find(e=>
+      e.getAttribute("x")==="752 304 720 352");
+    return {before:target?.getAttribute("r"),after:restoredTarget?.getAttribute("r"),
+      wattmetersBefore:wattmeters,wattmetersAfter:restored.querySelectorAll("WattmeterTrue").length,
+      resistorsBefore:resistors.length,resistorsAfter:restored.querySelectorAll("r").length};
+  });
+  console.log("ROUNDTRIP XML TRAS EDICIÓN GUI",JSON.stringify(guiRoundtrip));
+  if(guiRoundtrip.before!=="1137"||guiRoundtrip.after!=="1137"||
+     guiRoundtrip.wattmetersBefore!==2||guiRoundtrip.wattmetersAfter!==2||
+     guiRoundtrip.resistorsBefore!==3||guiRoundtrip.resistorsAfter!==3)
+    throw new Error("La reimportación XML perdió la resistencia editada o elementos del circuito");
+
   if(!resistorGui.opened||!resistorGui.occurrences1137)
     throw new Error("No se ha acreditado la modificación de resistencia desde el editor gráfico");
 
