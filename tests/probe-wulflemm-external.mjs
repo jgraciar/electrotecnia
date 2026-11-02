@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import { readFile } from 'node:fs/promises';
 
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage();
@@ -17,6 +18,37 @@ try {
   console.log('WULFLEMM EXTERNAL BROWSER PROBE', JSON.stringify({
     httpStatus: response?.status(), url: page.url(), ...probe
   }));
+
+  const sourceXml = await readFile('tests/fixtures/wulflemm-aron.xml', 'utf8');
+  const cross = await page.evaluate(async xml => {
+    const api = window.CircuitJS1;
+    if (!api?.importCircuit || !api?.exportCircuit)
+      throw new Error('Wulflemm API unavailable');
+    const inspect = raw => {
+      const doc = new DOMParser().parseFromString(raw, 'application/xml');
+      if (doc.querySelector('parsererror')) throw new Error('Malformed exported XML');
+      return {
+        wattmeters: Array.from(doc.querySelectorAll('WattmeterTrue')).map(e => ({
+          x: e.getAttribute('x'), meter: e.getAttribute('meter')
+        })),
+        resistors: Array.from(doc.querySelectorAll('r')).map(e => ({
+          x: e.getAttribute('x'), r: e.getAttribute('r')
+        }))
+      };
+    };
+    api.importCircuit(xml);
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    const first = inspect(api.exportCircuit());
+    api.importCircuit(api.exportCircuit());
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return { first, second: inspect(api.exportCircuit()) };
+  }, sourceXml);
+  console.log('WULFLEMM NATIVE XML IMPORT ROUNDTRIP', JSON.stringify(cross));
+  if (cross.first.wattmeters.length !== 2 ||
+      cross.first.resistors.length !== 3 ||
+      JSON.stringify(cross.first) !== JSON.stringify(cross.second))
+    throw new Error('Wulflemm native import/export/reimport did not preserve circuit');
+
 } catch (e) {
   console.log('WULFLEMM EXTERNAL BROWSER PROBE', JSON.stringify({
     reachable: false, error: String(e)
