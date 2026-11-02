@@ -278,8 +278,13 @@
       const nodes=window.WulflemmXml.parse(xml);
       const meters=nodes.filter(n=>n.name==="WattmeterTrue");
       wulflemmDocument={xml,nodes};
-      return {ok:true,format:"wulflemm-xml",elements:nodes.length-1,wattmeters:meters.length,
-        simulated:false,message:"XML conservado para exportación; todavía no se ha cargado en el motor eléctrico."};
+      // El motor CircuitJS actual admite XML con raíz <cir> mediante importCircuit.
+      // Conservar el original permite comprobar por separado el intercambio sin pérdida.
+      const loaded=importModel("Wulflemm-XML",xml);
+      return {ok:loaded.ok,format:"wulflemm-xml",elements:nodes.length-1,wattmeters:meters.length,
+        simulated:loaded.ok,message:loaded.ok
+          ?"XML cargado en el motor CircuitJS; verificar equivalencia eléctrica por componentes."
+          :loaded.message};
     }catch(error){return {ok:false,message:error.message};}
   }
   function getWulflemmComponents(){
