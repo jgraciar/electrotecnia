@@ -288,10 +288,12 @@ try {
   const svgProbe=await page.evaluate(()=>{
     const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
     try {
-      const svg=api.getCircuitAsSVG();
-      const source=typeof svg==="string"?svg:String(svg);
-      return {available:true,length:source.length,head:source.slice(0,550),
-        resistorLabels:(source.match(/1000/g)||[]).length};
+      let source=null;
+      const previous=api.onsvgrendered;
+      api.onsvgrendered=(_api,svg)=>{source=svg;};
+      try { api.getCircuitAsSVG(); } finally { api.onsvgrendered=previous; }
+      return {available:typeof source==="string",length:source?.length||0,
+        head:source?.slice(0,550)||"",resistorLabels:(source?.match(/1000/g)||[]).length};
     } catch(error){return {available:false,error:String(error)};}
   });
   console.log("EXPORTACIÓN SVG CIRCUITJS",JSON.stringify(svgProbe));
