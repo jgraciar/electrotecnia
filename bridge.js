@@ -287,6 +287,20 @@
     return {ok:true,format:"wulflemm-xml",xml:window.WulflemmXml.serialize(wulflemmDocument.nodes),
       simulated:false,message:"Exportación del documento XML conservado; no refleja cambios realizados en CircuitJS."};
   }
+  // Diagnóstico real de las funciones que expone la versión compilada,
+  // sin asumir que sus métodos XML son accesibles desde JavaScript.
+  function getCompatibilityDiagnostics(){
+    if(!sim)return {ready:false,message:"Motor CircuitJS aún no conectado."};
+    const names=["importCircuit","exportCircuit","importCircuitFromXml",
+      "exportCircuitAsXml","importXML","exportXML","loadCircuit","getElements"];
+    const methods=Object.fromEntries(names.map(name=>[name,typeof sim[name]==="function"]));
+    let types=[];
+    try{types=Array.from(sim.getElements?.()||[]).map(e=>e.getType?.()).filter(Boolean);}
+    catch(error){return {ready:true,methods,error:error.message};}
+    return {ready:true,methods,elementTypes:[...new Set(types)],
+      wattmeterTruePresent:types.includes("WattmeterTrueElm"),
+      xmlImportVerified:false,xmlExportVerified:false};
+  }
   window.LabCircuit={
     loadExample,
     loadExerciseCircuit,
@@ -298,6 +312,7 @@
     exportWulflemmXml,
     getWulflemmComponents,
     updateWulflemmAttribute,
+    getCompatibilityDiagnostics,
     isIntegrated:()=>localAvailable,
     currentExample:()=>selectedExample
   };
