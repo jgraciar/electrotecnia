@@ -302,8 +302,18 @@
   }
   function exportWulflemmXml(){
     if(!wulflemmDocument)return {ok:false,message:"No se ha importado un documento XML de wulflemm."};
-    return {ok:true,format:"wulflemm-xml",xml:window.WulflemmXml.serialize(wulflemmDocument.nodes),
-      simulated:false,message:"Exportación del documento XML conservado; no refleja cambios realizados en CircuitJS."};
+    // La exportación debe proceder del motor, nunca de una copia obsoleta.
+    // Rechazar formatos distintos del XML compatible para evitar pérdidas silenciosas.
+    const live=exportNativeCircuit();
+    if(!live.ok)return {ok:false,message:"No se puede exportar el estado actual: "+live.message};
+    if(live.format!=="circuitjs-xml")
+      return {ok:false,message:"El motor exporta texto CircuitJS, no XML Wulflemm; se rechaza una copia obsoleta.",
+        availableFormat:live.format};
+    try{
+      const nodes=window.WulflemmXml.parse(live.dump);
+      return {ok:true,format:"wulflemm-xml",xml:window.WulflemmXml.serialize(nodes),
+        simulated:true,message:"Exportación XML desde el estado actual de CircuitJS."};
+    }catch(error){return {ok:false,message:"El XML exportado no es compatible: "+error.message};}
   }
   // Diagnóstico real de las funciones que expone la versión compilada,
   // sin asumir que sus métodos XML son accesibles desde JavaScript.
