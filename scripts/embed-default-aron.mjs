@@ -20,11 +20,11 @@ ts=ts.replace(anchor,injection+anchor);
 // Keep it visible by default in both embedded and standalone views.
 const uiSource=source.replace(/CirSim\\.ts$/, 'UIManager.ts');
 let ui=readFileSync(uiSource,'utf8');
-const toolbarCondition=`            (this.app as any).startCircuit == null &&
-            (this.app as any).startCircuitText == null &&
-            (this.app as any).startCircuitLink == null`;
-if(!ui.includes(toolbarCondition))throw Error('Upstream toolbar initialization has changed');
-ui=ui.replace(toolbarCondition,'            true');
+const toolbarStart='        this.menus.toolbarCheckItem.setState(';
+const a=ui.indexOf(toolbarStart);
+const b=ui.indexOf(');',a);
+if(a<0||b<0||!ui.slice(a,b).includes('startCircuitText'))throw Error('Toolbar startup block not found');
+ui=ui.slice(0,a)+toolbarStart+'!this.hideMenu && !noEditing && !hideSidebar'+ui.slice(b);
 writeFileSync(uiSource,ui);
 writeFileSync(source,ts);
 console.log('Embedded original Aron XML in CircuitJS TypeScript:',xml.length,'bytes');
