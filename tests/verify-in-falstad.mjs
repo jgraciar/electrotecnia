@@ -141,6 +141,30 @@ try {
     "La exportación viva pierde los vatímetros");
   console.log("EXPORTACIÓN WULFLEMM DESDE MOTOR REAL",JSON.stringify({
     format:liveWulflemm.native,bytes:liveWulflemm.live.xml.length}));
+  // Round-trip de una edición XML de resistencia a través del motor real.
+  const editedRoundTrip=await page.evaluate(()=>{
+    const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
+    const doc=new DOMParser().parseFromString(api.exportCircuit(),"application/xml");
+    const node=Array.from(doc.documentElement.children).find(e=>e.tagName==="r");
+    if(!node)return {error:"No hay resistencia"};
+    const original=Number(node.getAttribute("r")),changed=original+137;
+    node.setAttribute("r",String(changed));
+    const imported=window.LabCircuit.importWulflemmXml(new XMLSerializer().serializeToString(doc));
+    const exported=window.LabCircuit.exportWulflemmXml();
+    if(!imported.ok||!exported.ok)return {imported,exported};
+    const saved=new DOMParser().parseFromString(exported.xml,"application/xml");
+    const persisted=Number(Array.from(saved.documentElement.children).find(e=>e.tagName==="r")?.getAttribute("r"));
+    const reimported=window.LabCircuit.importWulflemmXml(exported.xml);
+    return {original,changed,persisted,imported,reimported};
+  });
+  assert(editedRoundTrip.imported?.ok&&editedRoundTrip.reimported?.ok,
+    "Error de edición y reimportación: "+JSON.stringify(editedRoundTrip));
+  assert.equal(editedRoundTrip.persisted,editedRoundTrip.changed,
+    "La exportación no conserva la resistencia editada");
+  console.log("EDICIÓN XML BIDIRECCIONAL",JSON.stringify({
+    original:editedRoundTrip.original,changed:editedRoundTrip.changed}));
+  const restored=await page.evaluate(xml=>window.LabCircuit.importWulflemmXml(xml),originalXml);
+  assert(restored.ok,"No se pudo restaurar el circuito original");
   assert(originalCross.imported.ok && originalCross.imported.simulated,
     "El circuito original Wulflemm no se ha cargado eléctricamente: "+JSON.stringify(originalCross.imported));
   assert.equal(originalCross.types.filter(t=>/Wattmeter/.test(t)).length,2,
