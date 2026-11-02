@@ -238,7 +238,8 @@
     try{elements=Array.from(sim.getElements()||[]);time=sim.getTime();}catch(_){return null;}
     if(!Number.isFinite(time))return null;
     const get=type=>elements.find(el=>{try{return el.getType()===type;}catch(_){return false;}});
-    const ammeter=get("AmmeterElm"),voltmeter=get("ProbeElm"),
+    const probes=elements.filter(el=>{try{return el.getType()==="ProbeElm";}catch(_){return false;}});
+    const ammeter=get("AmmeterElm"),voltmeter=probes[0],
       wattmeter=get("WattmeterTrueElm") || get("WattmeterElm");
     let current=NaN,voltage=NaN,power=NaN;
     try{if(ammeter)current=ammeter.getCurrent();}catch(_){}
@@ -248,7 +249,8 @@
     const wattmeterPowers=wattmeters.map((m,i)=>({index:i+1,power:wattPowerAverage(m.element===measuredWattmeter?wattSamples:m.samples)}));
     const totalWattmeterPower=wattmeterPowers.length>0 && wattmeterPowers.every(m=>Number.isFinite(m.power))
       ? wattmeterPowers.reduce((sum,m)=>sum+m.power,0):NaN;
-    return {id:selectedExample,time,current,voltage,power,wattmeterPowers,totalWattmeterPower,
+    const probeVoltages=probes.map((el,index)=>{let value=NaN;try{value=el.getVoltageDiff();}catch(_){}return {index,value};});
+    return {id:selectedExample,time,current,voltage,probeVoltages,power,wattmeterPowers,totalWattmeterPower,
       hasAmmeter:!!ammeter,hasVoltmeter:!!voltmeter,hasWattmeter:!!wattmeter};
   }
   // Lectura independiente de los dos vatímetros del método Aron.
