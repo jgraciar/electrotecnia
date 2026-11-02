@@ -87,6 +87,20 @@ try {
     assert(current,meta.id+": sin corriente esperada");
     assert(Math.abs(readings.current-current.value)<=Math.max(.0001,Math.abs(current.value)*.005),
       meta.id+": intensidad simulada "+readings.current+"; esperada "+current.value);
+    // Balance de potencia obtenido de las resistencias simuladas, no
+    // de valores calculados por la ficha ni de un vatímetro inexistente.
+    const balance=await page.evaluate(()=>{
+      const els=Array.from(document.getElementById("circuit-frame").contentWindow.CircuitJS1.getElements());
+      const resistors=els.filter(e=>e.getType()==="ResistorElm");
+      const powers=resistors.map(e=>Math.abs(e.getVoltageDiff()*e.getCurrent()));
+      return {count:resistors.length,total:powers.reduce((a,b)=>a+b,0)};
+    });
+    assert(balance.count>=1&&Number.isFinite(balance.total),meta.id+": balance resistivo no disponible");
+    const expectedPower=meta.expected.find(x=>x.type==="power"&&/total/i.test(x.label));
+    if(expectedPower){
+      assert(Math.abs(balance.total-expectedPower.value)<=Math.max(.001,Math.abs(expectedPower.value)*.005),
+        meta.id+": potencia simulada "+balance.total+"; esperada "+expectedPower.value);
+    }
     console.log("MEDIDA REAL",meta.id,"I=",readings.current,"OK");
   }
   // Auditoría de los temas anteriores: todas las actividades con circuito.
