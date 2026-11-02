@@ -96,9 +96,9 @@
       {page:77,circuit:seriesCircuit(24,20,10),
        meterScales:{current:"A",voltage:"V",power:"W"},
        measured:[{label:"Amperímetro A1",type:"current",value:0.8,unit:"A"},
-         {label:"Voltímetro de R1",type:"voltage",value:16,unit:"V"},
+         {label:"Voltímetro de alimentación",type:"voltage",value:24,unit:"V"},
          {label:"Voltímetro de R2",type:"voltage",value:8,unit:"V"}],
-       scope:"Resistencias en serie; medidas de corriente y tensión. Potencias calculadas."}),
+       scope:"Resistencias en serie; el voltímetro de la izquierda mide 24 V y el de la derecha mide 8 V. La caída de 16 V en R1 se obtiene por diferencia. Potencias calculadas."}),
 
     ref(2,1,"Ley de Ohm",
       "Calcula la intensidad que circula por el filamento de una lámpara incandescente de 10 Ω de resistencia, cuando está sometida a una tensión de 12 V.",
