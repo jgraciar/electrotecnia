@@ -223,10 +223,19 @@
     return {id:selectedExample,time,current,voltage,power,wattmeterPowers,totalWattmeterPower,
       hasAmmeter:!!ammeter,hasVoltmeter:!!voltmeter,hasWattmeter:!!wattmeter};
   }
+  // Lectura independiente de los dos vatímetros del método Aron.
+  // Los valores son NaN hasta completar la ventana de integración.
+  function getAronReadings(){
+    if(!sim || wattmeters.length!==2)return null;
+    const readings=wattmeters.map(m=>wattPowerAverage(m.element===measuredWattmeter?wattSamples:m.samples));
+    const valid=readings.every(Number.isFinite);
+    return {w1:readings[0],w2:readings[1],total:valid?readings[0]+readings[1]:NaN,valid};
+  }
   window.LabCircuit={
     loadExample,
     loadExerciseCircuit,
     getInstrumentReadings,
+    getAronReadings,
     isIntegrated:()=>localAvailable,
     currentExample:()=>selectedExample
   };
