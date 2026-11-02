@@ -69,6 +69,26 @@ try {
       console.log(meta.id,measure.label,"teoría",measure.value,"medido",actual);
     }
   }
+  // Todas las actividades añadidas: importación, simulación y lectura física.
+  for(const [unit,number] of [[6,1],[6,2],[6,3],[6,4],[6,6],[6,7],[6,8],[6,9],[6,10],[6,12]]){
+    const ref={unit,kind:"resuelta",number};
+    const meta=await page.evaluate(ref=>{
+      const x=window.LabTextbookExercises.build(ref);
+      return {id:x.id,expected:x.measured,
+        load:window.LabCircuit.loadExerciseCircuit(x.id,x.circuit)};
+    },ref);
+    assert(meta.load?.ok,meta.id+": importación fallida: "+JSON.stringify(meta.load));
+    await page.waitForFunction(id=>{
+      const r=window.LabCircuit.getInstrumentReadings();
+      return r?.id===id&&r.time>=0.03&&Number.isFinite(r.current);
+    },meta.id,{timeout:12000});
+    const readings=await page.evaluate(()=>window.LabCircuit.getInstrumentReadings());
+    const current=meta.expected.find(x=>x.type==="current");
+    assert(current,meta.id+": sin corriente esperada");
+    assert(Math.abs(readings.current-current.value)<=Math.max(.0001,Math.abs(current.value)*.005),
+      meta.id+": intensidad simulada "+readings.current+"; esperada "+current.value);
+    console.log("MEDIDA REAL",meta.id,"I=",readings.current,"OK");
+  }
   // Comprobar importación y exportación nativas con el motor real del iframe.
   const roundtrip=await page.evaluate(()=>{
     const frame=document.getElementById("circuit-frame");
