@@ -201,6 +201,45 @@ try {
     "Los dos vatímetros siguen sin medir potencia: "+JSON.stringify(aron));
   console.log("ARON INSTANTÁNEO",JSON.stringify({time:aron.time,
     meters:aron.meterPowers,total:meterTotal,resistors:resistorTotal}));
+  // Integración trapezoidal de potencia durante al menos un ciclo de 60 Hz.
+  // El muestreo depende del tiempo simulado, no del reloj de Playwright.
+  const average=await page.evaluate(async()=>{
+    const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
+    const elements=Array.from(api.getElements());
+    const meters=elements.filter(e=>e.getType()==="WattmeterTrueElm");
+    const resistors=elements.filter(e=>e.getType()==="ResistorElm");
+    const samples=[];
+    const start=api.getTime();
+    const deadline=performance.now()+45000;
+    while(api.getTime()-start<1/60 && performance.now()<deadline){
+      const t=api.getTime();
+      if(!samples.length || t>samples[samples.length-1].t){
+        samples.push({t,w:meters.map(e=>e.getVoltageDiff()*e.getCurrent()),
+          r:resistors.map(e=>e.getVoltageDiff()*e.getCurrent())});
+      }
+      await new Promise(resolve=>setTimeout(resolve,30));
+    }
+    const integrate=key=>{
+      let energy=0;
+      for(let i=1;i<samples.length;i++){
+        const a=samples[i-1],b=samples[i],dt=b.t-a.t;
+        const pa=a[key].reduce((x,y)=>x+y,0),pb=b[key].reduce((x,y)=>x+y,0);
+        energy+=dt*(pa+pb)/2;
+      }
+      const duration=samples.length>1?samples[samples.length-1].t-samples[0].t:0;
+      return duration>0?energy/duration:NaN;
+    };
+    return {start,end:api.getTime(),samples:samples.length,
+      watts:integrate("w"),resistors:integrate("r")};
+  });
+  console.log("ARON MEDIA 60 HZ",JSON.stringify(average));
+  assert(average.end-average.start>=1/60,
+    "No se completó un periodo simulado de 60 Hz: "+JSON.stringify(average));
+  assert(average.samples>=5 && Number.isFinite(average.watts) &&
+    Number.isFinite(average.resistors),
+    "Muestreo insuficiente para potencia media: "+JSON.stringify(average));
+  // Durante transitorios, la energía reactiva almacenada puede cambiar
+  // entre los extremos de la ventana; no exigir aún igualdad de medias.
   // La potencia activa media exige integrar muestras en un periodo completo;
   // no se afirma validación de esa medida mediante esta prueba instantánea.
   console.log("ARCHIVO ORIGINAL WULFLEMM: DOS VATÍMETROS Y TOPOLOGÍA CONSERVADOS");
