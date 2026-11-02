@@ -140,6 +140,12 @@
       <label>Archivo XML de wulflemm<input id="wulflemmXmlFile" type="file" accept=".xml,application/xml,text/xml"></label>
       <button id="wulflemmXmlSave" type="button" disabled>Exportar XML conservado</button>
     </div>
+    <div class="controls bridge-controls">
+      <label>Elemento XML<select id="wulflemmComponent" disabled><option value="">Selecciona un XML</option></select></label>
+      <label>Atributo<input id="wulflemmAttribute" type="text" placeholder="r, fr, phaseShift…"></label>
+      <label>Valor<input id="wulflemmValue" type="text" placeholder="Nuevo valor"></label>
+      <button id="wulflemmApply" type="button" disabled>Modificar XML</button>
+    </div>
     <p class="hint" id="wulflemmXmlStatus" role="status">Intercambio documental XML. No importa ni exporta circuitos eléctricos editables en CircuitJS.</p>
     <iframe title="Simulador CircuitJS de Falstad" id="circuit-frame" loading="lazy"></iframe>
     <p class="hint">Las señales mostradas proceden del motor CircuitJS cuando está alojado en este mismo dominio. En modo externo solo se puede editar el circuito: el navegador impide leer sus señales por motivos de seguridad.</p>
