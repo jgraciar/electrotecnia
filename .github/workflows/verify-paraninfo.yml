@@ -40,6 +40,8 @@ jobs:
         run: |
           mkdir -p public/circuitjs
           cp lab/*.html lab/*.css lab/*.js public/
+          mkdir -p public/tests/fixtures
+          cp lab/tests/fixtures/wulflemm-aron.xml public/tests/fixtures/
           cp -a circuitjs-src/ts/dist/. public/circuitjs/
       - name: Instalar navegador de pruebas
         working-directory: lab
