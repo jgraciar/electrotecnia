@@ -32,8 +32,8 @@ jobs:
       - name: Comprobar modelo e importador XML
         run: |
           find circuitjs-src -type f \( -name '*Wattmeter*' -o -name '*XMLDeserializer*' \) -print
-          test -n "$(find circuitjs-src -type f -name 'WattmeterTrueElm.java' -print -quit)"
-          test -n "$(find circuitjs-src -type f -name 'XMLDeserializer.java' -print -quit)"
+          if ! find circuitjs-src -type f -name 'WattmeterTrueElm.java' | grep -q .; then echo 'ERROR: Falta WattmeterTrueElm.java en la revision oficial seleccionada'; exit 1; fi
+          if ! find circuitjs-src -type f -name 'XMLDeserializer.java' | grep -q .; then echo 'ERROR: Falta XMLDeserializer.java en la revision oficial seleccionada'; exit 1; fi
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
           root=ET.parse('laboratorio/tests/fixtures/wulflemm-aron.xml').getroot()
