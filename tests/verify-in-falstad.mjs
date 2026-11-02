@@ -268,6 +268,15 @@ try {
   });
   console.log("BARRIDO POSICIONES CIRCUITJS",JSON.stringify(canvasProbe));
 
+  // La edición GUI no está validada: impedir que una ejecución verde se
+  // interprete como una prueba superada de doble clic.
+  const guiDialogOpened=dialogSnapshot.some(e=>
+    e.tag==="INPUT" && e.type==="text" && /^1000(?:\\.0+)?$/.test(e.value||""));
+  console.log("ESTADO EDICIÓN GRÁFICA",JSON.stringify({
+    verified:guiDialogOpened,reason:guiDialogOpened?"Diálogo de resistencia visible":
+      "El doble clic sintético no abrió el editor; la prueba GUI sigue pendiente"}));
+
+
 
 
 
