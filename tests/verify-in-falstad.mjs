@@ -182,7 +182,10 @@ try {
     const d=frame.contentDocument;
     const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
     const r=Array.from(new DOMParser().parseFromString(frame.contentWindow.CircuitJS1.exportCircuit(),"application/xml").documentElement.children)
-      .find(n=>n.tagName==="r");
+      .filter(n=>n.tagName==="r").find(n=>{
+        const p=n.getAttribute("x").trim().split(/\s+/).map(Number);
+        return (p[1]+p[3])/2<canvas.height-30;
+      });
     if(!canvas||!r)return {error:"Faltan lienzo o resistencia"};
     const xy=r.getAttribute("x").trim().split(/\s+/).map(Number);
     const rect=canvas.getBoundingClientRect();
