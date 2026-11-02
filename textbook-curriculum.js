@@ -35,5 +35,9 @@ window.LabTextbookActivityCurriculum={
   "3.5":{ra:"RA1",ce:["1d"],character:"Necesario"},
   "3.6":{ra:"RA1",ce:["1d"],character:"Necesario"},
   "3.9":{ra:"RA1",ce:["1d"],character:"Necesario",note:"La conversión correcta es 8 h = 28.800 s."},
-  "3.10":{ra:"RA1",ce:["1d"],character:"Necesario"}
+  "3.10":{ra:"RA1",ce:["1d"],character:"Necesario"},
+  "4.1":{ra:"RA1",ce:["1d"],character:"Necesario"},
+  "4.4":{ra:"RA1",ce:["1d"],character:"Apoyo / opcional"},
+  "4.5":{ra:"RA1",ce:["1d"],character:"Necesario"},
+  "4.6":{ra:"RA1",ce:[],character:"Opcional",note:"Calorimetría y cálculo de temperatura: no acredita directamente un CE."}
 };
