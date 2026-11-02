@@ -402,6 +402,39 @@ try {
   });
   console.log("MAPA EDITORES CIRCUITJS",JSON.stringify(editorGrid));
 
+  const resistorGui=await page.evaluate(()=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const r=canvas.getBoundingClientRect(),x=760,y=60;
+    canvas.dispatchEvent(new MouseEvent("mousemove",{bubbles:true,view:d.defaultView,
+      clientX:r.x+x,clientY:r.y+y}));
+    canvas.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,
+      view:d.defaultView,clientX:r.x+x,clientY:r.y+y,button:0,detail:2}));
+    const title=d.body.innerText.match(/Edit Resistor/);
+    const visible=Array.from(d.querySelectorAll('input[type="text"]'))
+      .filter(e=>e.getBoundingClientRect().width>10);
+    const before=visible.map(e=>e.value);
+    if(!title||!visible.length)return {opened:!!title,before,error:"Resistor edit field missing"};
+    const field=visible.find(e=>Number(e.value)===1000)||visible[visible.length-1];
+    field.value="1137";
+    field.dispatchEvent(new Event("input",{bubbles:true}));
+    field.dispatchEvent(new Event("change",{bubbles:true}));
+    const ok=Array.from(d.querySelectorAll("button")).find(e=>
+      e.textContent?.trim()==="OK"&&e.getBoundingClientRect().width>0);
+    if(!ok)return {opened:true,before,error:"OK button missing"};
+    ok.click();
+    const api=d.defaultView.CircuitJS1;
+    const exported=api.exportCircuit();
+    return {opened:true,before,editedField:field===visible[0]?0:visible.indexOf(field),
+      exportedContains1137:/\\br\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+1137(?:\\s|$)/m.test(exported),
+      occurrences1137:(exported.match(/1137/g)||[]).length,
+      snippet:exported.split("\\n").filter(line=>line.includes("1137")).slice(0,3)};
+  });
+  console.log("EDICIÓN REAL RESISTENCIA GUI",JSON.stringify(resistorGui));
+  if(!resistorGui.opened||!resistorGui.occurrences1137)
+    throw new Error("No se ha acreditado la modificación de resistencia desde el editor gráfico");
+
+
 
 
 
