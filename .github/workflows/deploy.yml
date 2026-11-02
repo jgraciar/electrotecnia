@@ -54,6 +54,10 @@ jobs:
             test -f "circuitjs-src/ts/$class.ts" || { echo "::error::Falta $class.ts"; exit 1; }
           done
 
+      - name: Incorporar circuito original de Aron al código de CircuitJS
+        run: |
+          node laboratorio/scripts/embed-default-aron.mjs circuitjs-src/ts/CirSim.ts laboratorio/tests/fixtures/wulflemm-aron.xml
+
       - name: Instalar dependencias y compilar CircuitJS
         working-directory: circuitjs-src/ts
         run: |
