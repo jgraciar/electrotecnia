@@ -176,6 +176,31 @@ try {
         tag:e.tagName,id:e.id,value:e.value,text:e.textContent?.trim().slice(0,45)}))};
   });
   console.log("DIAGNÓSTICO EDICIÓN GRÁFICA",JSON.stringify(gui));
+  // Inspección del diálogo real de edición mediante doble clic en la resistencia.
+  const guiEdit=await page.evaluate(()=>{
+    const frame=document.getElementById("circuit-frame");
+    const d=frame.contentDocument;
+    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const r=Array.from(new DOMParser().parseFromString(frame.contentWindow.CircuitJS1.exportCircuit(),"application/xml").documentElement.children)
+      .find(n=>n.tagName==="r");
+    if(!canvas||!r)return {error:"Faltan lienzo o resistencia"};
+    const xy=r.getAttribute("x").split(/\\s+/).map(Number);
+    const rect=canvas.getBoundingClientRect();
+    return {x:rect.x+(xy[0]+xy[2])/2,y:rect.y+(xy[1]+xy[3])/2,
+      resistor:xy,canvas:{width:rect.width,height:rect.height}};
+  });
+  if(guiEdit.error)throw Error(JSON.stringify(guiEdit));
+  const circuitFrame=page.frameLocator("#circuit-frame");
+  await circuitFrame.locator("canvas").last().dblclick({position:{
+    x:guiEdit.x,y:guiEdit.y},timeout:5000});
+  const dialogSnapshot=await page.evaluate(()=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    return Array.from(d.querySelectorAll("input,button,[role=dialog]"))
+      .filter(e=>e.getBoundingClientRect().width>0)
+      .map(e=>({tag:e.tagName,type:e.type,value:e.value,text:e.textContent?.trim().slice(0,70)}))
+      .slice(-25);
+  });
+  console.log("DIÁLOGO EDICIÓN RESISTENCIA",JSON.stringify({guiEdit,dialogSnapshot}));
   assert(originalCross.imported.ok && originalCross.imported.simulated,
     "El circuito original Wulflemm no se ha cargado eléctricamente: "+JSON.stringify(originalCross.imported));
   assert.equal(originalCross.types.filter(t=>/Wattmeter/.test(t)).length,2,
