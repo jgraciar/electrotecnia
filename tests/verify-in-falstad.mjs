@@ -165,6 +165,17 @@ try {
     original:editedRoundTrip.original,changed:editedRoundTrip.changed}));
   const restored=await page.evaluate(xml=>window.LabCircuit.importWulflemmXml(xml),originalXml);
   assert(restored.ok,"No se pudo restaurar el circuito original");
+  // Diagnóstico reproducible para automatizar la edición gráfica del resistor.
+  const gui=await page.evaluate(()=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    return {canvas:Array.from(d.querySelectorAll("canvas")).map(c=>({
+      id:c.id,width:c.width,height:c.height,
+      rect:{x:c.getBoundingClientRect().x,y:c.getBoundingClientRect().y,
+        width:c.getBoundingClientRect().width,height:c.getBoundingClientRect().height}})),
+      controls:Array.from(d.querySelectorAll("input,button")).slice(0,12).map(e=>({
+        tag:e.tagName,id:e.id,value:e.value,text:e.textContent?.trim().slice(0,45)}))};
+  });
+  console.log("DIAGNÓSTICO EDICIÓN GRÁFICA",JSON.stringify(gui));
   assert(originalCross.imported.ok && originalCross.imported.simulated,
     "El circuito original Wulflemm no se ha cargado eléctricamente: "+JSON.stringify(originalCross.imported));
   assert.equal(originalCross.types.filter(t=>/Wattmeter/.test(t)).length,2,
