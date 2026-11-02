@@ -378,6 +378,31 @@ try {
   });
   console.log("BARRIDO CURSOR CIRCUITJS",JSON.stringify(hoverProbe));
 
+  const editorGrid=await page.evaluate(()=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const r=canvas.getBoundingClientRect(),found=[],counts={};
+    for(let y=30;y<=390;y+=30){
+      for(let x=40;x<=900;x+=30){
+        canvas.dispatchEvent(new MouseEvent("mousemove",{bubbles:true,view:d.defaultView,
+          clientX:r.x+x,clientY:r.y+y}));
+        canvas.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,
+          view:d.defaultView,clientX:r.x+x,clientY:r.y+y,button:0,detail:2}));
+        const m=d.body.innerText.match(/Edit (Resistor|Inductor|Capacitor|Wattmeter|Voltage Source)/);
+        if(m){counts[m[1]]=(counts[m[1]]||0)+1;
+          if(!found.some(v=>v.editor===m[1]))found.push({x,y,editor:m[1]});
+          const cancel=Array.from(d.querySelectorAll("button")).find(e=>
+            e.textContent?.trim()==="Cancel"&&e.getBoundingClientRect().width>0);
+          cancel?.click();
+          if(m[1]==="Resistor")return {found,counts,success:true};
+        }
+      }
+    }
+    return {found,counts,success:false};
+  });
+  console.log("MAPA EDITORES CIRCUITJS",JSON.stringify(editorGrid));
+
+
 
 
 
