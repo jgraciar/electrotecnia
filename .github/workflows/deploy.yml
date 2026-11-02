@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: pfalstad/circuitjs1
-          ref: master
+          ref: 8ac55f22a03606579b822b3dccd4dc10de1ddc5b
           path: circuitjs-src
 
       - name: Preparar Java para compilador GWT
