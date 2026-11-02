@@ -258,6 +258,24 @@
   function importNativeCircuit(filename,dump){
     return importModel(filename,dump);
   }
+  // Intercambio XML sin pérdida. No modifica el motor hasta que exista
+  // soporte de importación y exportación eléctrica compatible.
+  let wulflemmDocument=null;
+  function importWulflemmXml(xml){
+    if(!window.WulflemmXml)return {ok:false,message:"El módulo XML no está cargado."};
+    try{
+      const nodes=window.WulflemmXml.parse(xml);
+      const meters=nodes.filter(n=>n.name==="WattmeterTrue");
+      wulflemmDocument={xml,nodes};
+      return {ok:true,format:"wulflemm-xml",elements:nodes.length-1,wattmeters:meters.length,
+        simulated:false,message:"XML conservado para exportación; todavía no se ha cargado en el motor eléctrico."};
+    }catch(error){return {ok:false,message:error.message};}
+  }
+  function exportWulflemmXml(){
+    if(!wulflemmDocument)return {ok:false,message:"No se ha importado un documento XML de wulflemm."};
+    return {ok:true,format:"wulflemm-xml",xml:window.WulflemmXml.serialize(wulflemmDocument.nodes),
+      simulated:false,message:"Exportación del documento XML conservado; no refleja cambios realizados en CircuitJS."};
+  }
   window.LabCircuit={
     loadExample,
     loadExerciseCircuit,
@@ -265,6 +283,8 @@
     getAronReadings,
     exportNativeCircuit,
     importNativeCircuit,
+    importWulflemmXml,
+    exportWulflemmXml,
     isIntegrated:()=>localAvailable,
     currentExample:()=>selectedExample
   };
