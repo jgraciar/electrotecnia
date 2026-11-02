@@ -18,7 +18,7 @@ const cases=[
   [4,5,[2.8,.25],[230,230**2/(10000000/3600)]],
   [4,6,[12.5,225000,168750/(7000*.11)],[125,10]]
 ];
-assert.equal(lab.totalCatalogued,cases.length+9);
+assert.equal(lab.totalCatalogued,cases.length+10);
 for(const [unit,number,expected,elec] of cases){
   const entry={unit,kind:"resuelta",number,id:"Actividad resuelta "+unit+"."+number};
   assert(lab.has(entry)&&lab.validate(entry));
@@ -94,3 +94,9 @@ const five=lab.build({unit:6,kind:"resuelta",number:10});
 assert(five&&five.circuit&&five.questions.length===12);
 [4,10,5,100,1,95,5,.5,1/3,1/6,.5,100].forEach((v,i)=>assert(Math.abs(five.questions[i].value-v)<1e-8));
 assert(five.circuit.includes("r 1040 96 1040 448 0 12"));
+
+const mixed612=lab.build({unit:6,kind:"resuelta",number:12});
+assert(mixed612&&mixed612.circuit&&mixed612.questions.length===11);
+assert.equal(mixed612.questions[7].value,22.5);
+assert.equal(mixed612.questions[9].value,2.78125);
+assert.equal(mixed612.questions[10].value,62.578125);
