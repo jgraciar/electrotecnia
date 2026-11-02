@@ -16,6 +16,7 @@
   let selectedExample=null;
   let pendingModel=null;
   let measuredWattmeter=null, wattSamples=[];
+  let wattmeters=[];
   const WATT_WINDOW_S=0.1;
   function wattPowerInstant(element){
     if(!element || element.getPostCount()<4 || typeof element.getVoltage!=="function")return NaN;
@@ -35,13 +36,13 @@
     const cutoff=t-WATT_WINDOW_S;
     while(wattSamples.length>2 && wattSamples[1].t<cutoff)wattSamples.shift();
   }
-  function wattPowerAverage(){
-    if(wattSamples.length<2)return NaN;
-    const last=wattSamples[wattSamples.length-1],start=last.t-WATT_WINDOW_S;
-    if(wattSamples[0].t>start)return NaN;
+  function wattPowerAverage(samples=wattSamples){
+    if(samples.length<2)return NaN;
+    const last=samples[samples.length-1],start=last.t-WATT_WINDOW_S;
+    if(samples[0].t>start)return NaN;
     let area=0;
-    for(let i=1;i<wattSamples.length;i++){
-      const a=wattSamples[i-1],b=wattSamples[i];
+    for(let i=1;i<samples.length;i++){
+      const a=samples[i-1],b=samples[i];
       if(b.t<=start)continue;
       const t0=Math.max(a.t,start),frac=(t0-a.t)/(b.t-a.t);
       const p0=a.power+(b.power-a.power)*frac;
@@ -54,6 +55,7 @@
   function clear(){
     record=[];lastSample=-Infinity;lastPaint=0;
     wattSamples=[];
+    wattmeters.forEach(m=>m.samples=[]);
     scope.clearCircuit();
   }
   function updateSelection(){
@@ -61,7 +63,8 @@
     if(!sim)return;
     let elements=[];
     try{elements=Array.from(sim.getElements()||[]);}catch(err){message("Error al consultar los componentes: "+err.message);return;}
-    measuredWattmeter=elements.find(el=>{try{return el.getType()==="WattmeterTrueElm";}catch(_){return false;}}) || null;
+    wattmeters=elements.filter(el=>{try{return el.getType()==="WattmeterTrueElm";}catch(_){return false;}}).map(element=>({element,samples:[]}));
+    measuredWattmeter=wattmeters[0]?.element || null;
     wattSamples=[];
     eligible=elements.filter(el=>{
       try{return el.getPostCount()>=2 && typeof el.getVoltageDiff==="function" &&
@@ -93,6 +96,18 @@
     try{t=sim.getTime();}catch(_){return;}
     if(!Number.isFinite(t))return;
     captureWattmeter(t);
+    for(const meter of wattmeters){
+      if(meter.element===measuredWattmeter)continue;
+      const p=wattPowerInstant(meter.element);
+      if(!Number.isFinite(p))continue;
+      const samples=meter.samples;
+      if(samples.length && t<=samples[samples.length-1].t){
+        if(t<samples[samples.length-1].t)samples.length=0;
+        else continue;
+      }
+      samples.push({t,power:p});
+      while(samples.length>2 && samples[1].t<t-WATT_WINDOW_S)samples.shift();
+    }
     if(selector.disabled)return;
     if(t<lastSample)clear();
     const step=Math.max(.000002,windowSeconds()/1200);
@@ -165,7 +180,7 @@
     if(!examples.has(filename))return {ok:false,message:"Plantilla no autorizada."};
     if(!localAvailable)return {ok:false,message:"La copia integrada de CircuitJS aún no está disponible."};
     clear();sim=null;pendingModel=null;eligible=[];selector.disabled=true;
-    measuredWattmeter=null;
+    measuredWattmeter=null;wattmeters=[];
     selector.replaceChildren();
     const option=document.createElement("option");
     option.value="";option.textContent="Cargando práctica…";selector.append(option);
@@ -202,7 +217,10 @@
     try{if(voltmeter)voltage=voltmeter.getVoltageDiff();}catch(_){}
     // Potencia activa media; NaN si no hay cuatro bornes o faltan muestras.
     if(wattmeter && wattmeter===measuredWattmeter)power=wattPowerAverage();
-    return {id:selectedExample,time,current,voltage,power,
+    const wattmeterPowers=wattmeters.map((m,i)=>({index:i+1,power:wattPowerAverage(m.element===measuredWattmeter?wattSamples:m.samples)}));
+    const totalWattmeterPower=wattmeterPowers.length>0 && wattmeterPowers.every(m=>Number.isFinite(m.power))
+      ? wattmeterPowers.reduce((sum,m)=>sum+m.power,0):NaN;
+    return {id:selectedExample,time,current,voltage,power,wattmeterPowers,totalWattmeterPower,
       hasAmmeter:!!ammeter,hasVoltmeter:!!voltmeter,hasWattmeter:!!wattmeter};
   }
   window.LabCircuit={
