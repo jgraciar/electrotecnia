@@ -152,6 +152,15 @@ try {
     "La importación/exportación Wulflemm modifica componentes o conexiones");
   // Identidad instantánea de Aron: no requiere esperar 100 ms simulados.
   // Se comprueba la suma de potencias instantáneas, no la media activa.
+  // Evitar el falso positivo observado: t=0 y todas las potencias nulas.
+  await page.waitForFunction(()=>{
+    const api=document.getElementById("circuit-frame")?.contentWindow?.CircuitJS1;
+    if(!api || !(api.getTime()>0.005))return false;
+    const meters=Array.from(api.getElements()).filter(e=>e.getType()==="WattmeterTrueElm");
+    if(meters.length!==2)return false;
+    const powers=meters.map(e=>(e.getVoltage(2)-e.getVoltage(3))*e.getCurrent());
+    return powers.every(Number.isFinite) && powers.some(p=>Math.abs(p)>0.01);
+  },null,{timeout:30000});
   const aron=await page.evaluate(()=>{
     const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
     const elements=Array.from(api.getElements());
