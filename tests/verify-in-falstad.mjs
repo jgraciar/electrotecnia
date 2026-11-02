@@ -302,7 +302,7 @@ try {
               .map(n=>({tag:n.tagName,transform:n.getAttribute("transform")})),
             labels:nodes.filter(n=>n.tagName==="text").slice(0,18)
               .map(n=>({x:n.getAttribute("x"),y:n.getAttribute("y"),text:n.textContent}))};
-        })()}};
+        })()};
     } catch(error){return {available:false,error:String(error)};}
   });
   console.log("EXPORTACIÓN SVG CIRCUITJS",JSON.stringify(svgProbe));
