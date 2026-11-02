@@ -376,7 +376,7 @@
       const response=await fetch(initialUrl.href,{cache:"no-store"});
       if(!response.ok)throw new Error("HTTP "+response.status);
       const xml=await response.text();
-      if(!/^<cir(?:\\s|>)/.test(xml.trimStart()))
+      if(!/^<cir(?:\s|>)/.test(xml.trimStart()))
         throw new Error("El archivo inicial no es XML CircuitJS válido.");
       pendingModel={filename:"wulflemm-aron.xml",dump:xml};
     }catch(error){
