@@ -184,7 +184,7 @@ try {
     const r=Array.from(new DOMParser().parseFromString(frame.contentWindow.CircuitJS1.exportCircuit(),"application/xml").documentElement.children)
       .find(n=>n.tagName==="r");
     if(!canvas||!r)return {error:"Faltan lienzo o resistencia"};
-    const xy=r.getAttribute("x").split(/\\s+/).map(Number);
+    const xy=r.getAttribute("x").trim().split(/\s+/).map(Number);
     const rect=canvas.getBoundingClientRect();
     return {x:rect.x+(xy[0]+xy[2])/2,y:rect.y+(xy[1]+xy[3])/2,
       resistor:xy,canvas:{width:rect.width,height:rect.height}};
