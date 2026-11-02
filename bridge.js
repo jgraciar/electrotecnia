@@ -15,10 +15,45 @@
   let localAvailable=false;
   let selectedExample=null;
   let pendingModel=null;
+  let measuredWattmeter=null, wattSamples=[];
+  const WATT_WINDOW_S=0.1;
+  function wattPowerInstant(element){
+    if(!element || element.getPostCount()<4 || typeof element.getVoltage!=="function")return NaN;
+    const voltage=element.getVoltage(2)-element.getVoltage(3);
+    const current=element.getCurrent();
+    return Number.isFinite(voltage) && Number.isFinite(current) ? voltage*current : NaN;
+  }
+  function captureWattmeter(t){
+    if(!measuredWattmeter || !Number.isFinite(t))return;
+    if(wattSamples.length && t<=wattSamples[wattSamples.length-1].t){
+      if(t<wattSamples[wattSamples.length-1].t)wattSamples=[];
+      else return;
+    }
+    const power=wattPowerInstant(measuredWattmeter);
+    if(!Number.isFinite(power))return;
+    wattSamples.push({t,power});
+    const cutoff=t-WATT_WINDOW_S;
+    while(wattSamples.length>2 && wattSamples[1].t<cutoff)wattSamples.shift();
+  }
+  function wattPowerAverage(){
+    if(wattSamples.length<2)return NaN;
+    const last=wattSamples[wattSamples.length-1],start=last.t-WATT_WINDOW_S;
+    if(wattSamples[0].t>start)return NaN;
+    let area=0;
+    for(let i=1;i<wattSamples.length;i++){
+      const a=wattSamples[i-1],b=wattSamples[i];
+      if(b.t<=start)continue;
+      const t0=Math.max(a.t,start),frac=(t0-a.t)/(b.t-a.t);
+      const p0=a.power+(b.power-a.power)*frac;
+      area+=(p0+b.power)*(b.t-t0)/2;
+    }
+    return area/WATT_WINDOW_S;
+  }
   const windowSeconds=()=>Math.max(.001,Math.min(10,Number(windowInput.value)||.1));
   function message(text){status.textContent=text;}
   function clear(){
     record=[];lastSample=-Infinity;lastPaint=0;
+    wattSamples=[];
     scope.clearCircuit();
   }
   function updateSelection(){
@@ -26,6 +61,8 @@
     if(!sim)return;
     let elements=[];
     try{elements=Array.from(sim.getElements()||[]);}catch(err){message("Error al consultar los componentes: "+err.message);return;}
+    measuredWattmeter=elements.find(el=>{try{return el.getType()==="WattmeterTrueElm";}catch(_){return false;}}) || null;
+    wattSamples=[];
     eligible=elements.filter(el=>{
       try{return el.getPostCount()>=2 && typeof el.getVoltageDiff==="function" &&
         typeof el.getCurrent==="function" && el.getType()!=="WireElm";}
@@ -51,10 +88,12 @@
     message("CircuitJS conectado: selecciona un componente y observa su tensión o corriente en el osciloscopio.");
   }
   function capture(){
-    if(!sim || selector.disabled)return;
+    if(!sim)return;
     let t;
     try{t=sim.getTime();}catch(_){return;}
     if(!Number.isFinite(t))return;
+    captureWattmeter(t);
+    if(selector.disabled)return;
     if(t<lastSample)clear();
     const step=Math.max(.000002,windowSeconds()/1200);
     if(t-lastSample<step)return;
@@ -126,6 +165,7 @@
     if(!examples.has(filename))return {ok:false,message:"Plantilla no autorizada."};
     if(!localAvailable)return {ok:false,message:"La copia integrada de CircuitJS aún no está disponible."};
     clear();sim=null;pendingModel=null;eligible=[];selector.disabled=true;
+    measuredWattmeter=null;
     selector.replaceChildren();
     const option=document.createElement("option");
     option.value="";option.textContent="Cargando práctica…";selector.append(option);
@@ -160,17 +200,8 @@
     let current=NaN,voltage=NaN,power=NaN;
     try{if(ammeter)current=ammeter.getCurrent();}catch(_){}
     try{if(voltmeter)voltage=voltmeter.getVoltageDiff();}catch(_){}
-    // Preferir la bobina de tensión independiente cuando el elemento expone 4 bornes.
-    // Esta lectura es potencia INSTANTÁNEA; la activa requiere promediarla.
-    try {
-      if(wattmeter){
-        const count=wattmeter.getPostCount();
-        const v= count>=4
-          ? wattmeter.getPostVoltage(2)-wattmeter.getPostVoltage(3)
-          : wattmeter.getVoltageDiff();
-        power=v*wattmeter.getCurrent();
-      }
-    } catch(_) {}
+    // Potencia activa media; NaN si no hay cuatro bornes o faltan muestras.
+    if(wattmeter && wattmeter===measuredWattmeter)power=wattPowerAverage();
     return {id:selectedExample,time,current,voltage,power,
       hasAmmeter:!!ammeter,hasVoltmeter:!!voltmeter,hasWattmeter:!!wattmeter};
   }
