@@ -454,6 +454,10 @@ try {
     return {options,before,after};
   });
   console.log("ROUNDTRIP MODO VATÍMETRO GUI",JSON.stringify(wattmeterModeRoundtrip));
+
+  if(JSON.stringify(wattmeterModeRoundtrip.before?.map(e=>e.meter))!==JSON.stringify(["0","1"]))
+    throw new Error("El cambio gráfico del vatímetro superior a potencia instantánea no se aplicó");
+
   if(wattmeterModeRoundtrip.error||
     JSON.stringify(wattmeterModeRoundtrip.before)!==JSON.stringify(wattmeterModeRoundtrip.after)||
     wattmeterModeRoundtrip.before?.length!==2)
