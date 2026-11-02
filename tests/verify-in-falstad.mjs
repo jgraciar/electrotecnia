@@ -197,7 +197,7 @@ try {
   await page.evaluate(({x,y})=>{
     const d=document.getElementById("circuit-frame").contentDocument;
     const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
-    for(const type of ["mousedown","mouseup","click","mousedown","mouseup","click","dblclick"])
+    for(const type of ["mousemove","mousedown","mouseup","click","mousemove","mousedown","mouseup","click","dblclick"])
       canvas.dispatchEvent(new MouseEvent(type,{bubbles:true,cancelable:true,view:d.defaultView,
         clientX:x,clientY:y,button:0,buttons:type==="mousedown"?1:0,detail:type==="dblclick"?2:1}));
   },{x:guiEdit.x,y:guiEdit.y});
