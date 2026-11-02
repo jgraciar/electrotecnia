@@ -219,6 +219,25 @@ try {
   });
   console.log("DIAGNÓSTICO INTERACCIÓN CIRCUITJS",JSON.stringify(mouseDiagnostics));
 
+  // Los eventos sintéticos pueden informar offsetX/Y incorrectos.
+  // Registrar las coordenadas que recibe realmente el lienzo.
+  const eventCoordinates=await page.evaluate(({x,y})=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const rect=canvas.getBoundingClientRect();
+    const values=[];
+    const listener=e=>values.push({type:e.type,clientX:e.clientX,clientY:e.clientY,
+      offsetX:e.offsetX,offsetY:e.offsetY,target:e.target?.tagName});
+    canvas.addEventListener("mousedown",listener,{capture:true,once:true});
+    const event=new MouseEvent("mousedown",{bubbles:true,cancelable:true,view:d.defaultView,
+      clientX:x,clientY:y,button:0,buttons:1});
+    canvas.dispatchEvent(event);
+    return {rect:{x:rect.x,y:rect.y,width:rect.width,height:rect.height},
+      expectedOffset:{x:x-rect.x,y:y-rect.y},values};
+  },{x:guiEdit.x,y:guiEdit.y});
+  console.log("COORDENADAS EVENTO CIRCUITJS",JSON.stringify(eventCoordinates));
+
+
   assert(originalCross.imported.ok && originalCross.imported.simulated,
     "El circuito original Wulflemm no se ha cargado eléctricamente: "+JSON.stringify(originalCross.imported));
   assert.equal(originalCross.types.filter(t=>/Wattmeter/.test(t)).length,2,
