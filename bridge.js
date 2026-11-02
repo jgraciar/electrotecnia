@@ -359,7 +359,7 @@
     if(!res.ok)return false;
     const html=await res.text();
     return /<script\b[^>]*type=["\x27]module["\x27][^>]*src=["\x27][^"\x27]+\.js["\x27]/i.test(html) || html.includes("circuitjs1.nocache.js");
-  }).then(available=>{
+  }).then(async available=>{
     localAvailable=available;
     if(!localAvailable){openRemote();return;}
     frame.addEventListener("load",()=>{
@@ -369,6 +369,19 @@
         else w.oncircuitjsloaded=()=>attach(w.CircuitJS1);
       }catch(err){message("No se puede establecer comunicación con CircuitJS: "+err.message);}
     });
+    // El circuito inicial es el XML original proporcionado para la prueba de Aron.
+    // Se prepara antes de abrir el iframe para evitar una carrera con onCircuitJSLoaded.
+    try{
+      const initialUrl=new URL("./tests/fixtures/wulflemm-aron.xml",location.href);
+      const response=await fetch(initialUrl.href,{cache:"no-store"});
+      if(!response.ok)throw new Error("HTTP "+response.status);
+      const xml=await response.text();
+      if(!/^<cir(?:\\s|>)/.test(xml.trimStart()))
+        throw new Error("El archivo inicial no es XML CircuitJS válido.");
+      pendingModel={filename:"wulflemm-aron.xml",dump:xml};
+    }catch(error){
+      message("No se ha podido preparar el circuito inicial de Aron: "+error.message);
+    }
     frame.src=localUrl.href;
     message("CircuitJS disponible en el mismo origen. Esperando a que inicialice…");
   }).catch(()=>openRemote());
