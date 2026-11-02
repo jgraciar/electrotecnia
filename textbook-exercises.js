@@ -94,7 +94,33 @@
       "p 400 96 400 352 3 0 "+meterScale(v)+" 0",
       "w 400 352 96 352 0","g 96 352 96 376 0"].join("\n")+"\n";
   }
+  function parallelCircuit(v,r1,r2){
+    const i=v/r1+v/r2;
+    return [HEADER,"v 96 352 96 96 0 0 40 "+decimal(v)+" 0",
+      "w 96 96 144 96 0","370 144 96 208 96 3 0 "+meterScale(i),
+      "w 208 96 304 96 0","w 304 96 496 96 0",
+      "r 304 96 304 352 0 "+decimal(r1),
+      "r 496 96 496 352 0 "+decimal(r2),
+      "w 496 352 304 352 0","w 304 352 96 352 0",
+      "w 496 96 624 96 0","p 624 96 624 352 3 0 "+meterScale(v)+" 0",
+      "w 624 352 496 352 0","g 96 352 96 376 0"].join("\n")+"\n";
+  }
   const entries=[
+    ref(6,6,"Dos resistencias en paralelo",
+      "A una pila de 9 V se conectan en paralelo dos resistencias de 6 Ω y 2 Ω. Calcula resistencia equivalente, corrientes de rama y total, y potencias individuales y total.",
+      [q("Resistencia equivalente",1.5,"Ω","Req=1/(1/6+1/2)=1,5 Ω"),
+       q("Corriente en 6 Ω",1.5,"A","I1=9/6=1,5 A"),
+       q("Corriente en 2 Ω",4.5,"A","I2=9/2=4,5 A"),
+       q("Corriente total",6,"A","I=1,5+4,5=6 A"),
+       q("Potencia en 6 Ω",13.5,"W","P1=9·1,5=13,5 W"),
+       q("Potencia en 2 Ω",40.5,"W","P2=9·4,5=40,5 W"),
+       q("Potencia total",54,"W","P=9·6=54 W")],
+      {page:81,circuit:parallelCircuit(9,6,2),
+       meterScales:{current:"A",voltage:"V",power:"W"},
+       measured:[{label:"Amperímetro de alimentación",type:"current",value:6,unit:"A"},
+         {label:"Voltímetro de ramas",type:"voltage",value:9,unit:"V"}],
+       scope:"Dos ramas resistivas en paralelo con amperímetro total y voltímetro común."}),
+
     ref(6,4,"Resistencia limitadora de una lámpara",
       "Una lámpara incandescente de 110 V y 40 W se alimenta desde 230 V mediante una resistencia en serie. Calcula el valor de la resistencia y la potencia que disipa.",
       [q("Intensidad nominal",40/110,"A","I=40/110≈0,363636 A"),
