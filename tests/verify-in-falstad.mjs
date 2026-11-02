@@ -448,6 +448,28 @@ try {
       resistorsBefore:resistors.length,resistorsAfter:restored.querySelectorAll("r").length};
   });
   console.log("ROUNDTRIP XML TRAS EDICIÓN GUI",JSON.stringify(guiRoundtrip));
+
+  const wattmeterGui=await page.evaluate(()=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const r=canvas.getBoundingClientRect(),x=430,y=30;
+    canvas.dispatchEvent(new MouseEvent("mousemove",{bubbles:true,view:d.defaultView,
+      clientX:r.x+x,clientY:r.y+y}));
+    canvas.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,
+      view:d.defaultView,clientX:r.x+x,clientY:r.y+y,button:0,detail:2}));
+    const body=d.body.innerText;
+    const fields=Array.from(d.querySelectorAll("input,select")).filter(e=>
+      e.getBoundingClientRect().width>10).map(e=>({tag:e.tagName,type:e.type,value:e.value,
+        checked:e.type==="checkbox"?e.checked:undefined}));
+    const opened=/Edit Wattmeter/.test(body);
+    const cancel=Array.from(d.querySelectorAll("button")).find(e=>
+      e.textContent?.trim()==="Cancel"&&e.getBoundingClientRect().width>0);
+    cancel?.click();
+    return {opened,fields,dialogText:opened?body.slice(-700):null};
+  });
+  console.log("EDITOR VATÍMETRO WULFLEMM",JSON.stringify(wattmeterGui));
+  if(!wattmeterGui.opened)throw new Error("No se ha abierto el editor gráfico del vatímetro");
+
   if(guiRoundtrip.before!=="1137"||guiRoundtrip.after!=="1137"||
      guiRoundtrip.wattmetersBefore!==2||guiRoundtrip.wattmetersAfter!==2||
      guiRoundtrip.resistorsBefore!==3||guiRoundtrip.resistorsAfter!==3)
