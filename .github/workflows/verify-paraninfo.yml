@@ -31,6 +31,10 @@ jobs:
         run: |
           for file in lab/app.js lab/bridge.js lab/textbook-exercises.js lab/textbook-ui.js lab/publications.js; do node --check "$file"; done
           node lab/tests/verify-paraninfo.mjs
+      - name: Incorporar circuito original de Aron al código de CircuitJS
+        run: |
+          node lab/scripts/embed-default-aron.mjs circuitjs-src/ts/CirSim.ts lab/tests/fixtures/wulflemm-aron.xml
+
       - name: Compilar CircuitJS TypeScript
         working-directory: circuitjs-src/ts
         run: |
