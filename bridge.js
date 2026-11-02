@@ -271,6 +271,17 @@
         simulated:false,message:"XML conservado para exportación; todavía no se ha cargado en el motor eléctrico."};
     }catch(error){return {ok:false,message:error.message};}
   }
+  function getWulflemmComponents(){
+    return wulflemmDocument?window.WulflemmXml.getComponents(wulflemmDocument.nodes):[];
+  }
+  function updateWulflemmAttribute(index,key,value){
+    if(!wulflemmDocument)return {ok:false,message:"No hay documento XML cargado."};
+    try{
+      const nodes=window.WulflemmXml.updateAttribute(wulflemmDocument.nodes,index,key,value);
+      wulflemmDocument={...wulflemmDocument,nodes};
+      return {ok:true,simulated:false,message:"Atributo XML modificado; no se ha actualizado el motor eléctrico."};
+    }catch(error){return {ok:false,message:error.message};}
+  }
   function exportWulflemmXml(){
     if(!wulflemmDocument)return {ok:false,message:"No se ha importado un documento XML de wulflemm."};
     return {ok:true,format:"wulflemm-xml",xml:window.WulflemmXml.serialize(wulflemmDocument.nodes),
@@ -285,6 +296,8 @@
     importNativeCircuit,
     importWulflemmXml,
     exportWulflemmXml,
+    getWulflemmComponents,
+    updateWulflemmAttribute,
     isIntegrated:()=>localAvailable,
     currentExample:()=>selectedExample
   };
