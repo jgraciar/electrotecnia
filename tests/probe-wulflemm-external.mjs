@@ -49,6 +49,33 @@ try {
       JSON.stringify(cross.first) !== JSON.stringify(cross.second))
     throw new Error('Wulflemm native import/export/reimport did not preserve circuit');
 
+  const labEditedXml = await readFile('/tmp/lab-edited-wulflemm.xml','utf8');
+  const importedFromLab = await page.evaluate(async xml => {
+    const api=window.CircuitJS1;
+    const inspect=()=>{
+      const doc=new DOMParser().parseFromString(api.exportCircuit(),'application/xml');
+      return {
+        wattmeters:Array.from(doc.querySelectorAll('WattmeterTrue')).map(e=>e.getAttribute('meter')),
+        resistor:Array.from(doc.querySelectorAll('r')).find(e=>
+          e.getAttribute('x')==='752 304 720 352')?.getAttribute('r'),
+        resistors:doc.querySelectorAll('r').length
+      };
+    };
+    api.importCircuit(xml);
+    await new Promise(resolve=>setTimeout(resolve,800));
+    const first=inspect();
+    api.importCircuit(api.exportCircuit());
+    await new Promise(resolve=>setTimeout(resolve,500));
+    return {first,second:inspect()};
+  },labEditedXml);
+  console.log('LAB TO ORIGINAL WULFLEMM XML CROSS IMPORT',JSON.stringify(importedFromLab));
+  if(importedFromLab.first.resistor!=='1137' ||
+      importedFromLab.first.resistors!==3 ||
+      JSON.stringify(importedFromLab.first.wattmeters)!==JSON.stringify(['0','1']) ||
+      JSON.stringify(importedFromLab.first)!==JSON.stringify(importedFromLab.second))
+    throw new Error('Wulflemm failed to preserve XML edited by laboratory CircuitJS');
+
+
 } catch (e) {
   console.log('WULFLEMM EXTERNAL BROWSER PROBE', JSON.stringify({
     reachable: false, error: String(e)
