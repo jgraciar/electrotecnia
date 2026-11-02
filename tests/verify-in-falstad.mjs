@@ -209,6 +209,16 @@ try {
       .slice(-25);
   });
   console.log("DIÁLOGO EDICIÓN RESISTENCIA",JSON.stringify({guiEdit,dialogSnapshot}));
+  const mouseDiagnostics=await page.evaluate(()=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    return {dialogs:Array.from(d.querySelectorAll('[role="dialog"],.ui-dialog,.modal'))
+      .map(e=>({className:e.className,text:e.textContent?.slice(0,180),
+        visible:e.getBoundingClientRect().width>0})).slice(0,8),
+      inputs:Array.from(d.querySelectorAll("input")).map(e=>({
+        type:e.type,value:e.value,outer:e.outerHTML.slice(0,160)})).slice(-15)};
+  });
+  console.log("DIAGNÓSTICO INTERACCIÓN CIRCUITJS",JSON.stringify(mouseDiagnostics));
+
   assert(originalCross.imported.ok && originalCross.imported.simulated,
     "El circuito original Wulflemm no se ha cargado eléctricamente: "+JSON.stringify(originalCross.imported));
   assert.equal(originalCross.types.filter(t=>/Wattmeter/.test(t)).length,2,
