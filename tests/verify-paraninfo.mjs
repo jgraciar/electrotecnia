@@ -51,7 +51,7 @@ for(const [unit,number,expected,elec] of cases){
   console.log("Comprobación matemática y esquema: AR "+unit+"."+number+" OK");
 }
 assert(lab.has({unit:6,kind:"resuelta",number:1}));
-console.log("Actividades originales:",cases.length);
+console.log("Actividades originales:",lab.totalCatalogued);
 
 const series=lab.build({unit:6,kind:"resuelta",number:1});
 assert(series&&series.circuit&&series.questions.length===7);
