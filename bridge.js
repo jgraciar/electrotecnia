@@ -241,11 +241,30 @@
     const valid=readings.every(Number.isFinite);
     return {w1:readings[0],w2:readings[1],total:valid?readings[0]+readings[1]:NaN,valid};
   }
+  // Intercambio bidireccional del formato textual nativo de CircuitJS.
+  // No se presenta como XML de wulflemm: son formatos diferentes.
+  function exportNativeCircuit(){
+    if(!sim || typeof sim.exportCircuit!=="function")
+      return {ok:false,message:"CircuitJS no está inicializado o no expone exportCircuit."};
+    try{
+      const dump=sim.exportCircuit();
+      if(typeof dump!=="string" || !dump.trimStart().startsWith("$ "))
+        return {ok:false,message:"El simulador devolvió un formato de exportación inesperado."};
+      return {ok:true,format:"circuitjs-text",dump};
+    }catch(error){
+      return {ok:false,message:"Error al exportar: "+error.message};
+    }
+  }
+  function importNativeCircuit(filename,dump){
+    return importModel(filename,dump);
+  }
   window.LabCircuit={
     loadExample,
     loadExerciseCircuit,
     getInstrumentReadings,
     getAronReadings,
+    exportNativeCircuit,
+    importNativeCircuit,
     isIntegrated:()=>localAvailable,
     currentExample:()=>selectedExample
   };
