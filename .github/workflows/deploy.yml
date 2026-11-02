@@ -47,40 +47,24 @@ jobs:
           ref: master
           path: circuitjs-src
 
-      - name: Verificar clases del motor compilado
+      - name: Verificar componentes TypeScript del motor
         run: |
           set -eu
-          for class in WattmeterTrueElm WattmeterElm XMLDeserializer XMLSerializer; do
-            found=$(find circuitjs-src -type f -name "$class.java" -print -quit)
-            if [ -z "$found" ]; then
-              echo "::error::Falta $class.java en el código descargado de CircuitJS"
-              exit 1
-            fi
-            echo "PRESENTE: $found"
+          for class in WattmeterTrueElm WattmeterElm CircuitXMLDeserializer CircuitXMLSerializer; do
+            test -f "circuitjs-src/ts/$class.ts" || { echo "::error::Falta $class.ts"; exit 1; }
           done
-          wattmeter=$(find circuitjs-src -type f -name 'WattmeterTrueElm.java' -print -quit)
-          grep -nE 'getPostCount|getVoltage|getCurrent|getDumpType' "$wattmeter" || true
 
-      - name: Preparar Java para compilador GWT
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '8'
-
-      - name: Configurar Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Compilar CircuitJS
-        working-directory: circuitjs-src
+      - name: Instalar dependencias y compilar CircuitJS
+        working-directory: circuitjs-src/ts
         run: |
-          chmod +x gradlew
-          ./gradlew --no-daemon compileGwt makeSite --console plain
+          npm ci
+          npm run build
 
       - name: Preparar sitio estático de GitHub Pages
         run: |
           mkdir -p public/circuitjs
           cp laboratorio/index.html laboratorio/styles.css laboratorio/app.js laboratorio/lab-circuits.js laboratorio/bridge.js laboratorio/wulflemm-xml.js laboratorio/wulflemm-ui.js laboratorio/sce-practices.js laboratorio/curriculum.js laboratorio/networks-solar-curriculum.js laboratorio/networks-solar-practices.js laboratorio/practices.js laboratorio/publications-data.js laboratorio/paraninfo-activities.js laboratorio/textbook-exercises.js laboratorio/textbook-curriculum.js laboratorio/textbook-ui.js laboratorio/publications.js laboratorio/LICENSE public/
-          cp -a circuitjs-src/site/. public/circuitjs/
+          cp -a circuitjs-src/ts/dist/. public/circuitjs/
           cp circuitjs-src/COPYING.txt public/circuitjs/COPYING.txt
           test -f public/index.html
           test -f public/practices.js
@@ -96,7 +80,7 @@ jobs:
           test -f public/networks-solar-curriculum.js
           test -f public/networks-solar-practices.js
           test -f public/circuitjs/circuitjs.html
-          test -f public/circuitjs/circuitjs1/circuitjs1.nocache.js
+          test -f public/circuitjs/index.html || test -f public/circuitjs/circuitjs.html
 
       - name: Configurar Pages
         uses: actions/configure-pages@v5
