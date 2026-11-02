@@ -69,6 +69,32 @@ try {
     return {first,second:inspect()};
   },labEditedXml);
   console.log('LAB TO ORIGINAL WULFLEMM XML CROSS IMPORT',JSON.stringify(importedFromLab));
+
+  const fullCrossStructure = await page.evaluate(xml => {
+    const normalized = raw => {
+      const doc = new DOMParser().parseFromString(raw,'application/xml');
+      if(doc.querySelector('parsererror')) throw Error('Invalid XML');
+      return Array.from(doc.documentElement.children)
+        .filter(e=>e.tagName!=='o')
+        .map(e=>({
+          tag:e.tagName,
+          attrs:Object.fromEntries(Array.from(e.attributes)
+            .filter(a=>!['i','vd'].includes(a.name))
+            .map(a=>[a.name,a.value]).sort((a,b)=>a[0].localeCompare(b[0])))
+        }));
+    };
+    const expected=normalized(xml);
+    const actual=normalized(window.CircuitJS1.exportCircuit());
+    return {
+      equal:JSON.stringify(expected)===JSON.stringify(actual),
+      expectedCount:expected.length,actualCount:actual.length,
+      mismatch:expected.findIndex((e,i)=>JSON.stringify(e)!==JSON.stringify(actual[i]))
+    };
+  },labEditedXml);
+  console.log('LAB TO WULFLEMM COMPLETE STRUCTURAL CROSS CHECK',JSON.stringify(fullCrossStructure));
+  if(!fullCrossStructure.equal)
+    throw new Error('Wulflemm changes circuit structure when importing lab-edited XML');
+
   if(importedFromLab.first.resistor!=='1137' ||
       importedFromLab.first.resistors!==3 ||
       JSON.stringify(importedFromLab.first.wattmeters)!==JSON.stringify(['0','1']) ||
