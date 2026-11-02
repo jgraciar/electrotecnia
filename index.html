@@ -10,6 +10,7 @@
   <script src="lab-circuits.js" defer></script>
   <script src="wulflemm-xml.js" defer></script>
   <script src="bridge.js" defer></script>
+  <script src="wulflemm-ui.js" defer></script>
   <script src="sce-practices.js" defer></script>
   <script src="curriculum.js" defer></script>
   <script src="networks-solar-curriculum.js" defer></script>
@@ -135,6 +136,11 @@
       <label>Ventana de adquisición · ms<input id="sampleWindow" type="number" min="1" max="10000" step="10" value="100"></label>
     </div>
     <div class="actions"><a href="./circuitjs/circuitjs.html" target="_blank" rel="noopener noreferrer" class="button-link">Abrir Falstad</a></div>
+    <div class="controls bridge-controls">
+      <label>Archivo XML de wulflemm<input id="wulflemmXmlFile" type="file" accept=".xml,application/xml,text/xml"></label>
+      <button id="wulflemmXmlSave" type="button" disabled>Exportar XML conservado</button>
+    </div>
+    <p class="hint" id="wulflemmXmlStatus" role="status">Intercambio documental XML. No importa ni exporta circuitos eléctricos editables en CircuitJS.</p>
     <iframe title="Simulador CircuitJS de Falstad" id="circuit-frame" loading="lazy"></iframe>
     <p class="hint">Las señales mostradas proceden del motor CircuitJS cuando está alojado en este mismo dominio. En modo externo solo se puede editar el circuito: el navegador impide leer sus señales por motivos de seguridad.</p>
   </section>
