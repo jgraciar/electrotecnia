@@ -13,6 +13,21 @@ try {
   await page.waitForFunction(()=>document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1,null,{timeout:180000});
   // La instancia JS puede existir antes de que termine la carga del circuito inicial.
   await page.waitForFunction(()=>{const s=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;return s?.getTime?.()>0.02;},null,{timeout:45000});
+  // Comprobar el circuito de inicio ANTES de importar ninguna práctica.
+  const startup=await page.evaluate(()=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(sim.getElements()).map(e=>e.getType());
+  });
+  console.log("CIRCUITO INICIAL",JSON.stringify(startup));
+  assert(startup.filter(x=>x==="WattmeterTrueElm").length===2,
+    "El circuito inicial no contiene los dos vatímetros de Aron: "+JSON.stringify(startup));
+  await page.waitForTimeout(2200);
+  const startupAfter=await page.evaluate(()=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(sim.getElements()).map(e=>e.getType());
+  });
+  assert.deepEqual(startupAfter,startup,
+    "CircuitJS ha sustituido el circuito de Aron después de arrancar");
   for(const [unit,number] of [[2,1],[2,2],[3,3],[3,5],[3,6],[4,4],[4,5],[4,6]]){
     const ref={unit,kind:"resuelta",number};
     const meta=await page.evaluate(ref=>{
