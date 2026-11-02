@@ -10,5 +10,13 @@ assert.deepEqual(meters.map(m=>m.attrs.x),["336 304 448 304","336 592 448 592"])
 assert.deepEqual(roundTrip.filter(n=>n.name==="v").map(n=>n.attrs.phaseShift||"0"),
   ["0","2.0943951023931953","-2.0943951023931953"]);
 assert.throws(()=>parse("$ 1 0.000005 10 50 5 50"),/No es un circuito/);
+const changed=require("../wulflemm-xml.js").updateAttribute(original,original.findIndex(n=>n.name==="r"),"r","470");
+assert.equal(original.find(n=>n.name==="r").attrs.r,"1000","La edición ha modificado el original");
+const editedRoundTrip=parse(serialize(changed));
+assert.equal(editedRoundTrip.find(n=>n.name==="r").attrs.r,"470");
+assert.equal(editedRoundTrip.filter(n=>n.name==="WattmeterTrue").length,2);
+assert.deepEqual(editedRoundTrip.map(n=>n.name),original.map(n=>n.name));
+assert.deepEqual(editedRoundTrip.filter(n=>n.name==="v").map(n=>n.attrs.phaseShift||"0"),
+  original.filter(n=>n.name==="v").map(n=>n.attrs.phaseShift||"0"));
 console.log("OK: lectura y escritura XML conservan estructura, atributos, vatímetros y fases.");
 console.log("AVISO: no acredita la compatibilidad con el motor eléctrico de CircuitJS.");
