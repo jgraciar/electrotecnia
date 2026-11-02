@@ -129,6 +129,38 @@ try {
       meterProbe.resistorPower.some(p=>!Number.isFinite(p)))
     throw new Error('Wulflemm imported circuit returned invalid electrical readings');
 
+  const averageProbe=await page.evaluate(async()=>{
+    const api=window.CircuitJS1;
+    const elements=Array.from(api.getElements());
+    const meters=elements.filter(e=>e.getType()==='WattmeterTrueElm');
+    const samples=[];
+    const start=api.getTime();
+    const deadline=performance.now()+45000;
+    while(api.getTime()-start<1/60 && performance.now()<deadline){
+      const t=api.getTime();
+      if(!samples.length||t>samples[samples.length-1].t)
+        samples.push({t,p:meters.reduce((sum,e)=>sum+e.getVoltageDiff()*e.getCurrent(),0)});
+      await new Promise(resolve=>setTimeout(resolve,30));
+    }
+    let energy=0;
+    for(let i=1;i<samples.length;i++){
+      const a=samples[i-1],b=samples[i];
+      energy+=(b.t-a.t)*(a.p+b.p)/2;
+    }
+    const duration=samples.length>1?samples.at(-1).t-samples[0].t:0;
+    return {samples:samples.length,duration,watts:duration>0?energy/duration:NaN};
+  });
+  const reactance=2*Math.PI*60-1/(2*Math.PI*60*10e-6);
+  const expectedWatts=3*120**2*1000/(1000**2+reactance**2);
+  const error=Math.abs(averageProbe.watts-expectedWatts)/expectedWatts;
+  console.log('WULFLEMM INDEPENDENT ARON AVERAGE',JSON.stringify({
+    ...averageProbe,expectedWatts,relativeError:error
+  }));
+  if(averageProbe.duration<1/60-0.001 || averageProbe.samples<5 ||
+      !Number.isFinite(error)||error>0.05)
+    throw new Error('Original Wulflemm Aron mean power differs by more than 5% from RLC theory');
+
+
 
 
   if(importedFromLab.first.resistor!=='1137' ||
