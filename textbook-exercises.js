@@ -128,7 +128,40 @@
       "w 688 352 496 352 0","w 496 352 96 352 0",
       "g 96 352 96 376 0"].join("\n")+"\n";
   }
+  function mixedFiveCircuit(){
+    return [HEADER,"v 96 448 96 96 0 0 40 100 0",
+      "w 96 96 144 96 0","370 144 96 208 96 3 0 1",
+      "w 208 96 272 96 0","r 272 96 400 96 0 95",
+      "w 400 96 464 96 0","w 464 96 720 96 0",
+      "r 464 96 464 448 0 10",
+      "r 720 96 848 96 0 6",
+      "w 848 96 912 96 0","w 912 96 1040 96 0",
+      "r 912 96 912 448 0 6","r 1040 96 1040 448 0 12",
+      "w 1040 448 912 448 0","w 912 448 720 448 0",
+      "w 720 448 464 448 0","w 464 448 96 448 0",
+      "g 96 448 96 472 0"].join("\n")+"\n";
+  }
   const entries=[
+    ref(6,10,"Circuito mixto con cinco resistencias",
+      "Se aplica una tensión de 100 V a una resistencia de 95 Ω en serie con una red formada por una rama de 10 Ω y otra rama de 6 Ω en serie con el paralelo de 6 Ω y 12 Ω. Calcula tensiones, corrientes y potencias.",
+      [q("Paralelo de R3 y R4",4,"Ω","R34=6·12/(6+12)=4 Ω"),
+       q("Rama R2+R34",10,"Ω","R234=6+4=10 Ω"),
+       q("Paralelo con R5",5,"Ω","R2345=10·10/(10+10)=5 Ω"),
+       q("Resistencia total",100,"Ω","Req=95+5=100 Ω"),
+       q("Intensidad total",1,"A","I=100/100=1 A"),
+       q("Tensión R1",95,"V","U1=95·1=95 V"),
+       q("Tensión red paralela",5,"V","U2345=100−95=5 V"),
+       q("Corriente R2",0.5,"A","I2=5/10=0,5 A"),
+       q("Corriente R3",1/3,"A","I3=2/6≈0,333 A"),
+       q("Corriente R4",1/6,"A","I4=2/12≈0,167 A"),
+       q("Corriente R5",0.5,"A","I5=5/10=0,5 A"),
+       q("Potencia total",100,"W","P=100·1=100 W")],
+      {page:84,circuit:mixedFiveCircuit(),
+       meterScales:{current:"A",voltage:"V",power:"W"},
+       measured:[{label:"Amperímetro total",type:"current",value:1,unit:"A"}],
+       notes:"Las potencias parciales exactas son 95 W, 1,5 W, 2/3 W, 1/3 W y 2,5 W. Su suma es 100 W.",
+       scope:"R1 en serie con R5 en paralelo con R2 y el paralelo R3-R4."}),
+
     ref(6,9,"Circuito mixto: serie y paralelo",
       "Una resistencia de 10 Ω está en serie con dos resistencias en paralelo de 6 Ω y 4 Ω. La tensión total es 24,8 V. Determina tensiones, corrientes y potencias de cada resistencia.",
       [q("Equivalente paralelo",2.4,"Ω","R23=6·4/(6+4)=2,4 Ω"),
