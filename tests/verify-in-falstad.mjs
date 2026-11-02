@@ -95,6 +95,30 @@ try {
     "XML Wulflemm no se puede reimportar: "+JSON.stringify(cross));
   assert.deepEqual(cross.final,cross.types,
     "Ida y vuelta XML Wulflemm altera los componentes");
+  // Comparación estructural de atributos y jerarquía XML, no solo clases.
+  const structure=await page.evaluate(()=>{
+    const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
+    const first=api.exportCircuit();
+    const parse=xml=>{
+      const doc=new DOMParser().parseFromString(xml,"application/xml");
+      if(doc.querySelector("parsererror"))throw Error("XML mal formado");
+      const walk=el=>({
+        tag:el.tagName,
+        attrs:Object.fromEntries(Array.from(el.attributes).map(a=>[a.name,a.value]).sort((a,b)=>a[0].localeCompare(b[0]))),
+        children:Array.from(el.children).map(walk)
+      });
+      return walk(doc.documentElement);
+    };
+    const before=parse(first);
+    const imported=window.LabCircuit.importWulflemmXml(first);
+    const after=parse(api.exportCircuit());
+    return {imported,before,after};
+  });
+  assert(structure.imported.ok && structure.imported.simulated,
+    "Importación XML eléctrica fallida: "+JSON.stringify(structure.imported));
+  assert.deepEqual(structure.after,structure.before,
+    "Se han modificado parámetros, conexiones o estructura XML durante la importación");
+  console.log("ESTRUCTURA Y ATRIBUTOS XML CONSERVADOS TRAS IMPORTACIÓN ELÉCTRICA");
   console.log("INTERCAMBIO XML ENTRE IMPORTADOR WULFLEMM Y MOTOR CIRCUITJS VALIDADO");
   console.log("IMPORTACIÓN/EXPORTACIÓN NATIVA CIRCUITJS CONTRASTADA CON MOTOR REAL");
   console.log("OCHO ACTIVIDADES CONTRASTADAS CON MOTOR REAL CIRCUITJS");
