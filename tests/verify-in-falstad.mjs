@@ -237,6 +237,17 @@ try {
   },{x:guiEdit.x,y:guiEdit.y});
   console.log("COORDENADAS EVENTO CIRCUITJS",JSON.stringify(eventCoordinates));
 
+  // Detectar el encuadre real de CircuitJS a partir del SVG del circuito.
+  const visualGeometry=await page.evaluate(()=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    const nodes=Array.from(d.querySelectorAll("svg,canvas")).map(e=>({
+      tag:e.tagName,rect:{x:e.getBoundingClientRect().x,y:e.getBoundingClientRect().y,
+        width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}}));
+    return {nodes,frameViewport:{width:d.defaultView.innerWidth,height:d.defaultView.innerHeight}};
+  });
+  console.log("GEOMETRÍA VISUAL CIRCUITJS",JSON.stringify(visualGeometry));
+
+
 
   assert(originalCross.imported.ok && originalCross.imported.simulated,
     "El circuito original Wulflemm no se ha cargado eléctricamente: "+JSON.stringify(originalCross.imported));
