@@ -2,7 +2,7 @@
 
 Aplicación web docente para FP. Combina un generador de funciones, un osciloscopio virtual, cálculo de redes trifásicas equilibradas y el simulador CircuitJS.
 
-**Web publicada desde el repositorio:** https://jgraciar.github.io/-laboratorio-electrotecnia/
+**Web publicada desde el repositorio:** https://jgraciar.github.io/electrotecnia/
 
 **Versión 1.0 (desarrollo)**. Las funciones ya añadidas a la rama main pueden tardar unos minutos en aparecer en la web.
 
