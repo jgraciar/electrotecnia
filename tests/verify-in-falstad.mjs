@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {chromium} from "playwright";
+import {writeFile} from "node:fs/promises";
 
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:1440,height:1000}});
@@ -553,6 +554,12 @@ try {
   console.log("ESTRUCTURA COMPLETA XML TRAS EDICIÓN",JSON.stringify(structuralRoundtrip));
   if(!structuralRoundtrip.equal)
     throw new Error("El roundtrip conjunto altera la estructura o los atributos de los componentes");
+
+  const editedXml=await page.evaluate(()=>
+    document.getElementById("circuit-frame").contentWindow.CircuitJS1.exportCircuit());
+  await writeFile("/tmp/lab-edited-wulflemm.xml",editedXml,"utf8");
+  console.log("LAB EDITED XML SAVED FOR EXTERNAL WULFLEMM CROSS IMPORT",editedXml.length);
+
 
   if(combinedRoundtrip.before.resistor!=="1137"||
      combinedRoundtrip.after.resistor!=="1137"||
