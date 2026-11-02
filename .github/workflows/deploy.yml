@@ -47,22 +47,19 @@ jobs:
           ref: master
           path: circuitjs-src
 
-      - name: Diagnosticar soporte nativo de vatímetros y XML
+      - name: Verificar clases del motor compilado
         run: |
-          src=circuitjs-src/src/com/lushprojects/circuitjs1/client
-          missing=0
+          set -eu
           for class in WattmeterTrueElm WattmeterElm XMLDeserializer XMLSerializer; do
-            if test -f "$src/$class.java"; then
-              echo "PRESENTE: $class"
-            else
-              echo "::error::AUSENTE: $class en el código fuente que se compila"
-              missing=1
+            found=$(find circuitjs-src -type f -name "$class.java" -print -quit)
+            if [ -z "$found" ]; then
+              echo "::error::Falta $class.java en el código descargado de CircuitJS"
+              exit 1
             fi
+            echo "PRESENTE: $found"
           done
-          test "$missing" -eq 0
-          if test -f "$src/WattmeterTrueElm.java"; then
-            grep -nE 'getPostCount|getVoltage|getCurrent|getDumpType' "$src/WattmeterTrueElm.java" || true
-          fi
+          wattmeter=$(find circuitjs-src -type f -name 'WattmeterTrueElm.java' -print -quit)
+          grep -nE 'getPostCount|getVoltage|getCurrent|getDumpType' "$wattmeter" || true
 
       - name: Preparar Java para compilador GWT
         uses: actions/setup-java@v4
