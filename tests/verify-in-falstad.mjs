@@ -359,6 +359,26 @@ try {
   });
   console.log("LOCALIZACIÓN EDITOR RESISTENCIA",JSON.stringify(resistorClick));
 
+  // Barrido sistemático sin pulsar: los cambios de cursor permiten detectar
+  // la selección de elementos, evitando abrir docenas de diálogos.
+  const hoverProbe=await page.evaluate(()=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const r=canvas.getBoundingClientRect(),hits=[];
+    let last="";
+    for(let y=24;y<400;y+=24){
+      for(let x=32;x<920;x+=32){
+        canvas.dispatchEvent(new MouseEvent("mousemove",{bubbles:true,cancelable:true,
+          view:d.defaultView,clientX:r.x+x,clientY:r.y+y,buttons:0}));
+        const cursor=getComputedStyle(canvas).cursor;
+        if(cursor!==last){hits.push({x,y,cursor});last=cursor;}
+      }
+    }
+    return {hits:hits.slice(0,90),finalCursor:getComputedStyle(canvas).cursor};
+  });
+  console.log("BARRIDO CURSOR CIRCUITJS",JSON.stringify(hoverProbe));
+
+
 
 
 
