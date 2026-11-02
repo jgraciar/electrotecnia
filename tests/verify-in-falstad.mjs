@@ -247,6 +247,28 @@ try {
   });
   console.log("GEOMETRÍA VISUAL CIRCUITJS",JSON.stringify(visualGeometry));
 
+  // Calibración empírica: localizar la resistencia mediante barrido de ratón
+  // y observar si CircuitJS crea un editor al hacer doble clic.
+  const canvasProbe=await page.evaluate(()=>{
+    const d=document.getElementById("circuit-frame").contentDocument;
+    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const r=canvas.getBoundingClientRect();
+    const emit=(type,x,y)=>canvas.dispatchEvent(new MouseEvent(type,{
+      bubbles:true,cancelable:true,view:d.defaultView,clientX:r.x+x,clientY:r.y+y,
+      button:0,buttons:type==="mousedown"?1:0}));
+    const candidates=[];
+    for(const x of [400,480,560,640,720,800]){
+      for(const y of [140,220,300,380]){
+        emit("mousemove",x,y);
+        const found=Array.from(d.querySelectorAll("input")).filter(e=>e.type==="text"&&e.getBoundingClientRect().width>10);
+        if(found.length)candidates.push({x,y,fields:found.length});
+      }
+    }
+    return {candidates};
+  });
+  console.log("BARRIDO POSICIONES CIRCUITJS",JSON.stringify(canvasProbe));
+
+
 
 
   assert(originalCross.imported.ok && originalCross.imported.simulated,
