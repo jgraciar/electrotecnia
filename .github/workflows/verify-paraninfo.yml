@@ -52,3 +52,7 @@ jobs:
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 --directory public >/tmp/paraninfo-server.log 2>&1 &
           node lab/tests/verify-in-falstad.mjs
+      - name: Examinar CircuitJS original de Wulflemm en navegador independiente
+        run: |
+          cd lab
+          node tests/probe-wulflemm-external.mjs
