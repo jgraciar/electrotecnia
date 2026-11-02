@@ -89,6 +89,28 @@ try {
       meta.id+": intensidad simulada "+readings.current+"; esperada "+current.value);
     console.log("MEDIDA REAL",meta.id,"I=",readings.current,"OK");
   }
+  // Auditoría de los temas anteriores: todas las actividades con circuito.
+  for(const [unit,number] of [[2,1],[2,2],[3,3],[3,5],[3,6],[4,4],[4,5],[4,6]]){
+    const ref={unit,kind:"resuelta",number};
+    const meta=await page.evaluate(ref=>{
+      const x=window.LabTextbookExercises.build(ref);
+      return {id:x.id,expected:x.measured,
+        load:window.LabCircuit.loadExerciseCircuit(x.id,x.circuit)};
+    },ref);
+    assert(meta.load?.ok,meta.id+": importación fallida");
+    await page.waitForFunction(id=>{
+      const r=window.LabCircuit.getInstrumentReadings();
+      return r?.id===id&&r.time>=0.03&&
+        Number.isFinite(r.current)&&Number.isFinite(r.voltage)&&Number.isFinite(r.power);
+    },meta.id,{timeout:12000});
+    const actual=await page.evaluate(()=>window.LabCircuit.getInstrumentReadings());
+    for(const expected of meta.expected){
+      const measured=actual[expected.type];
+      assert(Math.abs(measured-expected.value)<=Math.max(.0001,Math.abs(expected.value)*.005),
+        meta.id+": "+expected.type+" esperado "+expected.value+" medido "+measured);
+    }
+    console.log("AUDITORÍA ANTERIOR",meta.id,"U/I/P OK");
+  }
   // Comprobar importación y exportación nativas con el motor real del iframe.
   const roundtrip=await page.evaluate(()=>{
     const frame=document.getElementById("circuit-frame");
