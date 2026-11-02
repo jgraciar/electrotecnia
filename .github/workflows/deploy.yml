@@ -35,6 +35,7 @@ jobs:
           node laboratorio/tests/wattmeter-average.test.js
           node laboratorio/tests/wulflemm-structure.test.js
           node laboratorio/tests/wulflemm-xml-diagnostics.test.js
+          node laboratorio/tests/aron-power.test.js
 
       - name: Obtener código oficial de CircuitJS
         uses: actions/checkout@v4
