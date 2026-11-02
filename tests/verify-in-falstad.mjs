@@ -284,6 +284,19 @@ try {
   });
   console.log("TRANSFORMACIÓN INTERNA CIRCUITJS",JSON.stringify(transformProbe));
 
+  // La API pública permite exportar el dibujo SVG del motor.
+  const svgProbe=await page.evaluate(()=>{
+    const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
+    try {
+      const svg=api.getCircuitAsSVG();
+      const source=typeof svg==="string"?svg:String(svg);
+      return {available:true,length:source.length,head:source.slice(0,550),
+        resistorLabels:(source.match(/1000/g)||[]).length};
+    } catch(error){return {available:false,error:String(error)};}
+  });
+  console.log("EXPORTACIÓN SVG CIRCUITJS",JSON.stringify(svgProbe));
+
+
 
   // La edición GUI no está validada: impedir que una ejecución verde se
   // interprete como una prueba superada de doble clic.
