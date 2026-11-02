@@ -24,6 +24,7 @@
   function close(){
     root.hidden=true;root.replaceChildren();current=null;tries=0;resetMode();
   }
+  const activityRelation=x=>window.LabTextbookActivityCurriculum?.[x.unit+"."+x.number]||null;
   function report(){
     if(!current)return;
     const x=current;
@@ -39,8 +40,8 @@
       "ADVERTENCIA",
       x.warning,
       "Modelo: "+x.scope,
-      "Currículo (vinculación parcial): "+(window.LabTextbookCurriculum?.[x.unit]?.ra||"Sin vinculación verificada")+
-        " · CE "+(window.LabTextbookCurriculum?.[x.unit]?.ce.join(", ")||"sin asignación"),
+      "Currículo (vinculación parcial): "+(activityRelation(x)?.ra||"Sin vinculación específica verificada")+
+        " · CE "+(activityRelation(x)?.ce.join(", ")||"sin asignación específica"),
       "BOE: "+(window.LabTextbookCurriculumSource||""),
       "",
       "CÁLCULOS",
@@ -104,12 +105,12 @@
         " (selección automática de W/kW de CircuitJS)."));
     }
     if(x.notes)root.append(create("p","practice-note",x.notes));
-    const relation=window.LabTextbookCurriculum?.[x.unit];
+    const relation=activityRelation(x);
     if(relation) {
       const line=create("p","practice-curriculum",
         "Vinculación curricular parcial: "+relation.ra+
         (relation.ce.length?" · CE "+relation.ce.join(", "):" · CE específicos no acreditados con este modelo.")+
-        ". Este ejercicio no demuestra el cumplimiento completo de los criterios.");
+        " · "+relation.character+". Este ejercicio no demuestra el cumplimiento completo de los criterios.");
       root.append(line);
       const link=create("a","practice-source","Consultar el RA/CE completo en el BOE ↗");
       link.href=window.LabTextbookCurriculumSource;
