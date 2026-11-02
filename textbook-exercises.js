@@ -118,6 +118,22 @@
       "w 304 352 96 352 0","g 96 352 96 376 0"].join("\n")+"\n";
   }
   const entries=[
+    ref(6,8,"Tres receptores conectados en paralelo",
+      "Una línea de 230 V alimenta en paralelo una lámpara de 60 W, una cocina de 3 kW y una estufa de 1 kW. Calcula la intensidad y resistencia de cada receptor y la resistencia equivalente.",
+      [q("Intensidad de lámpara",60/230,"A","I1=60/230≈0,26087 A"),
+       q("Intensidad de cocina",3000/230,"A","I2=3000/230≈13,04348 A"),
+       q("Intensidad de estufa",1000/230,"A","I3=1000/230≈4,34783 A"),
+       q("Intensidad total",4060/230,"A","It=4060/230≈17,65217 A"),
+       q("Resistencia de lámpara",230**2/60,"Ω","R1=230²/60≈881,667 Ω"),
+       q("Resistencia de cocina",230**2/3000,"Ω","R2=230²/3000≈17,633 Ω"),
+       q("Resistencia de estufa",230**2/1000,"Ω","R3=230²/1000=52,9 Ω"),
+       q("Resistencia equivalente",230**2/4060,"Ω","Req=230²/4060≈13,03 Ω")],
+      {page:82,circuit:threeParallelCircuit(230,230**2/60,230**2/3000,230**2/1000),
+       meterScales:{current:"A",voltage:"V",power:"W"},
+       measured:[{label:"Amperímetro total",type:"current",value:4060/230,unit:"A"}],
+       notes:"Los valores se calculan sin redondeos intermedios; las resistencias editoriales se obtienen usando corrientes redondeadas.",
+       scope:"Modelo de CC resistivo equivalente para cargas nominales a 230 V; no representa la forma de onda alterna."}),
+
     ref(6,7,"Corrientes en tres ramas en paralelo",
       "En tres resistencias de 40 Ω, 50 Ω y 10 Ω conectadas en paralelo se miden 2 A en la rama de 50 Ω. Calcula la tensión común, las otras corrientes y la corriente total.",
       [q("Tensión común",100,"V","U=50·2=100 V"),
