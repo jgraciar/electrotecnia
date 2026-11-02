@@ -95,6 +95,20 @@
       "w 400 352 96 352 0","g 96 352 96 376 0"].join("\n")+"\n";
   }
   const entries=[
+    ref(6,4,"Resistencia limitadora de una lámpara",
+      "Una lámpara incandescente de 110 V y 40 W se alimenta desde 230 V mediante una resistencia en serie. Calcula el valor de la resistencia y la potencia que disipa.",
+      [q("Intensidad nominal",40/110,"A","I=40/110≈0,363636 A"),
+       q("Caída en la resistencia",120,"V","UR=230−110=120 V"),
+       q("Resistencia limitadora",330,"Ω","R=120/(40/110)=330 Ω"),
+       q("Potencia disipada",120*40/110,"W","P=120·(40/110)≈43,636 W")],
+      {page:78,circuit:seriesCircuit(230,330,110**2/40),
+       meterScales:{current:"A",voltage:"V",power:"W"},
+       measured:[{label:"Amperímetro",type:"current",value:40/110,unit:"A"},
+         {label:"Voltímetro de alimentación",type:"voltage",value:230,unit:"V"},
+         {label:"Voltímetro de lámpara",type:"voltage",value:110,unit:"V"}],
+       notes:"La solución editorial redondea I a 0,36 A y obtiene 333 Ω y 43,2 W. Sin redondeo intermedio se obtienen 330 Ω y 43,64 W.",
+       scope:"Modelo resistivo nominal. La lámpara se representa por su resistencia a 110 V."}),
+
     ref(6,2,"Caídas de tensión en tres resistencias en serie",
       "En tres resistencias en serie de 20 Ω, 10 Ω y 30 Ω se miden 100 V en la segunda. Calcula intensidad, tensión y potencia de cada resistencia y del conjunto.",
       [q("Intensidad",10,"A","I=100/10=10 A"),
