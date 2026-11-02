@@ -109,7 +109,7 @@
     if(relation) {
       const line=create("p","practice-curriculum",
         "Vinculación curricular parcial: "+relation.ra+
-        (relation.ce.length?" · CE "+relation.ce.join(", "):" · CE específicos no acreditados con este modelo.")+
+        (relation.ce.length?" · CE "+relation.ce.join(", "):" · Sin CE directamente acreditable")+
         " · "+relation.character+". Este ejercicio no demuestra el cumplimiento completo de los criterios.");
       root.append(line);
       const link=create("a","practice-source","Consultar el RA/CE completo en el BOE ↗");
