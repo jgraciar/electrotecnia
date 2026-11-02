@@ -320,7 +320,12 @@ try {
     return {x,y,inputs:Array.from(d.querySelectorAll("input")).filter(e=>
       e.getBoundingClientRect().width>10).map(e=>({type:e.type,value:e.value})),
       dialogs:Array.from(d.querySelectorAll('[role="dialog"],.ui-dialog'))
-        .filter(e=>e.getBoundingClientRect().width>0).length};
+        .filter(e=>e.getBoundingClientRect().width>0).length,
+      visibleText:d.body.innerText.slice(-1100),
+      inputDetails:Array.from(d.querySelectorAll("input")).filter(e=>
+        e.getBoundingClientRect().width>10).map(e=>({
+          type:e.type,value:e.value,id:e.id,outer:e.outerHTML.slice(0,240),
+          parent:e.parentElement?.textContent?.trim().slice(0,120)}))};
   });
   console.log("DOBLE CLIC EN POSICIÓN SVG",JSON.stringify(transformedClick));
 
