@@ -141,7 +141,39 @@
       "w 720 448 464 448 0","w 464 448 96 448 0",
       "g 96 448 96 472 0"].join("\n")+"\n";
   }
+  function mixed612Circuit(){
+    return [HEADER,"v 96 448 96 96 0 0 40 22.5 0",
+      "w 96 96 144 96 0","370 144 96 208 96 3 0 1",
+      "w 208 96 272 96 0","w 272 96 464 96 0",
+      "r 272 96 272 448 0 16",
+      "r 464 96 592 96 0 12",
+      "w 592 96 656 96 0","w 656 96 848 96 0",
+      "r 656 96 656 448 0 6",
+      "r 848 96 848 272 0 10",
+      "r 848 272 848 448 0 6",
+      "w 848 448 656 448 0","w 656 448 272 448 0",
+      "w 272 448 96 448 0","g 96 448 96 472 0"].join("\n")+"\n";
+  }
   const entries=[
+    ref(6,12,"Circuito mixto con intensidad conocida en R3",
+      "En el circuito de cinco resistencias R1=16 Ω, R2=12 Ω, R3=6 Ω, R4=10 Ω y R5=6 Ω, R1 está en paralelo con la serie de R2 y el paralelo de R3 con R4+R5. Se mide I3=1 A. Calcula tensiones, intensidades y potencias.",
+      [q("Tensión R3",6,"V","U3=6·1=6 V"),
+       q("Equivalente R4+R5",16,"Ω","R45=10+6=16 Ω"),
+       q("Corriente R4 y R5",.375,"A","I45=6/16=0,375 A"),
+       q("Tensión R4",3.75,"V","U4=10·0,375=3,75 V"),
+       q("Tensión R5",2.25,"V","U5=6·0,375=2,25 V"),
+       q("Corriente R2",1.375,"A","I2=1+0,375=1,375 A"),
+       q("Tensión R2",16.5,"V","U2=12·1,375=16,5 V"),
+       q("Tensión de alimentación",22.5,"V","U=16,5+6=22,5 V"),
+       q("Corriente R1",22.5/16,"A","I1=22,5/16=1,40625 A"),
+       q("Corriente total",1.375+22.5/16,"A","It=1,375+1,40625=2,78125 A"),
+       q("Potencia total",22.5*(1.375+22.5/16),"W","Pt=22,5·2,78125=62,578125 W")],
+      {page:85,circuit:mixed612Circuit(),
+       meterScales:{current:"A",voltage:"V",power:"W"},
+       measured:[{label:"Amperímetro total",type:"current",value:1.375+22.5/16,unit:"A"}],
+       notes:"Se conserva la precisión completa: el libro redondea I1 a 1,406 A, It a 2,781 A y Pt a 62,57 W.",
+       scope:"R1 en paralelo con R2 en serie con R3 en paralelo con la serie R4+R5; fuente de 22,5 V deducida de I3=1 A."}),
+
     ref(6,10,"Circuito mixto con cinco resistencias",
       "Se aplica una tensión de 100 V a una resistencia de 95 Ω en serie con una red formada por una rama de 10 Ω y otra rama de 6 Ω en serie con el paralelo de 6 Ω y 12 Ω. Calcula tensiones, corrientes y potencias.",
       [q("Paralelo de R3 y R4",4,"Ω","R34=6·12/(6+12)=4 Ω"),
