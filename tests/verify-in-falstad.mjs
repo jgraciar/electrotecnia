@@ -238,6 +238,17 @@ try {
   assert(average.samples>=5 && Number.isFinite(average.watts) &&
     Number.isFinite(average.resistors),
     "Muestreo insuficiente para potencia media: "+JSON.stringify(average));
+  // Referencia independiente: tres ramas equilibradas R-L-C en serie.
+  // Fuente por fase: 169.705627 V de pico = 120 V eficaces.
+  const omega=2*Math.PI*60;
+  const reactance=omega*1-1/(omega*10e-6);
+  const theoreticalPower=3*120**2*1000/(1000**2+reactance**2);
+  const relativeError=Math.abs(average.watts-theoreticalPower)/theoreticalPower;
+  console.log("ARON TEORÍA RLC",JSON.stringify({theoreticalPower,
+    measuredPower:average.watts,relativeError}));
+  assert(relativeError<0.05,
+    "La potencia media Aron difiere más del 5 % de la referencia RLC: "+
+    JSON.stringify({theoreticalPower,average,relativeError}));
   // Durante transitorios, la energía reactiva almacenada puede cambiar
   // entre los extremos de la ventana; no exigir aún igualdad de medias.
   // La potencia activa media exige integrar muestras en un periodo completo;
