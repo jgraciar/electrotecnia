@@ -530,6 +530,30 @@ try {
     return {before,after:extract()};
   });
   console.log("ROUNDTRIP CONJUNTO VATÍMETROS Y RESISTENCIA",JSON.stringify(combinedRoundtrip));
+
+  const structuralRoundtrip=await page.evaluate(()=>{
+    const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
+    const normalize=xml=>{
+      const doc=new DOMParser().parseFromString(xml,"application/xml");
+      if(doc.querySelector("parsererror"))throw Error("XML mal formado");
+      return Array.from(doc.documentElement.children).filter(e=>e.tagName!=="o").map(e=>({
+        tag:e.tagName,
+        attrs:Object.fromEntries(Array.from(e.attributes)
+          .filter(a=>!["i","vd"].includes(a.name))
+          .map(a=>[a.name,a.value]).sort((a,b)=>a[0].localeCompare(b[0])))
+      }));
+    };
+    const before=normalize(api.exportCircuit());
+    api.importCircuit(api.exportCircuit());
+    const after=normalize(api.exportCircuit());
+    return {equal:JSON.stringify(before)===JSON.stringify(after),
+      countBefore:before.length,countAfter:after.length,
+      firstMismatch:before.findIndex((e,i)=>JSON.stringify(e)!==JSON.stringify(after[i]))};
+  });
+  console.log("ESTRUCTURA COMPLETA XML TRAS EDICIÓN",JSON.stringify(structuralRoundtrip));
+  if(!structuralRoundtrip.equal)
+    throw new Error("El roundtrip conjunto altera la estructura o los atributos de los componentes");
+
   if(combinedRoundtrip.before.resistor!=="1137"||
      combinedRoundtrip.after.resistor!=="1137"||
      JSON.stringify(combinedRoundtrip.before.wattmeters.map(e=>e.meter))!==JSON.stringify(["0","1"])||
