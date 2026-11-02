@@ -72,7 +72,34 @@
       {label:"Vatímetro W1",type:"power",value:u*u/r,unit:"W"}
     ],scope:"Modelo CC equivalente de receptor óhmico a tensión eficaz nominal. Los valores de U, I y P son comparables al caso resistivo de CA, pero la forma de onda no es alterna."
   });
+  function seriesCircuit(v,r1,r2){
+    const i=v/(r1+r2);
+    return [HEADER,"v 96 352 96 96 0 0 40 "+decimal(v)+" 0",
+      "w 96 96 144 96 0","370 144 96 208 96 3 0 "+meterScale(i),
+      "w 208 96 272 96 0","r 272 96 400 96 0 "+decimal(r1),
+      "r 400 96 528 96 0 "+decimal(r2),
+      "w 528 96 528 352 0","w 528 352 96 352 0",
+      "p 272 96 272 352 3 0 "+meterScale(v)+" 0",
+      "w 272 352 96 352 0","p 400 96 400 352 3 0 "+meterScale(v)+" 0",
+      "w 400 352 528 352 0","g 96 352 96 376 0"].join("\n")+"\n";
+  }
   const entries=[
+    ref(6,1,"Dos resistencias en serie",
+      "Batería de 24 V con resistencias de 20 Ω y 10 Ω en serie. Determina la corriente, las tensiones parciales, las potencias individuales y la potencia total (referencia: actividad resuelta 6.1, página 77).",
+      [q("Resistencia equivalente",30,"Ω","R=20+10=30 Ω"),
+       q("Intensidad",0.8,"A","I=24/30=0,8 A"),
+       q("Tensión en R1",16,"V","U1=0,8·20=16 V"),
+       q("Tensión en R2",8,"V","U2=0,8·10=8 V"),
+       q("Potencia en R1",12.8,"W","P1=16·0,8=12,8 W"),
+       q("Potencia en R2",6.4,"W","P2=8·0,8=6,4 W"),
+       q("Potencia total",19.2,"W","P=24·0,8=19,2 W")],
+      {page:77,circuit:seriesCircuit(24,20,10),
+       meterScales:{current:"A",voltage:"V",power:"W"},
+       measured:[{label:"Amperímetro A1",type:"current",value:0.8,unit:"A"},
+         {label:"Voltímetro de R1",type:"voltage",value:16,unit:"V"},
+         {label:"Voltímetro de R2",type:"voltage",value:8,unit:"V"}],
+       scope:"Resistencias en serie; medidas de corriente y tensión. Potencias calculadas."}),
+
     ref(2,1,"Ley de Ohm",
       "Calcula la intensidad que circula por el filamento de una lámpara incandescente de 10 Ω de resistencia, cuando está sometida a una tensión de 12 V.",
       [q("Intensidad del filamento",1.2,"A","I=U/R=12/10=1,2 A")],
