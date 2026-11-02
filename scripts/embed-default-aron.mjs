@@ -22,7 +22,7 @@ const uiSource=source.replace(/CirSim\\.ts$/, 'UIManager.ts');
 let ui=readFileSync(uiSource,'utf8');
 const toolbarStart='        this.menus.toolbarCheckItem.setState(';
 const a=ui.indexOf(toolbarStart);
-const b=ui.indexOf(');',a);
+const b=ui.indexOf(');',a+toolbarStart.length);
 if(a<0||b<0||!ui.slice(a,b).includes('startCircuitText'))throw Error('Toolbar startup block not found');
 ui=ui.slice(0,a)+toolbarStart+'!this.hideMenu && !noEditing && !hideSidebar'+ui.slice(b);
 writeFileSync(uiSource,ui);
