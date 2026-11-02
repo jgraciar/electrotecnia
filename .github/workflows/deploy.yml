@@ -24,6 +24,16 @@ jobs:
         with:
           path: laboratorio
 
+      - name: Preparar Node.js para pruebas del laboratorio
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Comprobar sintaxis y cálculo del vatímetro
+        run: |
+          node --check laboratorio/bridge.js
+          node laboratorio/tests/wattmeter-average.test.js
+
       - name: Obtener código oficial de CircuitJS
         uses: actions/checkout@v4
         with:
