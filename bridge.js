@@ -160,7 +160,17 @@
     let current=NaN,voltage=NaN,power=NaN;
     try{if(ammeter)current=ammeter.getCurrent();}catch(_){}
     try{if(voltmeter)voltage=voltmeter.getVoltageDiff();}catch(_){}
-    try{if(wattmeter)power=wattmeter.getVoltageDiff()*wattmeter.getCurrent();}catch(_){}
+    // Preferir la bobina de tensión independiente cuando el elemento expone 4 bornes.
+    // Esta lectura es potencia INSTANTÁNEA; la activa requiere promediarla.
+    try {
+      if(wattmeter){
+        const count=wattmeter.getPostCount();
+        const v= count>=4
+          ? wattmeter.getPostVoltage(2)-wattmeter.getPostVoltage(3)
+          : wattmeter.getVoltageDiff();
+        power=v*wattmeter.getCurrent();
+      }
+    } catch(_) {}
     return {id:selectedExample,time,current,voltage,power,
       hasAmmeter:!!ammeter,hasVoltmeter:!!voltmeter,hasWattmeter:!!wattmeter};
   }
