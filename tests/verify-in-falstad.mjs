@@ -73,6 +73,29 @@ try {
   assert(roundtrip.imported?.ok,"Importación nativa fallida: "+JSON.stringify(roundtrip));
   assert(roundtrip.again?.ok && roundtrip.again.header==="<c","Reexportación fallida");
   assert.deepEqual(roundtrip.typesAfter,roundtrip.typesBefore,"El circuito cambió al reimportarlo");
+  // Contraste cruzado: el XML del motor pasa por el importador Wulflemm,
+  // vuelve al motor eléctrico y conserva el inventario de componentes.
+  const cross=await page.evaluate(()=>{
+    const api=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
+    const original=window.LabCircuit.exportNativeCircuit();
+    const types=Array.from(api.getElements()).map(e=>e.getType());
+    const imported=window.LabCircuit.importWulflemmXml(original.dump);
+    const after=Array.from(api.getElements()).map(e=>e.getType());
+    const wulflemm=window.LabCircuit.exportWulflemmXml();
+    const reimported=wulflemm.ok
+      ?window.LabCircuit.importNativeCircuit("PN-wulflemm-roundtrip",wulflemm.xml):null;
+    const final=Array.from(api.getElements()).map(e=>e.getType());
+    return {imported,wulflemm:{ok:wulflemm.ok,length:wulflemm.xml?.length},
+      reimported,types,after,final};
+  });
+  assert(cross.imported?.ok && cross.imported.simulated,
+    "XML Wulflemm no se carga en el motor: "+JSON.stringify(cross));
+  assert.deepEqual(cross.after,cross.types,"XML Wulflemm altera los componentes");
+  assert(cross.wulflemm.ok && cross.reimported?.ok,
+    "XML Wulflemm no se puede reimportar: "+JSON.stringify(cross));
+  assert.deepEqual(cross.final,cross.types,
+    "Ida y vuelta XML Wulflemm altera los componentes");
+  console.log("INTERCAMBIO XML ENTRE IMPORTADOR WULFLEMM Y MOTOR CIRCUITJS VALIDADO");
   console.log("IMPORTACIÓN/EXPORTACIÓN NATIVA CIRCUITJS CONTRASTADA CON MOTOR REAL");
   console.log("OCHO ACTIVIDADES CONTRASTADAS CON MOTOR REAL CIRCUITJS");
 }finally{await browser.close();}
