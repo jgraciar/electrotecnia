@@ -18,7 +18,7 @@ const cases=[
   [4,5,[2.8,.25],[230,230**2/(10000000/3600)]],
   [4,6,[12.5,225000,168750/(7000*.11)],[125,10]]
 ];
-assert.equal(lab.totalCatalogued,cases.length+4);
+assert.equal(lab.totalCatalogued,cases.length+5);
 for(const [unit,number,expected,elec] of cases){
   const entry={unit,kind:"resuelta",number,id:"Actividad resuelta "+unit+"."+number};
   assert(lab.has(entry)&&lab.validate(entry));
@@ -69,3 +69,9 @@ const limiter=lab.build({unit:6,kind:"resuelta",number:4});
 assert(limiter&&limiter.circuit&&limiter.questions.length===4);
 assert.equal(limiter.questions[2].value,330);
 assert(Math.abs(limiter.questions[3].value-43.63636363636)<1e-7);
+
+const parallel=lab.build({unit:6,kind:"resuelta",number:6});
+assert(parallel&&parallel.circuit&&parallel.questions.length===7);
+[1.5,1.5,4.5,6,13.5,40.5,54].forEach((v,i)=>assert.equal(parallel.questions[i].value,v));
+assert(parallel.circuit.includes("r 304 96 304 352 0 6"));
+assert(parallel.circuit.includes("r 496 96 496 352 0 2"));
