@@ -330,7 +330,7 @@
   fetch(localUrl.href,{cache:"no-store"}).then(async res=>{
     if(!res.ok)return false;
     const html=await res.text();
-    return html.includes("circuitjs1.nocache.js");
+    return /<script\b[^>]*type=["\x27]module["\x27][^>]*src=["\x27][^"\x27]+\.js["\x27]/i.test(html) || html.includes("circuitjs1.nocache.js");
   }).then(available=>{
     localAvailable=available;
     if(!localAvailable){openRemote();return;}
