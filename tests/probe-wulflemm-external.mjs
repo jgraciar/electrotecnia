@@ -103,9 +103,8 @@ try {
 
 
 } catch (e) {
-  console.log('WULFLEMM EXTERNAL BROWSER PROBE', JSON.stringify({
-    reachable: false, error: String(e)
-  }));
+  console.error('WULFLEMM EXTERNAL BROWSER PROBE FAILED', String(e));
+  process.exitCode = 1;
 } finally {
   await browser.close();
 }
