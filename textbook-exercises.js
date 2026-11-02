@@ -105,7 +105,31 @@
       "w 496 96 624 96 0","p 624 96 624 352 3 0 "+meterScale(v)+" 0",
       "w 624 352 496 352 0","g 96 352 96 376 0"].join("\n")+"\n";
   }
+  function threeParallelCircuit(v,r1,r2,r3){
+    const i=v/r1+v/r2+v/r3;
+    return [HEADER,"v 96 352 96 96 0 0 40 "+decimal(v)+" 0",
+      "w 96 96 144 96 0","370 144 96 208 96 3 0 "+meterScale(i),
+      "w 208 96 304 96 0","w 304 96 496 96 0",
+      "w 496 96 688 96 0",
+      "r 304 96 304 352 0 "+decimal(r1),
+      "r 496 96 496 352 0 "+decimal(r2),
+      "r 688 96 688 352 0 "+decimal(r3),
+      "w 688 352 496 352 0","w 496 352 304 352 0",
+      "w 304 352 96 352 0","g 96 352 96 376 0"].join("\n")+"\n";
+  }
   const entries=[
+    ref(6,7,"Corrientes en tres ramas en paralelo",
+      "En tres resistencias de 40 Ω, 50 Ω y 10 Ω conectadas en paralelo se miden 2 A en la rama de 50 Ω. Calcula la tensión común, las otras corrientes y la corriente total.",
+      [q("Tensión común",100,"V","U=50·2=100 V"),
+       q("Corriente en 40 Ω",2.5,"A","I1=100/40=2,5 A"),
+       q("Corriente en 50 Ω",2,"A","I2=2 A"),
+       q("Corriente en 10 Ω",10,"A","I3=100/10=10 A"),
+       q("Corriente total",14.5,"A","I=2,5+2+10=14,5 A")],
+      {page:82,circuit:threeParallelCircuit(100,40,50,10),
+       meterScales:{current:"A",voltage:"V",power:"W"},
+       measured:[{label:"Amperímetro de alimentación",type:"current",value:14.5,unit:"A"}],
+       scope:"Tres ramas en paralelo, con tensión de alimentación deducida de la medida de la rama R2."}),
+
     ref(6,6,"Dos resistencias en paralelo",
       "A una pila de 9 V se conectan en paralelo dos resistencias de 6 Ω y 2 Ω. Calcula resistencia equivalente, corrientes de rama y total, y potencias individuales y total.",
       [q("Resistencia equivalente",1.5,"Ω","Req=1/(1/6+1/2)=1,5 Ω"),
