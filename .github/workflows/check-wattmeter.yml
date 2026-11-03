@@ -38,6 +38,7 @@ jobs:
         run: |
           node --experimental-strip-types laboratorio/tests/lab-power-measurement.test.mjs
           node laboratorio/tests/wulflemm-xml-roundtrip.test.js
+          node laboratorio/tests/bridge-import-inspection.test.js
 
       - name: Obtener motor CircuitJS
         uses: actions/checkout@v4
