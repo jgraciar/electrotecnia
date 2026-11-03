@@ -36,7 +36,9 @@ once('        this.meter = xml.parseIntAttr("meter", this.meter);',
 once('        const str = CircuitElm.getUnitText(this.getMeterPower(), "W");\n        g.save();\n        let fsize = 15;\n        let w;\n        // adjust font size to fit\n        while (true) {\n            g.setFont(new Font("SansSerif", 0, fsize));\n            w = Math.trunc(g.context.measureText(str).width);\n            if (w < this.maxTextLen)\n                break;\n            fsize--;\n        }\n        g.setColor(CircuitElm.whiteColor);\n        g.context.textBaseline = "middle";\n        g.drawString(str, this.center.x - Math.trunc(w/2), this.center.y);\n        g.restore();',
 `        const rows = this.getLabPowerRows();
         g.save();
-        let fsize = 14;
+        // Evitar el solapamiento vertical cuando se muestran varias potencias.
+        // La bobina ocupa 32 px de altura en el modelo de cuatro bornes.
+        let fsize = rows.length >= 3 ? 9 : rows.length === 2 ? 12 : 14;
         while (fsize > 7) {
             g.setFont(new Font("SansSerif", 0, fsize));
             if (rows.every(s => g.context.measureText(s).width < this.maxTextLen))
@@ -63,7 +65,7 @@ once('    canViewInScope(): boolean { return true; }',
         const type = this.labCurrentMode === 1 ? "dc" : this.labCurrentMode === 2 ? "ac" : "auto";
         const r = this.labMeasurement.measure(type);
         // En CC, solo potencia activa, independientemente de las casillas de CA.
-        if (r.kind !== "ac") {
+        if (r.kind === "dc" || (r.kind === "pending" && type !== "ac")) {
             return [CircuitElm.getUnitText(this.getMeterPower(), "W")];
         }
         const result: string[] = [];
