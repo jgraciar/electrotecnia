@@ -188,7 +188,7 @@ Mientras Pages esté configurado en **Deploy from a branch**, la web puede funci
 
 ### Ampliación del vatímetro verdadero (CA y CC)
 
-El vatímetro de cuatro bornes `WattmeterTrueElm` conserva los terminales M, L, C y V y el formato XML del componente original. El menú de propiedades permite seleccionar **Automático, CC o CA** y activar por separado **potencia activa (W)**, **reactiva fundamental Q1 (var)** y **aparente S (VA)**; en CA se admite cualquier combinación. En CC solo se presenta la potencia activa. Los prefijos de unidades se ajustan automáticamente. Se conserva la opción histórica de potencia instantánea o media.
+El vatímetro de cuatro bornes `WattmeterTrueElm` conserva los terminales M, L, C y V y el formato XML del componente original. El menú de propiedades permite seleccionar **Automático, CC o CA** y activar por separado **potencia activa (W)**, **reactiva Q (var)** — definida en el cálculo como Q₁ fundamental y **aparente S (VA)**; en CA se admite cualquier combinación. En CC solo se presenta la potencia activa. Los prefijos de unidades se ajustan automáticamente. Se conserva la opción histórica de potencia instantánea o media.
 
 En CA, `P` es la media temporal de `u(t)i(t)`; `S=Urms·Irms` incluye la distorsión; `Q1` se calcula con las componentes fundamentales de tensión e intensidad, y no debe confundirse con `sqrt(S²-P²)` cuando existen armónicos. La medida reactiva necesita identificar un periodo completo, por lo que al comenzar o cambiar un circuito puede aparecer una lectura pendiente.
 
