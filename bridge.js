@@ -183,20 +183,34 @@
       const doc=new DOMParser().parseFromString(dump,"application/xml");
       if(doc.querySelector("parsererror")||doc.documentElement?.tagName!=="cir")
         throw Error("El archivo XML está mal formado o no es CircuitJS.");
-      const n=Array.from(doc.documentElement.children).filter(el=>{
+      // Tipos que maneja aparte el propio CircuitXMLDeserializer; nunca
+      // se cuentan como componentes eléctricos de cuatro coordenadas.
+      const metadata=new Set(["o","dm","rlm","tm","mm","clm","ccm","h",
+        "adj","test","switchevent","scopedata"]);
+      let count=0;
+      for(const el of doc.documentElement.children){
+        if(metadata.has(el.tagName))continue;
         const coords=el.getAttribute("x");
-        return coords!=null && /^-?\d+(?:\s+-?\d+){3}$/.test(coords.trim());
-      }).length;
-      return {dump,format:"circuitjs-xml",elements:n};
+        if(coords===null)
+          throw Error("Etiqueta XML no reconocida sin posición: "+el.tagName+
+            ". No se puede asegurar que se importe íntegramente.");
+        if(!/^-?\d+(?:\s+-?\d+){3}$/.test(coords.trim()))
+          throw Error("Coordenadas eléctricas inválidas en "+el.tagName+": "+coords);
+        count++;
+      }
+      return {dump,format:"circuitjs-xml",elements:count};
     }
     if(/^\$\s+/.test(dump)){
       let count=0;
+      const metadata=new Set(["o","h","$","!","%","?","B",".","&",'"']);
       for(const line of dump.split(/\r?\n|\r/)){
-        const fields=line.trim().split(/\s+/);
-        if(fields.length>=6 && /^-?\d+$/.test(fields[1]) &&
-           /^-?\d+$/.test(fields[2]) && /^-?\d+$/.test(fields[3]) &&
-           /^-?\d+$/.test(fields[4]) && /^-?\d+$/.test(fields[5]) &&
-           !["o","h","$","!","%","?","B","."].includes(fields[0])) count++;
+        const value=line.trim();
+        if(!value)continue;
+        const fields=value.split(/\s+/);
+        if(metadata.has(fields[0]))continue;
+        if(fields.length<6 || fields.slice(1,6).some(n=>!/^[-]?\d+$/.test(n)))
+          throw Error("Línea de componente no reconocida en texto Falstad: "+value.slice(0,90));
+        count++;
       }
       return {dump,format:"circuitjs-text",elements:count};
     }
