@@ -364,10 +364,32 @@
   function updateWulflemmAttribute(index,key,value){
     if(!wulflemmDocument)return {ok:false,message:"No hay documento XML cargado."};
     try{
-      const nodes=window.WulflemmXml.updateAttribute(wulflemmDocument.nodes,index,key,value);
-      wulflemmDocument={...wulflemmDocument,nodes};
-      return {ok:true,simulated:false,message:"Atributo XML modificado; no se ha actualizado el motor eléctrico."};
-    }catch(error){return {ok:false,message:error.message};}
+      // Validar índice, nombre y valor antes de tocar la simulación.
+      window.WulflemmXml.updateAttribute(wulflemmDocument.nodes,index,key,value);
+      const selected=wulflemmDocument.nodes[index];
+      if(!selected || selected.depth!==1 || !selected.attrs.x)
+        throw Error("Selecciona un componente eléctrico del circuito.");
+      // Usar el XML vivo, no la copia importada: el usuario puede haber hecho
+      // cambios adicionales desde el editor gráfico.
+      const live=exportNativeCircuit();
+      if(!live.ok)throw Error(live.message);
+      if(live.format!=="circuitjs-xml")
+        throw Error("La edición XML solo está disponible con un circuito XML abierto.");
+      const doc=new DOMParser().parseFromString(live.dump,"application/xml");
+      if(doc.querySelector("parsererror")||doc.documentElement?.tagName!=="cir")
+        throw Error("El motor no devuelve un documento XML válido.");
+      const matches=Array.from(doc.documentElement.children).filter(el=>
+        el.tagName===selected.name && el.getAttribute("x")===selected.attrs.x);
+      if(matches.length!==1)
+        throw Error("El componente original se ha movido o no se identifica de forma única. Vuelve a importar el archivo antes de editarlo.");
+      matches[0].setAttribute(key,String(value));
+      const modified=new XMLSerializer().serializeToString(doc);
+      const reload=importModel("Wulflemm-XML",modified);
+      if(!reload.ok || !reload.simulated)
+        return {ok:false,simulated:false,message:reload.message||"No se pudo aplicar el cambio al circuito."};
+      wulflemmDocument={xml:modified,nodes:window.WulflemmXml.parse(modified)};
+      return {ok:true,simulated:true,message:"Atributo aplicado al circuito en funcionamiento: "+key+" = "+value+"."};
+    }catch(error){return {ok:false,simulated:false,message:error.message};}
   }
   function exportWulflemmXml(){
     if(!wulflemmDocument)return {ok:false,message:"No se ha importado un documento XML de wulflemm."};
@@ -379,9 +401,13 @@
       return {ok:false,message:"El motor exporta texto CircuitJS, no XML Wulflemm; se rechaza una copia obsoleta.",
         availableFormat:live.format};
     try{
-      const nodes=window.WulflemmXml.parse(live.dump);
-      return {ok:true,format:"wulflemm-xml",xml:window.WulflemmXml.serialize(nodes),
-        simulated:true,message:"Exportación XML desde el estado actual de CircuitJS."};
+      // No reconstruir ni simplificar el XML con un analizador limitado:
+      // se deben conservar también datos internos, modelos y osciloscopios.
+      const doc=new DOMParser().parseFromString(live.dump,"application/xml");
+      if(doc.querySelector("parsererror")||doc.documentElement?.tagName!=="cir")
+        throw Error("El motor no devuelve un documento XML válido.");
+      return {ok:true,format:"wulflemm-xml",xml:live.dump,
+        simulated:true,message:"Exportación íntegra del estado actual de CircuitJS."};
     }catch(error){return {ok:false,message:"El XML exportado no es compatible: "+error.message};}
   }
   // Diagnóstico real de las funciones que expone la versión compilada,
