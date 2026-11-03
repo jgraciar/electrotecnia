@@ -72,7 +72,7 @@ once('    canViewInScope(): boolean { return true; }',
                 CircuitElm.getUnitText(p, "W"));
         }
         if (mask & 2)
-            result.push("Q1 " + (r.q == null ? "..." : CircuitElm.getUnitText(r.q, "var")));
+            result.push("Q " + (r.q == null ? "..." : CircuitElm.getUnitText(r.q, "var")));
         if (mask & 4)
             result.push("S " + (r.s == null ? "..." : CircuitElm.getUnitText(r.s, "VA")));
         return result.length ? result : [CircuitElm.getUnitText(this.getMeterPower(),"W")];
@@ -88,7 +88,7 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
             ei.choice.add("Automatica (detectar)");
             ei.choice.add("Continua (CC)");
             ei.choice.add("Alterna (CA)");
-            ei.choice.select(this.labCurrentMode);
+            ei.choice.select(this.labCurrentMode);\n            ei.newDialog = true; // refresca las casillas al cambiar entre CC y CA
             return ei;
         }
         if (n === 1) {
@@ -103,7 +103,7 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
         const dc = this.labCurrentMode === 1 ||
             (this.labCurrentMode === 0 && this.labMeasurement.measure("auto").kind === "dc");
         if (dc) return null;
-        if (n === 3) return EditInfo.createCheckbox("Potencia reactiva fundamental Q1 (var)", !!(this.labPowerMask & 2));
+        if (n === 3) return EditInfo.createCheckbox("Potencia reactiva Q (var) - fundamental", !!(this.labPowerMask & 2));
         if (n === 4) return EditInfo.createCheckbox("Potencia aparente S (VA)", !!(this.labPowerMask & 4));
         return null;
     }
