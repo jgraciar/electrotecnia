@@ -15,6 +15,7 @@
   let localAvailable=false;
   let selectedExample=null;
   let pendingModel=null;
+  let lastImportDiagnostic=null;
   let measuredWattmeter=null, wattSamples=[];
   let wattmeters=[];
   const WATT_WINDOW_S=0.1;
@@ -207,7 +208,7 @@
         const value=line.trim();
         if(!value)continue;
         const fields=value.split(/\s+/);
-        if(metadata.has(fields[0].charAt(0)))continue;
+        if(metadata.has(fields[0].charAt(0)) || ["32","34","38"].includes(fields[0]))continue;
         if(fields.length<6 || fields.slice(1,6).some(n=>!/^[-]?\d+$/.test(n)))
           throw Error("Línea de componente no reconocida en texto Falstad: "+value.slice(0,90));
         count++;
@@ -220,11 +221,13 @@
     let info;
     try{info=inspectCircuitFile(raw);}
     catch(error){
+      lastImportDiagnostic={ok:false,filename,format:null,message:error.message};
       message(error.message);
       return {ok:false,message:error.message};
     }
     if(!sim){
       pendingModel={filename,dump:info.dump};
+      lastImportDiagnostic={ok:false,pending:true,filename,format:info.format};
       message("CircuitJS está inicializando; el archivo se cargará al terminar.");
       return {ok:true,pending:true,simulated:false,format:info.format};
     }
@@ -244,6 +247,7 @@
       clear();
       selectedExample=filename;
       updateSelection();
+      lastImportDiagnostic={ok:true,filename,format:info.format,expected:info.elements,recognized:actual};
       message("Circuito importado: "+filename+". "+actual+" elementos reconocidos.");
       document.dispatchEvent(new CustomEvent("lab:circuit-ready",{detail:{example:filename}}));
       return {ok:true,format:info.format,simulated:true,elements:actual};
@@ -253,6 +257,7 @@
       catch(recovery){message("Error al restaurar el circuito previo: "+recovery.message);}
       const warning="No se ha podido abrir el circuito completo: "+error.message+
         (restored?" Se ha restaurado el circuito anterior.":"");
+      lastImportDiagnostic={ok:false,filename,format:info.format,message:warning,restored};
       message(warning);
       return {ok:false,message:warning};
     }
@@ -390,7 +395,8 @@
     catch(error){return {ready:true,methods,error:error.message};}
     return {ready:true,methods,elementTypes:[...new Set(types)],
       wattmeterTruePresent:types.includes("WattmeterTrueElm"),
-      xmlImportVerified:false,xmlExportVerified:false};
+      xmlImportVerified:!!lastImportDiagnostic?.ok && lastImportDiagnostic.format==="circuitjs-xml",
+      lastImport:lastImportDiagnostic};
   }
   window.LabCircuit={
     loadExample,
