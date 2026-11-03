@@ -163,6 +163,67 @@ try {
     "Al rechazar un componente se debe restaurar el circuito anterior");
   console.log("Formatos entrantes verificados: TXT Falstad, XML Wulflemm y rechazo seguro de componentes no admitidos.");
 
+  // Conjunto de circuitos originales de Falstad (tomados de la copia upstream
+  // utilizada en esta misma compilación). No se alteran los parámetros.
+  const falstadSamples=[
+    ["ohms.txt", "ley de Ohm"],
+    ["lrc.txt", "RLC y variables ajustables"],
+    ["fullrect.txt", "rectificador con diodos"],
+    ["transformer.txt", "transformador"],
+    ["3phasewye.txt", "red trifásica"],
+    ["amp-noninvert.txt", "amplificador operacional"]
+  ];
+  for(const [filename,description] of falstadSamples){
+    const circuit=readFileSync(
+      new URL("../../circuitjs-src/ts/public/circuits/"+filename,import.meta.url),"utf8");
+    const expected=circuit.trim().split(/\r?\n/).filter(line=>{
+      const cols=line.trim().split(/\s+/);
+      return cols.length>=6 &&
+        /^-?\d+$/.test(cols[1]) && /^-?\d+$/.test(cols[2]) &&
+        /^-?\d+$/.test(cols[3]) && /^-?\d+$/.test(cols[4]) &&
+        /^-?\d+$/.test(cols[5]) &&
+        !["o","h","$","!","%","?","B",".","&",'"',"38"].includes(cols[0]);
+    }).length;
+    const actual=await page.evaluate(({filename,circuit})=>{
+      const loaded=window.LabCircuit.importNativeCircuit(filename,circuit);
+      const types=Array.from(document.querySelector("#circuit-frame").contentWindow.CircuitJS1.getElements())
+        .map(el=>el.getType());
+      return {loaded,types};
+    },{filename,circuit});
+    assert(actual.loaded?.ok && actual.loaded.simulated,
+      "Circuito original Falstad no importado: "+filename+" "+JSON.stringify(actual.loaded));
+    assert.equal(actual.types.length,expected,
+      "Pérdida de componentes al importar "+filename);
+    console.log("Falstad oficial importado:",filename,description,"componentes",expected);
+  }
+
+  // Comprobación independiente de potencia activa: los tres ramales equilibrados
+  // del circuito Aron de referencia tienen R-L-C serie y tensión de fase de 120 V.
+  // Se contrasta el cálculo eléctrico teórico, no solo que las lecturas sean finitas.
+  const impedanceRe=1000;
+  const impedanceIm=2*Math.PI*60*1 - 1/(2*Math.PI*60*10e-6);
+  const expectedAron=3*120*120*impedanceRe/
+    (impedanceRe*impedanceRe+impedanceIm*impedanceIm);
+  const replay=await page.evaluate(xml=>{
+    const loaded=window.LabCircuit.importWulflemmXml(xml);
+    return loaded;
+  },original);
+  assert(replay.ok && replay.simulated,"No se puede restaurar el Aron para comprobar la potencia");
+  await page.waitForFunction(()=>{
+    const reading=window.LabCircuit.getAronReadings();
+    return reading?.valid && Number.isFinite(reading.total) && reading.total>0;
+  },null,{timeout:90000});
+  const measuredAron=await page.evaluate(()=>window.LabCircuit.getAronReadings());
+  const relativeError=Math.abs(measuredAron.total-expectedAron)/expectedAron;
+  assert(relativeError<0.10,
+    "Potencia Aron incompatible con RLC calculado: "+JSON.stringify({
+      measured:measuredAron.total,expected:expectedAron,relativeError
+    }));
+  console.log("Aron: contraste eléctrico independiente",{
+    measured:measuredAron.total,expected:expectedAron,relativeError
+  });
+
+
 } finally {
   await browser.close();
 }
