@@ -1,0 +1,78 @@
+name: Verificar vatimetro avanzado y entrada Wulflemm
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/patch-wattmeter-powers.mjs
+      - scripts/LabPowerMeasurement.ts
+      - scripts/embed-default-aron.mjs
+      - tests/lab-power-measurement.test.mjs
+      - tests/verify-wattmeter-inbound.mjs
+      - tests/fixtures/wulflemm-aron.xml
+      - bridge.js
+      - wulflemm-xml.js
+      - .github/workflows/check-wattmeter.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-wattmeter:
+    name: Calculo, compilacion y prueba de importacion real
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Obtener laboratorio
+        uses: actions/checkout@v4
+        with:
+          path: laboratorio
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verificar calculos P/Q/S y XML
+        run: |
+          node --experimental-strip-types laboratorio/tests/lab-power-measurement.test.mjs
+          node laboratorio/tests/wulflemm-xml-roundtrip.test.js
+
+      - name: Obtener motor CircuitJS
+        uses: actions/checkout@v4
+        with:
+          repository: pfalstad/circuitjs1
+          ref: master
+          path: circuitjs-src
+
+      - name: Aplicar ampliacion sin alterar identificadores XML originales
+        run: |
+          node laboratorio/scripts/embed-default-aron.mjs circuitjs-src/ts/CirSim.ts laboratorio/tests/fixtures/wulflemm-aron.xml
+          node laboratorio/scripts/patch-wattmeter-powers.mjs circuitjs-src/ts/WattmeterTrueElm.ts laboratorio/scripts/LabPowerMeasurement.ts
+
+      - name: Compilar TypeScript y Vite
+        working-directory: circuitjs-src/ts
+        run: |
+          npm ci
+          npm run build
+
+      - name: Preparar sitio local de pruebas
+        run: |
+          mkdir -p public/circuitjs public/tests/fixtures
+          cp laboratorio/index.html laboratorio/styles.css laboratorio/app.js laboratorio/lab-circuits.js laboratorio/bridge.js laboratorio/wulflemm-xml.js laboratorio/wulflemm-ui.js laboratorio/sce-practices.js laboratorio/curriculum.js laboratorio/networks-solar-curriculum.js laboratorio/networks-solar-practices.js laboratorio/practices.js laboratorio/publications-data.js laboratorio/paraninfo-activities.js laboratorio/textbook-exercises.js laboratorio/textbook-curriculum.js laboratorio/textbook-ui.js laboratorio/publications.js public/
+          cp laboratorio/tests/fixtures/wulflemm-aron.xml public/tests/fixtures/
+          cp -a circuitjs-src/ts/dist/. public/circuitjs/
+          test -f public/circuitjs/circuitjs.html
+
+      - name: Instalar Playwright para pruebas en navegador
+        working-directory: laboratorio/tests
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Comprobar importacion de Wulflemm y preferencias propias
+        run: |
+          python3 -m http.server 8765 --directory public >/tmp/lab-test-http.log 2>&1 &
+          sleep 2
+          node laboratorio/tests/verify-wattmeter-inbound.mjs
