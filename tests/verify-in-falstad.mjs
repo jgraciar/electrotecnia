@@ -28,6 +28,28 @@ try {
   });
   assert.deepEqual(startupAfter,startup,
     "CircuitJS ha sustituido el circuito de Aron después de arrancar");
+  // Entrada unidireccional: XML de Wulflemm SIN atributos del laboratorio.
+  const inbound=await page.evaluate(async()=>{
+    const response=await fetch("./tests/fixtures/wulflemm-aron.xml");
+    if(!response.ok)throw Error("Falta el XML original de Wulflemm");
+    const xml=await response.text();
+    const imported=window.LabCircuit.importWulflemmXml(xml);
+    const sim=document.getElementById("circuit-frame").contentWindow.CircuitJS1;
+    const meters=Array.from(sim.getElements()).filter(e=>e.getType()==="WattmeterTrueElm");
+    const exported=sim.exportCircuit();
+    return {imported,count:meters.length,
+      settings:(exported.match(/<WattmeterTrue\b[^>]*>/g)||[]).map(tag=>({
+        current:/labCurrentMode="0"/.test(tag),power:/labPowerMask="1"/.test(tag)
+      }))};
+  });
+  assert(inbound.imported?.ok && inbound.imported.simulated,
+    "No se ha podido abrir el XML original de Wulflemm: "+JSON.stringify(inbound));
+  assert.equal(inbound.count,2,"Importacion de Wulflemm pierde vatimetros");
+  assert.equal(inbound.settings.length,2,"No se exportan los dos vatimetros");
+  assert(inbound.settings.every(x=>x.current && x.power),
+    "XML Wulflemm sin opciones locales debe iniciar automatico/P: "+JSON.stringify(inbound));
+  console.log("IMPORTACION ENTRANTE WULFLEMM",JSON.stringify(inbound));
+
   for(const [unit,number] of [[2,1],[2,2],[3,3],[3,5],[3,6],[4,4],[4,5],[4,6]]){
     const ref={unit,kind:"resuelta",number};
     const meta=await page.evaluate(ref=>{
