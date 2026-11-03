@@ -33,7 +33,7 @@ assert.equal(inspect(original).elements,27,"Wulflemm Aron: componentes");
 assert.equal(inspect(original).format,"circuitjs-xml");
 assert.equal(inspect("\uFEFF<?xml version=\"1.0\"?>\n"+original).elements,27,"BOM y declaración XML");
 assert.equal(inspect(classic).elements,5,"Falstad texto: componentes");
-assert.equal(inspect(classic.replace("r 32 64","-")).elements,4,
+assert.equal(inspect(classic.replace("r 32 64 160 64 0 100\n","")).elements,4,
  "Al reemplazar un componente por una directiva, no debe contarse");
 // Directivas del importador textual original (no son elementos del circuito).
 assert.equal(inspect(classic+".submodelo A\n!logic\n").elements,5,"Metadatos de modelos");
