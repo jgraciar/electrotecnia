@@ -8,6 +8,25 @@
   const value=document.getElementById("wulflemmValue");
   const apply=document.getElementById("wulflemmApply");
   if(!file||!save||!status)return;
+  let pendingFile=null;
+  document.addEventListener("lab:circuit-ready",event=>{
+    if(!pendingFile || event.detail?.example!==pendingFile.example)return;
+    status.textContent="Circuito cargado y comprobado: "+pendingFile.filename+".";
+    if(pendingFile.xml){
+      save.disabled=false;
+      if(component)component.disabled=false;
+      if(apply)apply.disabled=false;
+    }
+    pendingFile=null;
+  });
+  document.addEventListener("lab:circuit-import-error",event=>{
+    if(!pendingFile || event.detail?.example!==pendingFile.example)return;
+    status.textContent=event.detail.message||"No se pudo importar el circuito.";
+    save.disabled=true;
+    if(component)component.disabled=true;
+    if(apply)apply.disabled=true;
+    pendingFile=null;
+  });
   file.addEventListener("change",async()=>{
     const selected=file.files?.[0];
     if(!selected)return;
@@ -16,9 +35,12 @@
       const source=await selected.text();
       const content=source.replace(/^\uFEFF/,"").trimStart();
       const isXml=content.startsWith("<");
+      pendingFile=null;
       const result=isXml
         ? window.LabCircuit?.importWulflemmXml(content)
         : window.LabCircuit?.importNativeCircuit(selected.name,content);
+      if(result?.pending)
+        pendingFile={filename:selected.name,example:isXml?"Wulflemm-XML":selected.name,xml:isXml};
       if(!result?.ok){status.textContent=result?.message||"No se pudo leer el XML.";return;}
       status.textContent=result.pending
         ?"Archivo recibido, pendiente de inicialización de CircuitJS: "+selected.name
@@ -35,7 +57,7 @@
           const option=document.createElement("option");option.value=String(el.index);
           option.textContent=el.index+". "+el.name;component.append(option);
         }
-        component.disabled=false;if(apply)apply.disabled=false;
+        component.disabled=!!result.pending;if(apply)apply.disabled=!!result.pending;
       }
     }catch(error){status.textContent="Error al leer el archivo: "+error.message;}
   });
