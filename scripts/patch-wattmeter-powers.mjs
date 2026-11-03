@@ -22,8 +22,10 @@ once('    selectedValue: number = 0;',
 once('        CircuitXMLSerializer.dumpAttr(elem, "meter", this.meter);',
 `        CircuitXMLSerializer.dumpAttr(elem, "meter", this.meter);
         // Atributos optativos: los XML originales de Wulflemm carecen de ellos.
-        CircuitXMLSerializer.dumpAttr(elem, "labCurrentMode", this.labCurrentMode);
-        CircuitXMLSerializer.dumpAttr(elem, "labPowerMask", this.labPowerMask);`);
+        if (this.labCurrentMode !== 0)
+            CircuitXMLSerializer.dumpAttr(elem, "labCurrentMode", this.labCurrentMode);
+        if (this.labPowerMask !== 1)
+            CircuitXMLSerializer.dumpAttr(elem, "labPowerMask", this.labPowerMask);`);
 once('        this.meter = xml.parseIntAttr("meter", this.meter);',
 `        this.meter = xml.parseIntAttr("meter", this.meter);
         // La ausencia de estas opciones es normal en todos los archivos Wulflemm.
