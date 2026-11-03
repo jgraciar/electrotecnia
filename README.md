@@ -186,6 +186,14 @@ La integración necesita una publicación construida por el workflow de GitHub A
 
 Mientras Pages esté configurado en **Deploy from a branch**, la web puede funcionar con generador y trifásica, pero no tendrá la copia compilada de CircuitJS y utilizará el simulador externo.
 
+### Ampliación del vatímetro verdadero (CA y CC)
+
+El vatímetro de cuatro bornes `WattmeterTrueElm` conserva los terminales M, L, C y V y el formato XML del componente original. El menú de propiedades permite seleccionar **Automático, CC o CA** y activar por separado **potencia activa (W)**, **reactiva fundamental Q1 (var)** y **aparente S (VA)**; en CA se admite cualquier combinación. En CC solo se presenta la potencia activa. Los prefijos de unidades se ajustan automáticamente. Se conserva la opción histórica de potencia instantánea o media.
+
+En CA, `P` es la media temporal de `u(t)i(t)`; `S=Urms·Irms` incluye la distorsión; `Q1` se calcula con las componentes fundamentales de tensión e intensidad, y no debe confundirse con `sqrt(S²-P²)` cuando existen armónicos. La medida reactiva necesita identificar un periodo completo, por lo que al comenzar o cambiar un circuito puede aparecer una lectura pendiente.
+
+La compatibilidad exigida es **entrante**: los XML originales de Wulflemm, sin atributos adicionales, deben importarse y ejecutarse en el laboratorio. Las preferencias nuevas se almacenan con los atributos opcionales `labCurrentMode` y `labPowerMask`, sin alterar las conexiones eléctricas. No se exige que la versión externa de Wulflemm pueda interpretar las preferencias añadidas por el laboratorio. El código se incorpora a la compilación de CircuitJS mediante `scripts/patch-wattmeter-powers.mjs`; `tests/lab-power-measurement.test.mjs` comprueba los cálculos numéricos y `tests/verify-in-falstad.mjs` incluye una prueba de importación del XML original.
+
 ## Limitaciones
 
 - Simulación exclusivamente: no hay comunicación USB con el Hantek 6022BE ni control del ESP8266.
