@@ -72,7 +72,7 @@ try {
     const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
     const out=[];
     for(let mask=1;mask<=7;mask++){
-      const xml=original.replace(/(<WattmeterTrue\\b[^>]*\\bmeter="1")\\s*\\/>/,
+      const xml=original.replace(/(<WattmeterTrue\b[^>]*\bmeter="1")\s*\/>/,
         '$1 labCurrentMode="2" labPowerMask="'+mask+'"/>');
       sim.importCircuit(xml);
       const saved=sim.exportCircuit();
@@ -87,6 +87,48 @@ try {
   assert(modes.every(x=>x.requested===x.recorded && x.mode==="2"),
     "Alguna combinacion P/Q/S se pierde al guardar: "+JSON.stringify(modes));
   console.log("Combinaciones de potencia verificadas",modes);
+
+  // Archivo de texto del CircuitJS clásico (la compatibilidad no se limita a XML).
+  const nativeCircuit = [
+    "$ 1 0.000005 10 50 5 50",
+    "v 32 128 32 64 0 0 40 5 0 0 0.5",
+    "g 32 128 32 144 0",
+    "r 32 64 160 64 0 100",
+    "w 160 64 160 128 0",
+    "w 160 128 32 128 0"
+  ].join("\n")+"\n";
+  const plain=await page.evaluate(dump=>{
+    const loaded=window.LabCircuit.importNativeCircuit("falstad-example.txt",dump);
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return {loaded,types:Array.from(sim.getElements()).map(x=>x.getType())};
+  },nativeCircuit);
+  assert(plain.loaded?.ok && plain.loaded?.simulated,"Importación de archivo TXT Falstad fallida: "+JSON.stringify(plain));
+  assert.equal(plain.types.length,5,"Importación TXT Falstad pierde elementos");
+
+  // La cabecera XML opcional y BOM son frecuentes en archivos intercambiados.
+  const xmlDeclaration="\uFEFF<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+original;
+  const prefixed=await page.evaluate(xml=>{
+    const loaded=window.LabCircuit.importWulflemmXml(xml);
+    const types=Array.from(document.querySelector("#circuit-frame").contentWindow.CircuitJS1.getElements())
+      .map(x=>x.getType());
+    return {loaded,meters:types.filter(t=>t==="WattmeterTrueElm").length};
+  },xmlDeclaration);
+  assert(prefixed.loaded?.ok && prefixed.meters===2,
+    "Importación XML con declaración/BOM fallida: "+JSON.stringify(prefixed));
+
+  // Nunca anunciar éxito si el motor ha descartado un componente desconocido.
+  const unknown=original.replace("</cir>",'  <UnrecognizedLaboratoryPart x="16 16 80 16" f="0"/>\n</cir>');
+  const rejected=await page.evaluate(xml=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    const before=Array.from(sim.getElements()).map(x=>x.getType());
+    const result=window.LabCircuit.importWulflemmXml(xml);
+    const after=Array.from(sim.getElements()).map(x=>x.getType());
+    return {result,before,after};
+  },unknown);
+  assert.equal(rejected.result?.ok,false,"No debe aceptar XML con componentes descartados");
+  assert.deepEqual(rejected.after,rejected.before,
+    "Al rechazar un componente se debe restaurar el circuito anterior");
+  console.log("Formatos entrantes verificados: TXT Falstad, XML Wulflemm y rechazo seguro de componentes no admitidos.");
 
 } finally {
   await browser.close();
