@@ -39,6 +39,7 @@ jobs:
           node laboratorio/tests/wulflemm-xml-diagnostics.test.js
           node laboratorio/tests/aron-power.test.js
           node laboratorio/tests/wulflemm-xml-roundtrip.test.js
+          node --experimental-strip-types laboratorio/tests/lab-power-measurement.test.mjs
 
       - name: Obtener código oficial de CircuitJS
         uses: actions/checkout@v4
@@ -57,6 +58,10 @@ jobs:
       - name: Incorporar circuito original de Aron al código de CircuitJS
         run: |
           node laboratorio/scripts/embed-default-aron.mjs circuitjs-src/ts/CirSim.ts laboratorio/tests/fixtures/wulflemm-aron.xml
+
+      - name: Ampliar vatimetro con potencias P, Q1 y S
+        run: |
+          node laboratorio/scripts/patch-wattmeter-powers.mjs circuitjs-src/ts/WattmeterTrueElm.ts laboratorio/scripts/LabPowerMeasurement.ts
 
       - name: Instalar dependencias y compilar CircuitJS
         working-directory: circuitjs-src/ts
