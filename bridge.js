@@ -207,7 +207,7 @@
         const value=line.trim();
         if(!value)continue;
         const fields=value.split(/\s+/);
-        if(metadata.has(fields[0]))continue;
+        if(metadata.has(fields[0].charAt(0)))continue;
         if(fields.length<6 || fields.slice(1,6).some(n=>!/^[-]?\d+$/.test(n)))
           throw Error("Línea de componente no reconocida en texto Falstad: "+value.slice(0,90));
         count++;
