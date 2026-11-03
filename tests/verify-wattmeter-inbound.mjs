@@ -242,6 +242,16 @@ try {
     measured:measuredAron.total,expected:expectedAron,relativeError
   });
 
+  // Recargar Aron mediante el selector real para disponer de la lista de componentes.
+  await page.locator("#wulflemmXmlFile").setInputFiles({
+    name:"wulflemm-aron.xml",mimeType:"application/xml",buffer:Buffer.from(original)
+  });
+  await page.waitForFunction(()=>
+    document.querySelector("#wulflemmXmlStatus")?.textContent?.includes("cargado y comprobado"),
+    null,{timeout:12000});
+  assert.equal(await page.locator("#wulflemmComponent").isDisabled(),false);
+  assert.equal(await page.locator("#wulflemmApply").isDisabled(),false);
+
   // Modificar una resistencia desde la interfaz y comprobar el efecto sobre
   // el XML real exportado. Antes solo se alteraba una copia del archivo.
   const edited=await page.evaluate(()=>{
