@@ -137,7 +137,7 @@
     </div>
     <div class="actions"><a href="./circuitjs/circuitjs.html" target="_blank" rel="noopener noreferrer" class="button-link">Abrir Falstad</a></div>
     <div class="controls bridge-controls">
-      <label>Archivo XML de wulflemm<input id="wulflemmXmlFile" type="file" accept=".xml,.txt,application/xml,text/xml,text/plain"></label>
+      <label>Abrir circuito de Falstad o Wulflemm<input id="wulflemmXmlFile" type="file"></label>
       <button id="wulflemmXmlSave" type="button" disabled>Exportar XML conservado</button>
     </div>
     <div class="controls bridge-controls">
@@ -146,7 +146,7 @@
       <label>Valor<input id="wulflemmValue" type="text" placeholder="Nuevo valor"></label>
       <button id="wulflemmApply" type="button" disabled>Modificar XML</button>
     </div>
-    <p class="hint" id="wulflemmXmlStatus" role="status">Importa archivos XML de Wulflemm o CircuitJS, incluidos los guardados con extensión .txt.</p>
+    <p class="hint" id="wulflemmXmlStatus" role="status">Admite circuitos XML de Wulflemm/CircuitJS y texto de Falstad (cabecera $), independientemente de su extensión. Se comprueba que no falten componentes.</p>
     <iframe title="Simulador CircuitJS de Falstad" id="circuit-frame" loading="lazy"></iframe>
     <p class="hint">Las señales mostradas proceden del motor CircuitJS cuando está alojado en este mismo dominio. En modo externo solo se puede editar el circuito: el navegador impide leer sus señales por motivos de seguridad.</p>
   </section>
