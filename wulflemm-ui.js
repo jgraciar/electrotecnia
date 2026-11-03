@@ -14,12 +14,21 @@
     if(selected.size>2_000_000){status.textContent="Archivo demasiado grande (máximo 2 MB).";return;}
     try{
       const source=await selected.text();
-      const result=source.trimStart().startsWith("$ ")
-        ? window.LabCircuit?.importNativeCircuit(selected.name,source)
-        : window.LabCircuit?.importWulflemmXml(source);
+      const content=source.replace(/^\uFEFF/,"").trimStart();
+      const isXml=content.startsWith("<");
+      const result=isXml
+        ? window.LabCircuit?.importWulflemmXml(content)
+        : window.LabCircuit?.importNativeCircuit(selected.name,content);
       if(!result?.ok){status.textContent=result?.message||"No se pudo leer el XML.";return;}
-      status.textContent="Circuito cargado en el simulador: "+selected.name+".";
-      save.disabled=result.format!=="wulflemm-xml";
+      status.textContent=result.pending
+        ?"Archivo recibido, pendiente de inicialización de CircuitJS: "+selected.name
+        :"Circuito cargado y comprobado: "+selected.name+".";
+      save.disabled=result.format!=="wulflemm-xml" || result.pending;
+      if(component && result.format!=="wulflemm-xml"){
+        component.replaceChildren();
+        component.disabled=true;
+        if(apply)apply.disabled=true;
+      }
       if(component && result.format==="wulflemm-xml"){
         component.replaceChildren();
         for(const el of window.LabCircuit.getWulflemmComponents()){
