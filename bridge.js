@@ -382,12 +382,34 @@
         el.tagName===selected.name && el.getAttribute("x")===selected.attrs.x);
       if(matches.length!==1)
         throw Error("El componente original se ha movido o no se identifica de forma única. Vuelve a importar el archivo antes de editarlo.");
-      matches[0].setAttribute(key,String(value));
+      const requested=String(value);
+      const previous=matches[0].getAttribute(key);
+      if(previous!==null && previous.trim()!=="" && Number.isFinite(Number(previous)) &&
+          (requested.trim()==="" || !Number.isFinite(Number(requested))))
+        throw Error("El atributo "+key+" requiere un valor numérico.");
+      matches[0].setAttribute(key,requested);
       const modified=new XMLSerializer().serializeToString(doc);
       const reload=importModel("Wulflemm-XML",modified);
       if(!reload.ok || !reload.simulated)
         return {ok:false,simulated:false,message:reload.message||"No se pudo aplicar el cambio al circuito."};
-      wulflemmDocument={xml:modified,nodes:window.WulflemmXml.parse(modified)};
+      // Un importador puede ignorar un atributo desconocido sin lanzar error:
+      // verificar su persistencia para no anunciar modificaciones inexistentes.
+      const result=exportNativeCircuit();
+      const after=result.ok && result.format==="circuitjs-xml"
+        ? new DOMParser().parseFromString(result.dump,"application/xml"):null;
+      const newPosition=key==="x" ? requested : selected.attrs.x;
+      const persisted=after && Array.from(after.documentElement.children).filter(el=>
+        el.tagName===selected.name && el.getAttribute("x")===newPosition);
+      const actual=persisted?.length===1 ? persisted[0].getAttribute(key) : null;
+      const equalNumeric=requested.trim()!=="" && actual!==null &&
+        Number.isFinite(Number(requested)) && Number.isFinite(Number(actual)) &&
+        Math.abs(Number(actual)-Number(requested))<=1e-9*Math.max(1,Math.abs(Number(requested)));
+      if(actual!==requested && !equalNumeric){
+        const rollback=importModel("Wulflemm-XML",live.dump);
+        return {ok:false,simulated:false,message:"CircuitJS no admite o no conserva el atributo "+key+
+          ". "+(rollback.ok?"Se ha restaurado el circuito anterior.":"No ha sido posible restaurar el circuito anterior.")};
+      }
+      wulflemmDocument={xml:result.dump,nodes:window.WulflemmXml.parse(result.dump)};
       return {ok:true,simulated:true,message:"Atributo aplicado al circuito en funcionamiento: "+key+" = "+value+"."};
     }catch(error){return {ok:false,simulated:false,message:error.message};}
   }
