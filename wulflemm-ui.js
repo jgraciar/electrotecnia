@@ -11,7 +11,7 @@
   file.addEventListener("change",async()=>{
     const selected=file.files?.[0];
     if(!selected)return;
-    if(selected.size>2_000_000){status.textContent="Archivo demasiado grande (máximo 2 MB).";return;}
+    if(selected.size>10_000_000){status.textContent="Archivo demasiado grande (máximo 10 MB).";return;}
     try{
       const source=await selected.text();
       const content=source.replace(/^\uFEFF/,"").trimStart();
