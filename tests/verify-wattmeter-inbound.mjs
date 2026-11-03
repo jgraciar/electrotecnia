@@ -67,6 +67,27 @@ try {
   assert.equal(saved.attr[0]?.mask,"7");
   assert.deepEqual(saved.attr,saved.second,"Perdida de preferencias P/Q/S al guardar y abrir");
   console.log("Preferencias locales persistentes tras guardar y abrir",saved.attr);
+  // Las siete selecciones no vacias deben serializarse de forma estable.
+  const modes=await page.evaluate(original=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    const out=[];
+    for(let mask=1;mask<=7;mask++){
+      const xml=original.replace(/(<WattmeterTrue\\b[^>]*\\bmeter="1")\\s*\\/>/,
+        '$1 labCurrentMode="2" labPowerMask="'+mask+'"/>');
+      sim.importCircuit(xml);
+      const saved=sim.exportCircuit();
+      const meter=new DOMParser().parseFromString(saved,"application/xml")
+        .querySelector("WattmeterTrue");
+      out.push({requested:mask,recorded:Number(meter.getAttribute("labPowerMask")||1),
+        mode:meter.getAttribute("labCurrentMode")});
+    }
+    return out;
+  },original);
+  assert.equal(modes.length,7);
+  assert(modes.every(x=>x.requested===x.recorded && x.mode==="2"),
+    "Alguna combinacion P/Q/S se pierde al guardar: "+JSON.stringify(modes));
+  console.log("Combinaciones de potencia verificadas",modes);
+
 } finally {
   await browser.close();
 }
