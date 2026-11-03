@@ -36,6 +36,23 @@ try {
   assert.deepEqual(incoming.modes,["1","1"],"No conservar los modos originales");
   console.log("XML entrante Wulflemm: dos vatimetros y ajustes originales",incoming);
 
+  const parameters=await page.evaluate(xml=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    const signature=text=>{
+      const doc=new DOMParser().parseFromString(text,"application/xml");
+      const attrs={v:["x","f","wf","fr","maxv","phaseShift"],
+        r:["x","f","r"],l:["x","f","l","ic"],
+        c:["x","f","c","iv","sr"],
+        WattmeterTrue:["x","f","w","meter"]};
+      return Array.from(doc.documentElement.children).filter(el=>attrs[el.tagName])
+        .map(el=>({type:el.tagName,
+          values:attrs[el.tagName].map(key=>el.getAttribute(key)??(key==="phaseShift"?"0":""))}));
+    };
+    return {expected:signature(xml),actual:signature(sim.exportCircuit())};
+  },original);
+  assert.deepEqual(parameters.actual,parameters.expected,
+    "Al importar Wulflemm se modifican los parámetros originales de elementos eléctricos");
+
   await page.waitForFunction(()=>{
     const m=window.LabCircuit.getAronReadings();
     return m?.valid && Number.isFinite(m.w1)&&Number.isFinite(m.w2) && m.total>0;
@@ -104,6 +121,14 @@ try {
   },nativeCircuit);
   assert(plain.loaded?.ok && plain.loaded?.simulated,"Importación de archivo TXT Falstad fallida: "+JSON.stringify(plain));
   assert.equal(plain.types.length,5,"Importación TXT Falstad pierde elementos");
+
+  // Verificación de la vía real del usuario (selector de archivos de la web).
+  await page.locator("#wulflemmXmlFile").setInputFiles({
+    name:"falstad-circuit.txt",mimeType:"text/plain",buffer:Buffer.from(nativeCircuit)
+  });
+  await page.waitForFunction(()=>
+    document.querySelector("#wulflemmXmlStatus")?.textContent?.includes("cargado y comprobado"),
+    null,{timeout:12000});
 
   // La cabecera XML opcional y BOM son frecuentes en archivos intercambiados.
   const xmlDeclaration="\uFEFF<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+original;
