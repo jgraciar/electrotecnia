@@ -293,6 +293,23 @@ try {
   assert(editByUi.values.includes("680"),
     "El botón no modificó el componente real: "+JSON.stringify(editByUi));
 
+  const unsafeEdit=await page.evaluate(index=>{
+    const invalidNumber=window.LabCircuit.updateWulflemmAttribute(index,"r","sin-valor-numérico");
+    const ignoredField=window.LabCircuit.updateWulflemmAttribute(index,"atributoInventado","42");
+    const exported=window.LabCircuit.exportWulflemmXml();
+    const doc=exported.ok?new DOMParser().parseFromString(exported.xml,"application/xml"):null;
+    const resistors=doc?Array.from(doc.querySelectorAll("r")).map(el=>el.getAttribute("r")):[];
+    return {invalidNumber,ignoredField,resistors};
+  },edited.resistorIndex);
+  assert.equal(unsafeEdit.invalidNumber?.ok,false,
+    "No se puede aceptar una resistencia no numérica");
+  assert.equal(unsafeEdit.ignoredField?.ok,false,
+    "No se debe anunciar éxito para atributos que CircuitJS ignora");
+  assert(unsafeEdit.resistors.includes("680"),
+    "La edición incorrecta eliminó un ajuste válido: "+JSON.stringify(unsafeEdit));
+  console.log("Ediciones rechazadas sin perder valores eléctricos previos");
+
+
 
 
 } finally {
