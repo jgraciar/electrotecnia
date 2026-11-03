@@ -83,6 +83,18 @@ once('    canViewInScope(): boolean { return true; }',
     }
 
     canViewInScope(): boolean { return true; }`);
+once('        arr[3] = "P = " + CircuitElm.getUnitText(this.getVoltageDiff() * this.getCurrent(), "W");\n        arr[4] = "P = " + CircuitElm.getUnitText(this.getAveragePower(), "W");',
+`        arr[3] = "p(t) = " + CircuitElm.getUnitText(this.getPower(), "W");
+        arr[4] = "P = " + CircuitElm.getUnitText(this.getAveragePower(), "W");
+        const currentType = this.labCurrentMode === 1 ? "dc" : this.labCurrentMode === 2 ? "ac" : "auto";
+        const powers = this.labMeasurement.measure(currentType);
+        if (powers.kind === "ac") {
+            arr[5] = "Q (fundamental) = " +
+                (powers.q === null ? "..." : CircuitElm.getUnitText(powers.q, "var"));
+            arr[6] = "S = " +
+                (powers.s === null ? "..." : CircuitElm.getUnitText(powers.s, "VA"));
+        }`);
+
 once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n            const ei = new EditInfo("Value", this.selectedValue, -1, -1);\n            ei.choice = new Choice();\n            ei.choice.add("Instantaneous Power");\n            ei.choice.add("Average Power");\n            ei.choice.select(this.meter);\n            return ei;\n        }\n        return null;\n    }\n\n    setEditValue(n: number, ei: EditInfo): void {\n        if (n === 0)\n            this.meter = ei.choice!.getSelectedIndex();\n    }',
 `    getEditInfo(n: number): EditInfo | null {
         // Orden solicitado: tipo de corriente, modo P y magnitudes visibles.
