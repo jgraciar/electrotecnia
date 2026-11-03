@@ -172,33 +172,75 @@
   ]);
   // Navegar a una plantilla del catálogo incluido en CircuitJS reinicia
   // la simulación y los datos medidos; no altera otros circuitos guardados.
-  function importModel(filename,dump){
-    // CircuitJS importCircuit recibe un volcado textual, no el XML de wulflemm.
-    // Rechazarlo antes de modificar el circuito actualmente abierto.
-    if(typeof dump!=="string" || !(dump.trimStart().startsWith("$ ") || /^<cir(?:\s|>)/.test(dump.trimStart()))){
-      const xml=typeof dump==="string" && /^<cir(?:\s|>)/.test(dump.trimStart());
-      const reason=xml
-        ? "El archivo XML de wulflemm necesita un importador compatible; no se puede pasar directamente a importCircuit."
-        : "El modelo no tiene el formato de texto de CircuitJS (cabecera $).";
-      message(reason);
-      return {ok:false,message:reason};
+  // Reconoce los archivos originales sin confundir XML con texto CircuitJS.
+  // Tras importar, comprueba el inventario de elementos: el deserializador
+  // XML upstream puede ignorar etiquetas desconocidas sin lanzar un error.
+  function inspectCircuitFile(raw){
+    if(typeof raw!=="string")throw Error("El archivo no contiene texto CircuitJS.");
+    const dump=raw.replace(/^\uFEFF/,"").trimStart();
+    const xmlHeader=dump.replace(/^<\?xml\s+[^>]*\?>\s*/i,"");
+    if(/^<cir(?:\s|>)/.test(xmlHeader)){
+      const doc=new DOMParser().parseFromString(dump,"application/xml");
+      if(doc.querySelector("parsererror")||doc.documentElement?.tagName!=="cir")
+        throw Error("El archivo XML está mal formado o no es CircuitJS.");
+      const n=Array.from(doc.documentElement.children).filter(el=>{
+        const coords=el.getAttribute("x");
+        return coords!=null && /^-?\d+(?:\s+-?\d+){3}$/.test(coords.trim());
+      }).length;
+      return {dump,format:"circuitjs-xml",elements:n};
+    }
+    if(/^\$\s+/.test(dump)){
+      let count=0;
+      for(const line of dump.split(/\r?\n|\r/)){
+        const fields=line.trim().split(/\s+/);
+        if(fields.length>=6 && /^-?\d+$/.test(fields[1]) &&
+           /^-?\d+$/.test(fields[2]) && /^-?\d+$/.test(fields[3]) &&
+           /^-?\d+$/.test(fields[4]) && /^-?\d+$/.test(fields[5]) &&
+           !["o","h","$","!","%","?","B","."].includes(fields[0])) count++;
+      }
+      return {dump,format:"circuitjs-text",elements:count};
+    }
+    throw Error("Formato no reconocido. Se admiten XML de CircuitJS/Wulflemm y archivos TXT de Falstad con cabecera $.");
+  }
+  function importModel(filename,raw){
+    let info;
+    try{info=inspectCircuitFile(raw);}
+    catch(error){
+      message(error.message);
+      return {ok:false,message:error.message};
     }
     if(!sim){
-      pendingModel={filename,dump};
-      message("CircuitJS está inicializando; el modelo se cargará automáticamente.");
-      return {ok:true};
+      pendingModel={filename,dump:info.dump};
+      message("CircuitJS está inicializando; el archivo se cargará al terminar.");
+      return {ok:true,pending:true,simulated:false,format:info.format};
     }
+    if(typeof sim.exportCircuit!=="function" || typeof sim.getElements!=="function")
+      return {ok:false,message:"El motor integrado no permite verificar la importación."};
+    let backup;
+    const previousExample=selectedExample;
+    try{backup=sim.exportCircuit();}
+    catch(error){return {ok:false,message:"No se puede proteger el circuito anterior: "+error.message};}
     try{
+      sim.importCircuit(info.dump,false);
+      const actual=Array.from(sim.getElements()||[]).length;
+      if(actual!==info.elements)
+        throw Error("Circuito incompleto: se esperaban "+info.elements+
+          " elementos y CircuitJS solo ha reconocido "+actual+
+          ". Puede contener componentes no admitidos por esta versión.");
       clear();
       selectedExample=filename;
-      sim.importCircuit(dump,false);
       updateSelection();
-      message("Modelo equivalente cargado: "+filename+". Puedes editar sus elementos y medir las señales simuladas.");
+      message("Circuito importado: "+filename+". "+actual+" elementos reconocidos.");
       document.dispatchEvent(new CustomEvent("lab:circuit-ready",{detail:{example:filename}}));
-      return {ok:true};
+      return {ok:true,format:info.format,simulated:true,elements:actual};
     }catch(error){
-      message("No se pudo cargar el modelo: "+error.message);
-      return {ok:false,message:"Error en importación CircuitJS: "+error.message};
+      let restored=false;
+      try{sim.importCircuit(backup,false);selectedExample=previousExample;updateSelection();restored=true;}
+      catch(recovery){message("Error al restaurar el circuito previo: "+recovery.message);}
+      const warning="No se ha podido abrir el circuito completo: "+error.message+
+        (restored?" Se ha restaurado el circuito anterior.":"");
+      message(warning);
+      return {ok:false,message:warning};
     }
   }
   function loadExample(filename){
@@ -287,14 +329,13 @@
     try{
       const nodes=window.WulflemmXml.parse(xml);
       const meters=nodes.filter(n=>n.name==="WattmeterTrue");
-      wulflemmDocument={xml,nodes};
-      // El motor CircuitJS actual admite XML con raíz <cir> mediante importCircuit.
-      // Conservar el original permite comprobar por separado el intercambio sin pérdida.
+      // El motor debe reconocer todos los componentes del documento externo.
+      // No se comunica éxito si ha descartado etiquetas que no conoce.
       const loaded=importModel("Wulflemm-XML",xml);
-      return {ok:loaded.ok,format:"wulflemm-xml",elements:nodes.length-1,wattmeters:meters.length,
-        simulated:loaded.ok,message:loaded.ok
-          ?"XML cargado en el motor CircuitJS; verificar equivalencia eléctrica por componentes."
-          :loaded.message};
+      if(!loaded.ok)return loaded;
+      wulflemmDocument={xml,nodes};
+      return {...loaded,format:"wulflemm-xml",wattmeters:meters.length,
+        message:loaded.pending?"Archivo recibido; esperando al motor CircuitJS.":"Archivo XML importado y componentes comprobados."};
     }catch(error){return {ok:false,message:error.message};}
   }
   function getWulflemmComponents(){
