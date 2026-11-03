@@ -39,6 +39,7 @@ jobs:
           node laboratorio/tests/wulflemm-xml-diagnostics.test.js
           node laboratorio/tests/aron-power.test.js
           node laboratorio/tests/wulflemm-xml-roundtrip.test.js
+          node laboratorio/tests/bridge-import-inspection.test.js
           node --experimental-strip-types laboratorio/tests/lab-power-measurement.test.mjs
 
       - name: Obtener código oficial de CircuitJS
