@@ -9,6 +9,7 @@ on:
       - scripts/embed-default-aron.mjs
       - tests/lab-power-measurement.test.mjs
       - tests/bridge-import-inspection.test.js
+      - tests/wulflemm-ui-deferred.test.js
       - tests/verify-wattmeter-inbound.mjs
       - wulflemm-ui.js
       - index.html
@@ -42,6 +43,7 @@ jobs:
           node --experimental-strip-types laboratorio/tests/lab-power-measurement.test.mjs
           node laboratorio/tests/wulflemm-xml-roundtrip.test.js
           node laboratorio/tests/bridge-import-inspection.test.js
+          node laboratorio/tests/wulflemm-ui-deferred.test.js
 
       - name: Obtener motor CircuitJS
         uses: actions/checkout@v4
