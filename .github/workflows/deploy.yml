@@ -70,6 +70,12 @@ jobs:
           npm ci
           npm run build
 
+      - name: Confirmar vatímetro ampliado en el JavaScript compilado
+        working-directory: circuitjs-src/ts
+        run: |
+          grep -R -l --include='*.js' 'Tipo de corriente' dist >/dev/null || { echo '::error::El vatímetro ampliado no está en la compilación'; exit 1; }
+          grep -R -l --include='*.js' 'Potencia reactiva Q (var)' dist >/dev/null || { echo '::error::Falta la magnitud Q en el motor compilado'; exit 1; }
+
       - name: Preparar sitio estático de GitHub Pages
         run: |
           mkdir -p public/circuitjs
@@ -93,6 +99,18 @@ jobs:
           test -f public/networks-solar-practices.js
           test -f public/circuitjs/circuitjs.html
           test -f public/circuitjs/index.html || test -f public/circuitjs/circuitjs.html
+
+      - name: Instalar navegador para prueba eléctrica real
+        working-directory: laboratorio/tests
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Abrir CircuitJS, medir Aron e importar Wulflemm y Falstad
+        run: |
+          python3 -m http.server 8765 --directory public >/tmp/lab-http.log 2>&1 &
+          sleep 2
+          node laboratorio/tests/verify-wattmeter-inbound.mjs
 
       - name: Configurar Pages
         uses: actions/configure-pages@v5
