@@ -8,7 +8,10 @@ on:
       - scripts/LabPowerMeasurement.ts
       - scripts/embed-default-aron.mjs
       - tests/lab-power-measurement.test.mjs
+      - tests/bridge-import-inspection.test.js
       - tests/verify-wattmeter-inbound.mjs
+      - wulflemm-ui.js
+      - index.html
       - tests/fixtures/wulflemm-aron.xml
       - bridge.js
       - wulflemm-xml.js
