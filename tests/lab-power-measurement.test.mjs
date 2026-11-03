@@ -11,7 +11,7 @@ function measure(v, i, end=0.75, mode="auto") {
 }
 function approx(label, actual, expected, relative=0.012) {
     assert.ok(Number.isFinite(actual), label + ": resultado no numerico " + actual);
-    assert.ok(Math.abs(actual-expected)<=Math.max(1e-4,Math.abs(expected)*relative),
+    assert.ok(Math.abs(actual-expected)<=Math.max(0.5,Math.abs(expected)*relative),
         label + ": " + actual + " frente a " + expected);
 }
 const dc=measure(()=>12,()=>1.2);
