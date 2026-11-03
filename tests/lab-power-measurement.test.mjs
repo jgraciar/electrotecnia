@@ -53,6 +53,7 @@ const restarted=new LabPowerMeasurement();
 restarted.add(1,12,1.2);
 restarted.add(1.001,12,1.2);
 restarted.add(0,3,2);
+restarted.add(.05,3,2);
 restarted.add(.1,3,2);
 assert.equal(restarted.measure().kind,"dc","Debe reiniciarse el historial al retroceder el tiempo");
 approx("P tras reinicio",restarted.measure().p,6);
