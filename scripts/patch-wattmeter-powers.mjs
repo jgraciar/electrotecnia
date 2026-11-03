@@ -115,8 +115,11 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
         if (n === 1) this.meter = ei.choice!.getSelectedIndex();
         if (n >= 2 && n <= 4) {
             const bit = 1 << (n-2);
-            if (ei.checkbox!.getState()) this.labPowerMask |= bit;
-            else this.labPowerMask &= ~bit;
+            const mask = ei.checkbox!.getState()
+                ? this.labPowerMask | bit : this.labPowerMask & ~bit;
+            // No admitir un medidor sin ninguna magnitud seleccionada.
+            if (mask) this.labPowerMask = mask;
+            else ei.checkbox!.setState(true);
         }
     }`);
 writeFileSync(source,code);
