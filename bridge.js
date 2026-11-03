@@ -258,6 +258,7 @@
       const warning="No se ha podido abrir el circuito completo: "+error.message+
         (restored?" Se ha restaurado el circuito anterior.":"");
       lastImportDiagnostic={ok:false,filename,format:info.format,message:warning,restored};
+      document.dispatchEvent(new CustomEvent("lab:circuit-import-error",{detail:{example:filename,message:warning}}));
       message(warning);
       return {ok:false,message:warning};
     }
