@@ -8,7 +8,10 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(){
   const escape=s=>String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   function parse(xml){
-    if(typeof xml!=="string" || !/^<cir(?:\s|>)/.test(xml.trim()))throw Error("No es un circuito XML wulflemm");
+    if(typeof xml!=="string")throw Error("No es un circuito XML wulflemm");
+    // También se admiten los archivos XML con declaración <?xml ...?> y BOM.
+    xml=xml.trim().replace(/^<\?xml\s+[^>]*\?>\s*/i,"");
+    if(!/^<cir(?:\s|>)/.test(xml))throw Error("No es un circuito XML wulflemm");
     const stack=[],nodes=[];
     const token=/<\/?[A-Za-z][\w-]*(?:\s+[^<>]*?)?\s*\/?>/g;
     let m;
