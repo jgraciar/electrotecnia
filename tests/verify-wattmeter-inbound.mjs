@@ -64,6 +64,25 @@ try {
   },null,{timeout:90000});
   console.log("Aron con el motor real",await page.evaluate(()=>window.LabCircuit.getAronReadings()));
 
+  // Comprobar que el motor real ofrece P, Q y S en la ficha del vatímetro,
+  // además de conservar las máscaras de visualización en el XML.
+  const instrumentInfo=await page.evaluate(()=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(sim.getElements()).filter(e=>e.getType()==="WattmeterTrueElm")
+      .map(e=>e.getInfo());
+  });
+  assert.equal(instrumentInfo.length,2,"Deben existir los dos vatímetros físicos de Aron");
+  for(const info of instrumentInfo){
+    assert(info.some(line=>/^P = /.test(line)),
+      "El instrumento no muestra P promedio: "+JSON.stringify(info));
+    assert(info.some(line=>/^Q \(fundamental\) = /.test(line)),
+      "El instrumento no muestra Q fundamental: "+JSON.stringify(info));
+    assert(info.some(line=>/^S = /.test(line)),
+      "El instrumento no muestra S aparente: "+JSON.stringify(info));
+  }
+  console.log("Pantalla de magnitudes P/Q/S disponible para ambos vatímetros");
+
+
   // Opciones propias: se deben guardar y reabrir en el laboratorio,
   // sin que sea necesario exportarlas a Wulflemm.
   const extended=original.replace(/(<WattmeterTrue\b[^>]*\bmeter="1")\s*\/>/,
