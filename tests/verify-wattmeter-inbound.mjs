@@ -35,6 +35,11 @@ try {
   assert.equal(incoming.withExtra,false,"No introducir preferencias nuevas por defecto en XML Wulflemm");
   assert.deepEqual(incoming.modes,["1","1"],"No conservar los modos originales");
   console.log("XML entrante Wulflemm: dos vatimetros y ajustes originales",incoming);
+  const diagnostics=await page.evaluate(()=>window.LabCircuit.getCompatibilityDiagnostics());
+  assert(diagnostics.ready && diagnostics.wattmeterTruePresent);
+  assert.equal(diagnostics.xmlImportVerified,true,"Importación XML no confirmada por el puente");
+  assert.equal(diagnostics.lastImport?.expected,27,"Inventario Wulflemm inesperado");
+  assert.equal(diagnostics.lastImport?.recognized,27,"El motor perdió elementos");
 
   const parameters=await page.evaluate(xml=>{
     const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
@@ -121,6 +126,9 @@ try {
   },nativeCircuit);
   assert(plain.loaded?.ok && plain.loaded?.simulated,"Importación de archivo TXT Falstad fallida: "+JSON.stringify(plain));
   assert.equal(plain.types.length,5,"Importación TXT Falstad pierde elementos");
+  const textDiagnostics=await page.evaluate(()=>window.LabCircuit.getCompatibilityDiagnostics());
+  assert(textDiagnostics.lastImport?.ok && textDiagnostics.lastImport.format==="circuitjs-text",
+    "El diagnóstico no reconoce correctamente el formato de Falstad");
 
   // Verificación de la vía real del usuario (selector de archivos de la web).
   await page.locator("#wulflemmXmlFile").setInputFiles({
