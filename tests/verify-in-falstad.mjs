@@ -39,15 +39,15 @@ try {
     const exported=sim.exportCircuit();
     return {imported,count:meters.length,
       settings:(exported.match(/<WattmeterTrue\b[^>]*>/g)||[]).map(tag=>({
-        current:/labCurrentMode="0"/.test(tag),power:/labPowerMask="1"/.test(tag)
+        original:!/labCurrentMode=|labPowerMask=/.test(tag)
       }))};
   });
   assert(inbound.imported?.ok && inbound.imported.simulated,
     "No se ha podido abrir el XML original de Wulflemm: "+JSON.stringify(inbound));
   assert.equal(inbound.count,2,"Importacion de Wulflemm pierde vatimetros");
   assert.equal(inbound.settings.length,2,"No se exportan los dos vatimetros");
-  assert(inbound.settings.every(x=>x.current && x.power),
-    "XML Wulflemm sin opciones locales debe iniciar automatico/P: "+JSON.stringify(inbound));
+  assert(inbound.settings.every(x=>x.original),
+    "El XML de Wulflemm debe mantenerse sin atributos locales al importar y exportar: "+JSON.stringify(inbound));
   console.log("IMPORTACION ENTRANTE WULFLEMM",JSON.stringify(inbound));
 
   for(const [unit,number] of [[2,1],[2,2],[3,3],[3,5],[3,6],[4,4],[4,5],[4,6]]){
