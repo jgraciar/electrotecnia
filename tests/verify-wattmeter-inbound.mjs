@@ -242,6 +242,48 @@ try {
     measured:measuredAron.total,expected:expectedAron,relativeError
   });
 
+  // Modificar una resistencia desde la interfaz y comprobar el efecto sobre
+  // el XML real exportado. Antes solo se alteraba una copia del archivo.
+  const edited=await page.evaluate(()=>{
+    const source=window.LabCircuit.getWulflemmComponents();
+    const resistor=source.find(e=>e.name==="r");
+    if(!resistor)return {error:"No se encontró resistencia"};
+    const modified=window.LabCircuit.updateWulflemmAttribute(resistor.index,"r","470");
+    const output=window.LabCircuit.exportWulflemmXml();
+    const doc=output.ok?new DOMParser().parseFromString(output.xml,"application/xml"):null;
+    const actual=doc && Array.from(doc.querySelectorAll("r"))
+      .find(el=>el.getAttribute("x")===resistor.attrs.x)?.getAttribute("r");
+    const scopeCount=doc?.querySelectorAll("o").length ?? 0;
+    const wattCount=doc?.querySelectorAll("WattmeterTrue").length ?? 0;
+    const componentCount=Array.from(document.querySelector("#circuit-frame").contentWindow.CircuitJS1.getElements()).length;
+    return {modified,output:output.ok,actual,scopeCount,wattCount,componentCount,resistorIndex:resistor.index};
+  });
+  assert(edited.modified?.ok && edited.modified?.simulated && edited.output,
+    "No se aplicó el cambio XML al motor: "+JSON.stringify(edited));
+  assert.equal(edited.actual,"470","La resistencia modificada no quedó en el XML real");
+  assert.equal(edited.componentCount,27,"La edición eléctrica perdió componentes");
+  assert.equal(edited.wattCount,2,"La edición perdió vatímetros");
+  assert.equal(edited.scopeCount,3,"La edición perdió los osciloscopios");
+  console.log("Edición eléctrica real de resistencia: 1000 Ω -> 470 Ω, 27 elementos y tres osciloscopios");
+
+  // La vía del botón «Modificar XML» debe actualizar también la simulación.
+  await page.locator("#wulflemmComponent").selectOption(String(edited.resistorIndex));
+  await page.locator("#wulflemmAttribute").fill("r");
+  await page.locator("#wulflemmValue").fill("680");
+  await page.locator("#wulflemmApply").click();
+  const editByUi=await page.evaluate(()=>{
+    const status=document.querySelector("#wulflemmXmlStatus").textContent;
+    const saved=window.LabCircuit.exportWulflemmXml();
+    const values=saved.ok?Array.from(new DOMParser().parseFromString(saved.xml,"application/xml")
+      .querySelectorAll("r")).map(el=>el.getAttribute("r")):[];
+    return {status,values};
+  });
+  assert.match(editByUi.status,/aplicado al circuito en funcionamiento/,
+    "El botón no confirmó la edición eléctrica");
+  assert(editByUi.values.includes("680"),
+    "El botón no modificó el componente real: "+JSON.stringify(editByUi));
+
+
 
 } finally {
   await browser.close();
