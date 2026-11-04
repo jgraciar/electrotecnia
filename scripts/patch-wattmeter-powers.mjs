@@ -192,14 +192,39 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
             const ei = new EditInfo("Lectura de potencia activa", this.selectedValue, -1, -1);
             ei.choice = new Choice();
             ei.choice.add("Instantanea p(t)");
+            ei.choice.add("Pico pmax");
+            ei.choice.add("Eficaz pRMS");
             ei.choice.add("Activa media P");
-            ei.choice.select(this.meter);
+            ei.choice.select(this.labPowerReadMode);
             return ei;
         }
         if (n === 2) return EditInfo.createCheckbox("Potencia activa (W)", !!(this.labPowerMask & 1));
         // Casillas Q y S siempre seleccionables; en CC muestran 0 al marcarse.
         if (n === 3) return EditInfo.createCheckbox("Potencia reactiva Q (var) - fundamental", !!(this.labPowerMask & 2));
         if (n === 4) return EditInfo.createCheckbox("Potencia aparente S (VA)", !!(this.labPowerMask & 4));
+        if (n === 5) return EditInfo.createCheckbox("Mostrar tensión en el vatímetro", this.labShowVoltage);
+        if (n === 6 || n === 8) {
+            const ei = new EditInfo(n === 6 ? "Lectura de tensión U" : "Lectura de intensidad I", 0, -1, -1);
+            ei.choice = new Choice();
+            ei.choice.add("Instantanea");
+            ei.choice.add("Pico absoluto");
+            ei.choice.add("Eficaz RMS");
+            ei.choice.add("Media");
+            ei.choice.select(n === 6 ? this.labVoltageReadMode : this.labCurrentReadMode);
+            return ei;
+        }
+        if (n === 7) return EditInfo.createCheckbox("Mostrar intensidad en el vatímetro", this.labShowCurrent);
+        if (n === 9) {
+            const ei = new EditInfo("Ventana de cálculo de U, I y p(t)", 0, -1, -1);
+            ei.choice = new Choice();
+            ei.choice.add("1 periodo detectado");
+            ei.choice.add("3 periodos detectados");
+            ei.choice.add("100 ms");
+            ei.choice.add("250 ms");
+            ei.choice.add("500 ms");
+            ei.choice.select(this.labWindowMode);
+            return ei;
+        }
         return null;
     }
 
@@ -216,7 +241,16 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
             }
             this.labCurrentMode = mode;
         }
-        if (n === 1) this.meter = ei.choice!.getSelectedIndex();
+        if (n === 1) {
+            this.labPowerReadMode = ei.choice!.getSelectedIndex();
+            // El atributo meter clásico solo conoce instante (0) y media (1).
+            this.meter = this.labPowerReadMode === 0 ? this.PM_INST : this.PM_AVG;
+        }
+        if (n === 5) this.labShowVoltage = ei.checkbox!.getState();
+        if (n === 6) this.labVoltageReadMode = ei.choice!.getSelectedIndex();
+        if (n === 7) this.labShowCurrent = ei.checkbox!.getState();
+        if (n === 8) this.labCurrentReadMode = ei.choice!.getSelectedIndex();
+        if (n === 9) this.labWindowMode = ei.choice!.getSelectedIndex();
         if (n >= 2 && n <= 4) {
             if (this.labSwitchingToDC && n >= 3) {
                 if (n === 4) this.labSwitchingToDC = false;
