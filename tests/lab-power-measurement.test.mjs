@@ -131,3 +131,27 @@ approx("Pico algebraico negativo",powerOut.peak.p,-14.4);
 console.log("OK: lectura instantánea, pico, RMS y media de U/I/p; ventana y signos");
 
 console.log("OK: cos φ fundamental y f.d.p. P/S en CA sinusoidal, armónica, inversa y CC");
+
+
+// Pruebas espectrales con valores analíticos independientes.
+const harmonic=measure(t=>230*sin(t),
+ t=>10*sin(t,-Math.acos(.8))+3*Math.SQRT2*Math.sin(5*omega*t)+Math.SQRT2*Math.sin(7*omega*t));
+assert.equal(harmonic.kind,"ac");
+approx("THD U ideal",harmonic.thdVoltage,0,.001);
+assert(Math.abs(harmonic.thdCurrent-Math.sqrt(10)/10)<.008,
+ "THD I: 5.º de 3 A y 7.º de 1 A frente a 10 A fundamentales");
+approx("P con armonicos solo de corriente",harmonic.p,1840,.015);
+approx("Q1 con armonicos solo de corriente",harmonic.q,1380,.015);
+approx("S con armonicos solo de corriente",harmonic.s,230*Math.sqrt(110),.015);
+approx("D* residual",harmonic.distortionResidual,230*Math.sqrt(10),.025);
+assert(Math.abs(harmonic.powerFactor-.8*10/Math.sqrt(110))<.015);
+const voltageHarmonics=measure(t=>230*sin(t)+23*Math.SQRT2*Math.sin(5*omega*t),
+ t=>10*sin(t));
+assert.equal(voltageHarmonics.kind,"ac");
+assert(Math.abs(voltageHarmonics.thdVoltage-.1)<.008,"THD U 5.º al 10 %");
+assert(Math.abs(voltageHarmonics.thdCurrent)<.008,"THD I sinusoidal");
+const bothHarmonics=measure(t=>230*sin(t)+23*Math.SQRT2*Math.sin(5*omega*t),
+ t=>10*sin(t)+2*Math.SQRT2*Math.sin(5*omega*t));
+approx("P armonica adicional",bothHarmonics.p,2300+46,.015);
+approx("P solo armonicos",bothHarmonics.harmonicPower,46,.04);
+console.log("OK: THD U/I, potencia armonica y D* frente a referencias analiticas");
