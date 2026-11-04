@@ -429,8 +429,14 @@ try {
 
   // Repetir comprobación del circuito incrustado en un móvil, donde antes
   // se veía solo la potencia activa por falta de espacio para el dibujo.
+  // La vista principal ya no participa en la prueba; cerrarla evita que dos
+  // simulaciones sigan consumiendo CPU y que la pestaña móvil quede en segundo plano.
+  await page.close();
   const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,deviceScaleFactor:2});
+  mobile.on("pageerror",e=>console.error("Error JS móvil:",e.message));
+  mobile.on("console",m=>{if(m.type()==="error")console.error("Consola móvil:",m.text());});
   try {
+    await mobile.bringToFront();
     await mobile.addInitScript(recordPaint);
     await mobile.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
     await mobile.locator('button[data-mode="falstad"]').click();
@@ -447,7 +453,11 @@ try {
       return {viewport:window.innerWidth,frameWidth:frame?.clientWidth,
         scrollWidth:scroll?.scrollWidth,clientWidth:scroll?.clientWidth,
         loaded:!!api,masks:tags.map(x=>x.getAttribute("labPowerMask")),
-        startup:frame?.getAttribute("loading")};
+        startup:frame?.getAttribute("loading"),src:frame?.getAttribute("src"),
+        frameReady:frame?.contentDocument?.readyState,
+        frameTitle:frame?.contentDocument?.title,
+        frameBody:frame?.contentDocument?.body?.textContent?.slice(0,100),
+        scripts:frame?.contentDocument?.querySelectorAll("script").length};
     });
     console.log("Diagnóstico de CircuitJS incrustado en móvil",mobileDiagnostic);
     await mobile.waitForFunction(()=>{
