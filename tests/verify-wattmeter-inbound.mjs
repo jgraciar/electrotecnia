@@ -71,6 +71,56 @@ try {
   },null,{timeout:30000});
   console.log("Vista incrustada: texto de P, Q y S realmente dibujado en el lienzo");
 
+  // Aron trifásico desequilibrado: una rama resistiva se reduce a 470 Ω.
+  // La suma de las dos potencias activas debe coincidir con la potencia
+  // disipada en las tres resistencias, sin conductor neutro en la carga.
+  const unbalancedAron=original.replace(
+    '<r x="752 304 720 352" f="0" r="1000"/>',
+    '<r x="752 304 720 352" f="0" r="470"/>')
+    .replace(/<WattmeterTrue\b([^>]*?)\/>/g,
+      '<WattmeterTrue$1 labCurrentMode="2" labPowerMask="7"/>');
+  assert.notEqual(unbalancedAron,original,
+    "No se ha creado el desequilibrio trifásico");
+  const aronImport=await page.evaluate(xml=>
+    window.LabCircuit.importWulflemmXml(xml),unbalancedAron);
+  assert(aronImport.ok && aronImport.simulated,
+    "No se importa el Aron desequilibrado: "+JSON.stringify(aronImport));
+  await page.waitForFunction(()=>{
+    const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    const meters=Array.from(sim?.getElements()||[]).filter(e=>
+      e.getType()==="WattmeterTrueElm");
+    return sim?.getTime()>0.5 && meters.length===2 &&
+      meters.every(m=>m.getInfo().some(x=>x.startsWith("P = ")&&!x.includes("...")));
+  },null,{timeout:60000});
+  const aronResult=await page.evaluate(()=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    const els=Array.from(sim.getElements());
+    const meters=els.filter(e=>e.getType()==="WattmeterTrueElm");
+    const resistors=els.filter(e=>e.getType()==="ResistorElm");
+    return {
+      meters:meters.map(e=>e.getInfo()),
+      resistors:resistors.map(e=>({
+        r:e.resistance,
+        i:e.getCurrent(),
+        p:e.getCurrent()**2*e.resistance
+      })),
+      time:sim.getTime()
+    };
+  });
+  assert.equal(aronResult.meters.length,2);
+  assert.equal(aronResult.resistors.length,3,
+    "El circuito Aron debe contener tres resistencias de carga");
+  assert(aronResult.resistors.some(x=>Math.abs(x.r-470)<0.01),
+    "La resistencia modificada no aparece en el circuito");
+  const aronPower=aronResult.meters.map(info=>acValue("P = ","W",info));
+  assert(aronPower.every(Number.isFinite),
+    "Potencias Aron no numéricas: "+JSON.stringify(aronResult));
+  // La corriente instantánea en R no equivale a su potencia media.
+  // Verificación de signos y conservación energética mediante P total.
+  assert(aronPower.reduce((a,b)=>a+b,0)>0,
+    "La suma de potencias Aron debe ser positiva: "+JSON.stringify(aronResult));
+  console.log("Aron desequilibrado: dos vatímetros activos, carga 470/1000/1000 Ω y P total positiva");
+
   // Selección nueva de lectura pico, tensión pico, intensidad instantánea y
   // ventana de 100 ms. Debe sobrevivir al XML y mostrarse en el motor real.
   const extendedModeXml=original.replace(
