@@ -108,7 +108,6 @@ once('    canViewInScope(): boolean { return true; }',
         const electrical = this.labMeasurement.measure(type);
         const temporal = this.labMeasurement.getWindowReadings(
             this.getLabWindowSeconds(electrical.period));
-        const labels = ["instantanea", "pico", "RMS", "media"];
         const values = temporal ? [temporal.instantaneous,temporal.peak,
             temporal.rms,temporal.mean] : null;
         const choice = this.labPowerReadMode;
@@ -148,15 +147,34 @@ once('        arr[3] = "P = " + CircuitElm.getUnitText(this.getVoltageDiff() * t
         arr[4] = "P = " + CircuitElm.getUnitText(this.getAveragePower(), "W");
         const currentType = this.labCurrentMode === 1 ? "dc" : this.labCurrentMode === 2 ? "ac" : "auto";
         const powers = this.labMeasurement.measure(currentType);
-        if (powers.kind === "dc" || (powers.kind === "pending" && currentType !== "ac")) {
-            if (this.labPowerMask & 2) arr[5] = "Q (fundamental) = 0 var";
-            if (this.labPowerMask & 4) arr[6] = "S = 0 VA";
-        } else if (powers.kind === "ac") {
-            if (this.labPowerMask & 2) arr[5] = "Q (fundamental) = " +
-                (powers.q === null ? "..." : CircuitElm.getUnitText(powers.q, "var"));
-            if (this.labPowerMask & 4) arr[6] = "S = " +
-                (powers.s === null ? "..." : CircuitElm.getUnitText(powers.s, "VA"));
-        }`);
+        const temporal = this.labMeasurement.getWindowReadings(this.getLabWindowSeconds(powers.period));
+        const choices = temporal ? [temporal.instantaneous,temporal.peak,
+            temporal.rms,temporal.mean] : null;
+        const fmt = (value: number | null, unit: string) =>
+            value === null ? "..." : CircuitElm.getUnitText(value,unit);
+        let line = 5;
+        if (this.labPowerMask & 2) {
+            const q = powers.kind === "dc" || (powers.kind === "pending" && currentType !== "ac")
+                ? "0 var" : fmt(powers.q,"var");
+            arr[line++] = "Q (fundamental) = " + q;
+        }
+        if (this.labPowerMask & 4) {
+            const s = powers.kind === "dc" || (powers.kind === "pending" && currentType !== "ac")
+                ? "0 VA" : fmt(powers.s,"VA");
+            arr[line++] = "S = " + s;
+        }
+        const active = this.labPowerReadMode === 0 ? this.getPower() :
+            choices ? choices[this.labPowerReadMode].p : null;
+        arr[line++] = "Lectura P [" + ["instantánea","pico","RMS","media"][this.labPowerReadMode] +
+            "] = " + fmt(active,"W");
+        // U e I siempre se consultan en las propiedades, y opcionalmente
+        // también se pintan en el cuerpo del vatímetro.
+        const voltage = choices ? choices[this.labVoltageReadMode].v : null;
+        const current = choices ? choices[this.labCurrentReadMode].i : null;
+        arr[line++] = "U [" + ["instantánea","pico","RMS","media"][this.labVoltageReadMode] +
+            "] = " + fmt(voltage,"V");
+        arr[line++] = "I [" + ["instantánea","pico","RMS","media"][this.labCurrentReadMode] +
+            "] = " + fmt(current,"A");`);
 
 once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n            const ei = new EditInfo("Value", this.selectedValue, -1, -1);\n            ei.choice = new Choice();\n            ei.choice.add("Instantaneous Power");\n            ei.choice.add("Average Power");\n            ei.choice.select(this.meter);\n            return ei;\n        }\n        return null;\n    }\n\n    setEditValue(n: number, ei: EditInfo): void {\n        if (n === 0)\n            this.meter = ei.choice!.getSelectedIndex();\n    }',
 `    getEditInfo(n: number): EditInfo | null {
