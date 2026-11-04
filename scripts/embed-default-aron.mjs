@@ -44,7 +44,7 @@ writeFileSync(uiSource,ui);
 // La API opcional de Dropbox se descargaba de forma síncrona antes del motor.
 // En móviles o redes donde el recurso externo no responde bloqueaba la carga
 // del CircuitJS incrustado. "async" mantiene Dropbox sin bloquear el HTML.
-const htmlSource=source.replace(/CirSim\\.ts$/, 'circuitjs.html');
+const htmlSource=source.replace(/CirSim\.ts$/, 'circuitjs.html');
 if(htmlSource===source)throw Error('No se encuentra circuitjs.html');
 let html=readFileSync(htmlSource,'utf8');
 const dropbox='<script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js"';
