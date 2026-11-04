@@ -155,3 +155,20 @@ const bothHarmonics=measure(t=>230*sin(t)+23*Math.SQRT2*Math.sin(5*omega*t),
 approx("P armonica adicional",bothHarmonics.p,2300+46,.015);
 approx("P solo armonicos",bothHarmonics.harmonicPower,46,.04);
 console.log("OK: THD U/I, potencia armonica y D* frente a referencias analiticas");
+
+
+// Regresión: una carga rectificadora puede tener varios máximos y cruces
+// en la corriente; la frecuencia fundamental debe seguir siendo 50 Hz.
+const rectifierLike=measure(t=>230*sin(t),
+ t=>10*sin(t)+8*Math.SQRT2*Math.sin(3*omega*t)+5*Math.SQRT2*Math.sin(5*omega*t));
+assert.equal(rectifierLike.kind,"ac");
+assert(Math.abs(rectifierLike.period-.02)<.001,
+ "La corriente deformada no debe cambiar el periodo de la fuente de 50 Hz");
+assert(Math.abs(rectifierLike.thdCurrent-Math.hypot(8,5)/10)<.02,
+ "El THD de la corriente deformada debe incluir el 3.º y el 5.º");
+const waveformVoltage=measure(t=>230*sin(t)+70*Math.SQRT2*Math.sin(5*omega*t),
+ t=>10*sin(t));
+assert.equal(waveformVoltage.kind,"ac");
+assert(Math.abs(waveformVoltage.period-.02)<.001,
+ "Una tensión con 5.º armónico no debe confundirse con 250 Hz");
+console.log("OK: periodo de red frente a formas de onda muy deformadas");
