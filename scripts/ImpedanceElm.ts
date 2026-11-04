@@ -19,7 +19,8 @@ import { Font } from "./Font";
 import { Graphics } from "./Graphics";
 import { Point } from "./Point";
 import { StringTokenizer } from "./StringTokenizer";
-import { RLCValues, atFrequency, fromPolar, fromRectangular, validateFrequency, validateRLC } from "./LabImpedance";
+import type { RLCValues } from "./LabImpedance";
+import { atFrequency, fromPolar, fromRectangular, validateFrequency, validateRLC } from "./LabImpedance";
 
 export class ImpedanceElm extends CompositeElm {
     // 0 polar, 1 rectangular, 2 R/L/C; todos referidos a CA.
