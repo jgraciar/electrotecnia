@@ -137,7 +137,8 @@ export class ImpedanceElm extends CompositeElm {
         g.restore();
         // La corriente se calcula en el RLC interno; sincronizar la animación
         // del elemento exterior y dibujarla también dentro del símbolo Z.
-        this.updateDotCount(this.getCurrent());
+        this.current = this.getCurrent();
+        this.updateDotCount();
         this.drawDots(g,this.point1,this.point2,this.curcount);
         this.drawPosts(g);
         if(this.showValues()) {
