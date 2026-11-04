@@ -192,7 +192,15 @@ once('        arr[3] = "P = " + CircuitElm.getUnitText(this.getVoltageDiff() * t
         arr[line++] = "U [" + ["instantánea","pico","RMS","media"][this.labVoltageReadMode] +
             "] = " + fmt(voltage,"V");
         arr[line++] = "I [" + ["instantánea","pico","RMS","media"][this.labCurrentReadMode] +
-            "] = " + fmt(current,"A");`);
+            "] = " + fmt(current,"A");
+        const fraction = (n: number | null) =>
+            n === null ? "..." : CircuitElm.showFormat.format(n);
+        if (this.labShowCosPhi)
+            arr[line++] = "cos φ (fundamental) = " +
+                (powers.kind === "dc" ? "—" : fraction(powers.cosPhi));
+        if (this.labShowPowerFactor)
+            arr[line++] = "f.d.p. real (P/S) = " +
+                (powers.kind === "dc" ? "—" : fraction(powers.powerFactor));`);
 
 once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n            const ei = new EditInfo("Value", this.selectedValue, -1, -1);\n            ei.choice = new Choice();\n            ei.choice.add("Instantaneous Power");\n            ei.choice.add("Average Power");\n            ei.choice.select(this.meter);\n            return ei;\n        }\n        return null;\n    }\n\n    setEditValue(n: number, ei: EditInfo): void {\n        if (n === 0)\n            this.meter = ei.choice!.getSelectedIndex();\n    }',
 `    getEditInfo(n: number): EditInfo | null {
