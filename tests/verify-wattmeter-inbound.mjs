@@ -165,7 +165,7 @@ try {
     if(!sim || sim.getTime()<0.025)return false;
     const meter=Array.from(sim.getElements()).find(e=>e.getType()==="WattmeterTrueElm");
     const lines=meter?.getInfo()||[];
-    return lines.some(line=>/^Q \\(fundamental\\) = /.test(line)) &&
+    return lines.some(line=>/^Q \(fundamental\) = /.test(line)) &&
       lines.some(line=>/^S = /.test(line));
   },null,{timeout:30000});
   const extendedInfo=await page.evaluate(()=>{
