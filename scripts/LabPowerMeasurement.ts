@@ -162,8 +162,8 @@ export class LabPowerMeasurement {
                             for(let j=1;j<cycle.length;j++){
                                 const a=cycle[j-1],b=cycle[j],dt=b.t-a.t;
                                 const va=a[field],vb=b[field];
-                                co+=dt*(va*Math.cos(omega*(a.t-t0))+vb*Math.cos(omega*(b.t-t0)))/T;
-                                si+=dt*(va*Math.sin(omega*(a.t-t0))+vb*Math.sin(omega*(b.t-t0)))/T;
+                                co+=dt*(va*Math.cos(omega*(a.t-t0))+vb*Math.cos(omega*(b.t-t0)))/(2*T);
+                                si+=dt*(va*Math.sin(omega*(a.t-t0))+vb*Math.sin(omega*(b.t-t0)))/(2*T);
                             }
                             co*=2;si*=2;
                             result.push({rms:Math.hypot(co,si)/Math.SQRT2,cos:co,sin:si});
