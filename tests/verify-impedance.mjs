@@ -147,7 +147,34 @@ try{
         JSON.stringify(parallelRead));
     assert(parallelRead.every(z=>Number.isFinite(z.current) && Number.isFinite(z.voltage)),
         "Corriente o tensión no finita en una rama paralela: "+JSON.stringify(parallelRead));
-    console.log("Dos Z en paralelo: ambas ramas importadas, simuladas y medidas");
+    // Verificación cuantitativa en régimen permanente: dos Z idénticas
+    // comparten tensión, conducen la misma corriente y cumplen KCL.
+    // Se leen todas las corrientes en el mismo instante de simulación.
+    const kirchhoff=await page.evaluate(()=>{
+        const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+        const elements=Array.from(sim.getElements());
+        const branches=elements.filter(e=>e.getType()==="ImpedanceElm");
+        const source=elements.find(e=>e.getType()==="VoltageElm");
+        return {time:sim.getTime(),branchCurrents:branches.map(e=>e.getCurrent()),
+            branchVoltages:branches.map(e=>e.getVoltageDiff()),
+            sourceCurrent:source?.getCurrent()};
+    });
+    const [i1,i2]=kirchhoff.branchCurrents;
+    const [u1,u2]=kirchhoff.branchVoltages;
+    const is=kirchhoff.sourceCurrent;
+    assert([i1,i2,u1,u2,is].every(Number.isFinite),
+        "Valores no finitos en la comprobación de Kirchhoff: "+JSON.stringify(kirchhoff));
+    assert(Math.max(Math.abs(i1),Math.abs(i2))>0.01,
+        "No circula corriente por las dos ramas: "+JSON.stringify(kirchhoff));
+    const toleranceI=Math.max(0.005,0.02*Math.max(Math.abs(i1),Math.abs(i2)));
+    assert(Math.abs(i1-i2)<toleranceI,
+        "Dos Z iguales en paralelo deben conducir la misma corriente: "+JSON.stringify(kirchhoff));
+    assert(Math.abs(u1-u2)<0.05,
+        "Las dos Z en paralelo deben tener la misma tensión: "+JSON.stringify(kirchhoff));
+    assert(Math.abs(Math.abs(is)-Math.abs(i1+i2))<Math.max(0.01,0.02*Math.abs(is)),
+        "No se cumple la primera ley de Kirchhoff en el nodo: "+JSON.stringify(kirchhoff));
+    console.log("Kirchhoff en paralelo: U1=U2, I1=I2 e |Ifuente|=|I1+I2|");
+
 
     const compatible=await page.evaluate(()=>window.LabCircuit.exportStandardRLC());
     assert(compatible.ok && compatible.converted===2 && compatible.added===2,
