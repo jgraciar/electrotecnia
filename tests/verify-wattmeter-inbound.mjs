@@ -691,6 +691,48 @@ try {
   assert(rlQ>0 && rcQ<0,"La potencia reactiva debe cambiar de signo entre RL y RC");
   console.log("CA capacitiva RC: P=8 W, Q1=-6 VAr, S=10 VA y cosφ=0,8 comprobados");
 
+  // Ensayo con quinto armónico: U1=10 V RMS (50 Hz), U5=5 V RMS (250 Hz),
+  // R=10 ohmios. P=S=12,5; Q1=0; THD U=THD I=50 %.
+  const harmonicCircuit=acCircuit
+    .replace('<v x="80 304 80 448" f="0" wf="1" fr="50" maxv="16.97056274847714"/>',
+      '<v x="80 304 80 376" f="0" wf="1" fr="50" maxv="14.142135623730951"/>'+
+      '<v x="80 376 80 448" f="0" wf="1" fr="250" maxv="7.0710678118654755"/>')
+    .replace('<r x="512 304 512 448" f="0" r="12"/>',
+      '<r x="512 304 512 448" f="0" r="10"/>')
+    .replace('labPowerMask="7"',
+      'labPowerMask="7" labShowTHDU="1" labShowTHDI="1"');
+  const harmonicImport=await page.evaluate(xml=>window.LabCircuit.importWulflemmXml(xml),harmonicCircuit);
+  assert(harmonicImport.ok && harmonicImport.simulated,
+    "No se abre el circuito con quinto armónico: "+JSON.stringify(harmonicImport));
+  await page.waitForFunction(()=>{
+    const api=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    const meter=Array.from(api?.getElements()||[]).find(e=>e.getType()==="WattmeterTrueElm");
+    const info=meter?.getInfo()||[];
+    return api?.getTime()>0.4 && ["P = ","Q (fundamental) = ","S = ",
+      "THD tension = ","THD corriente = "].every(prefix=>
+      info.some(x=>x.startsWith(prefix)&&!x.includes("...")));
+  },null,{timeout:45000});
+  const harmonicInfo=await page.evaluate(()=>{
+    const api=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(api.getElements()).find(e=>e.getType()==="WattmeterTrueElm").getInfo();
+  });
+  const hP=acValue("P = ","W",harmonicInfo);
+  const hQ=acValue("Q (fundamental) = ","VAr",harmonicInfo);
+  const hS=acValue("S = ","VA",harmonicInfo);
+  assert(Math.abs(hP-12.5)<0.7 && Math.abs(hQ)<0.7 && Math.abs(hS-12.5)<0.7,
+    "Potencias con quinto armónico incorrectas: "+JSON.stringify({hP,hQ,hS,harmonicInfo}));
+  const readPercentage=prefix=>{
+    const line=harmonicInfo.find(x=>x.startsWith(prefix));
+    const match=line?.match(/(-?\d+(?:[.,]\d+)?)\s*%/);
+    assert(match,"THD sin porcentaje reconocible: "+JSON.stringify({prefix,line,harmonicInfo}));
+    return Number(match[1].replace(",","."));
+  };
+  const hThdU=readPercentage("THD tension = ");
+  const hThdI=readPercentage("THD corriente = ");
+  assert(Math.abs(hThdU-50)<5 && Math.abs(hThdI-50)<5,
+    "THD U/I esperada 50 %: "+JSON.stringify({hThdU,hThdI,harmonicInfo}));
+  console.log("Quinto armónico: P=S=12,5, Q1=0, THD U=THD I=50 %");
+
   // Al cargar otro vatímetro en CC sin máscara explícita, Q y S
   // siguen disponibles en el editor, pero empiezan sin seleccionar.
   const defaultDc=dcCircuit.replace(' labPowerMask="7"','');
