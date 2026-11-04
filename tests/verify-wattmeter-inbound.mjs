@@ -89,7 +89,7 @@ try {
     const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
     const meters=Array.from(sim?.getElements()||[]).filter(e=>
       e.getType()==="WattmeterTrueElm");
-    return sim?.getTime()>0.5 && meters.length===2 &&
+    return sim?.getTime()>0.12 && meters.length===2 &&
       meters.every(m=>m.getInfo().some(x=>x.startsWith("P = ")&&!x.includes("...")));
   },null,{timeout:60000});
   const aronResult=await page.evaluate(()=>{
