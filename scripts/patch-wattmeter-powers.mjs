@@ -177,9 +177,12 @@ once('    canViewInScope(): boolean { return true; }',
     canViewInScope(): boolean { return true; }`);
 once('        arr[3] = "P = " + CircuitElm.getUnitText(this.getVoltageDiff() * this.getCurrent(), "W");\n        arr[4] = "P = " + CircuitElm.getUnitText(this.getAveragePower(), "W");',
 `        arr[3] = "p(t) = " + CircuitElm.getUnitText(this.getPower(), "W");
-        arr[4] = "P = " + CircuitElm.getUnitText(this.getAveragePower(), "W");
         const currentType = this.labCurrentMode === 1 ? "dc" : this.labCurrentMode === 2 ? "ac" : "auto";
         const powers = this.labMeasurement.measure(currentType);
+        // La media histórica puede incluir transitorios y producir P>S.
+        // Usar la misma ventana temporal que Q1, S y el f.d.p. real.
+        arr[4] = "P = " + CircuitElm.getUnitText(
+            powers.p ?? this.getAveragePower(), "W");
         const temporal = this.labMeasurement.getWindowReadings(this.getLabWindowSeconds(powers.period));
         const choices = temporal ? [temporal.instantaneous,temporal.peak,
             temporal.rms,temporal.mean] : null;
