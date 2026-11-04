@@ -215,7 +215,7 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
             return ei;
         }
         if (n === 1) {
-            const ei = new EditInfo("Lectura de potencia activa", this.selectedValue, -1, -1);
+            const ei = new EditInfo("Lectura de P", this.selectedValue, -1, -1);
             ei.choice = new Choice();
             ei.choice.add("Instantanea p(t)");
             ei.choice.add("Pico Pmax");
@@ -224,7 +224,7 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
             ei.choice.select(this.labPowerReadMode);
             return ei;
         }
-        if (n === 2) return EditInfo.createCheckbox("Potencia activa (W)", !!(this.labPowerMask & 1));
+        if (n === 2) return EditInfo.createCheckbox("Potencia activa P (W)", !!(this.labPowerMask & 1));
         // Casillas Q y S siempre seleccionables; en CC muestran 0 al marcarse.
         if (n === 3) return EditInfo.createCheckbox("Potencia reactiva Q (VAr) - fundamental", !!(this.labPowerMask & 2));
         if (n === 4) return EditInfo.createCheckbox("Potencia aparente S (VA)", !!(this.labPowerMask & 4));
