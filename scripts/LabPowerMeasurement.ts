@@ -104,6 +104,57 @@ export class LabPowerMeasurement {
             q: null, period: null};
     }
 
+    // Lecturas temporales de tensión, intensidad y potencia instantánea.
+    // La ventana utiliza tiempo simulado, no frecuencia de redondeo de pantalla.
+    // Pico de U/I = máximo valor absoluto; pico de p = máximo algebraico.
+    // El RMS de p(t) es matemático y NO equivale a la potencia aparente.
+    getWindowReadings(seconds: number): {
+        duration: number;
+        instantaneous: {v:number; i:number; p:number};
+        peak: {v:number; i:number; p:number};
+        rms: {v:number; i:number; p:number};
+        mean: {v:number; i:number; p:number};
+    } | null {
+        const data=this.samples.slice(this.start);
+        if(data.length===0)return null;
+        const last=data[data.length-1];
+        const instant={v:last.v, i:last.i, p:last.v*last.i};
+        if(data.length<2)return {duration:0,instantaneous:instant,
+            peak:{v:Math.abs(last.v),i:Math.abs(last.i),p:instant.p},
+            rms:{v:Math.abs(last.v),i:Math.abs(last.i),p:Math.abs(instant.p)},
+            mean:instant};
+        const durationRequested=Math.max(0.0001,Math.min(this.history,
+            Number.isFinite(seconds)?seconds:0.02));
+        const a=this.interval(data,Math.max(data[0].t,last.t-durationRequested),last.t);
+        if(a.length<2)return null;
+        const sum={v:0,i:0,p:0,vv:0,ii:0,pp:0};
+        const peak={v:0,i:0,p:-Infinity};
+        const contribute=(x: PowerSample)=>{
+            const p=x.v*x.i;
+            peak.v=Math.max(peak.v,Math.abs(x.v));
+            peak.i=Math.max(peak.i,Math.abs(x.i));
+            peak.p=Math.max(peak.p,p);
+            return {v:x.v,i:x.i,p,vv:x.v*x.v,ii:x.i*x.i,pp:p*p};
+        };
+        let previous=contribute(a[0]);
+        for(let j=1;j<a.length;j++){
+            const current=contribute(a[j]);
+            const dt=a[j].t-a[j-1].t;
+            if(dt>0)for(const key of Object.keys(sum) as Array<keyof typeof sum>)
+                sum[key]+=0.5*dt*(previous[key]+current[key]);
+            previous=current;
+        }
+        const duration=a[a.length-1].t-a[0].t;
+        if(duration<=0)return null;
+        return {
+            duration,instantaneous:instant,peak,
+            rms:{v:Math.sqrt(Math.max(0,sum.vv/duration)),
+                 i:Math.sqrt(Math.max(0,sum.ii/duration)),
+                 p:Math.sqrt(Math.max(0,sum.pp/duration))},
+            mean:{v:sum.v/duration,i:sum.i/duration,p:sum.p/duration}
+        };
+    }
+
     private interval(data: PowerSample[], lo: number, hi: number): PowerSample[] {
         const out: PowerSample[] = [];
         for (let j=1; j<data.length; j++) {
