@@ -142,6 +142,15 @@ export class ImpedanceElm extends CompositeElm {
         }
     }
 
+    // CompositeElm calcula la intensidad en sus elementos internos, pero
+    // no actualiza this.current. El doDots() heredado debe avanzar con la
+    // intensidad instantánea real del primer elemento de la serie RLC.
+    // Se conservan el trazado de punto1 a punto2 y el signo de la corriente
+    // tanto para Z horizontal como vertical, también en ramas en paralelo.
+    updateDotCount():void {
+        this.curcount=this.updateDotCountImpl(this.getCurrent(),this.curcount);
+    }
+
     getCurrent():number {
         return this.compElmList[0]?.getCurrent() ?? 0;
     }
