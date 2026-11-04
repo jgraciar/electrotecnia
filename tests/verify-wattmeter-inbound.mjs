@@ -207,13 +207,22 @@ try {
     return ["THD tension = ","THD corriente = ","D* residual no fundamental = "]
       .every(prefix=>info.some(line=>line.startsWith(prefix)&&!line.endsWith("...")));
   },null,{timeout:90000});
+  // Esperar un repintado posterior a la importación. getInfo() puede
+  // actualizarse antes de que el lienzo haya dibujado las nuevas filas.
+  await page.waitForFunction(()=>{
+    const w=document.querySelector("#circuit-frame")?.contentWindow;
+    const drawn=w?.__labWattPaint||[];
+    return ["THD U ","THD I ","D* "].every(prefix=>
+      drawn.some(line=>line.startsWith(prefix)));
+  },null,{timeout:30000});
   const harmonicPaint=await page.evaluate(()=>{
     const w=document.querySelector("#circuit-frame").contentWindow;
     return (w.__labWattPaint||[]).slice(-180);
   });
   assert(["THD U ","THD I ","D* "].every(prefix=>
     harmonicPaint.some(line=>line.startsWith(prefix))),
-    "No se dibujan todas las magnitudes armónicas en el vatímetro");
+    "No se dibujan todas las magnitudes armónicas en el vatímetro: "+
+      JSON.stringify(harmonicPaint));
   console.log("THD U/I y D*: XML persistente, cálculo disponible y dibujo verificado");
 
   // Archivo original de Wulflemm: carga de circuito y dos vatimetros reconocidos.
