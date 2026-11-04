@@ -184,3 +184,29 @@ assert(Math.abs(multipleCrossings.period-.02)<.001,
 assert(Math.abs(multipleCrossings.thdVoltage-180/230)<.025,
  "THD U incorrecto tras identificar la fundamental");
 console.log("OK: quinto armónico intenso con cruces por cero adicionales");
+
+
+// Referencia independiente: fundamental inductiva y 5.º armónico con
+// potencia activa NEGATIVA. Q1 solo corresponde a la fundamental.
+const fifthOpposed=measure(
+ t=>230*sin(t)+40*Math.SQRT2*Math.sin(5*omega*t),
+ t=>10*sin(t,-Math.PI/3)-2*Math.SQRT2*Math.sin(5*omega*t));
+assert.equal(fifthOpposed.kind,"ac");
+const expectedP=230*10*Math.cos(Math.PI/3)-40*2;
+const expectedQ1=230*10*Math.sin(Math.PI/3);
+const expectedS=Math.hypot(230,40)*Math.hypot(10,2);
+const expectedD=Math.sqrt(expectedS**2-expectedP**2-expectedQ1**2);
+approx("P con quinto armonico de signo opuesto",fifthOpposed.p,expectedP,.012);
+approx("Q1 fundamental inductiva con quinto armonico",fifthOpposed.q,expectedQ1,.012);
+approx("S total con armonicos en ambas ondas",fifthOpposed.s,expectedS,.012);
+approx("Potencia activa del quinto armonico negativa",fifthOpposed.harmonicPower,-80,.03);
+approx("THD U quinto armonico",fifthOpposed.thdVoltage,40/230,.02);
+approx("THD I quinto armonico",fifthOpposed.thdCurrent,2/10,.02);
+approx("D* residual con potencia armonica negativa",fifthOpposed.distortionResidual,expectedD,.02);
+assert(Math.abs(fifthOpposed.cosPhi-.5)<.015,
+ "cos phi fundamental debe ser 0,5 aunque exista potencia armonica negativa");
+assert(Math.abs(fifthOpposed.powerFactor-expectedP/expectedS)<.015,
+ "El factor de potencia real debe calcularse como P total/S total");
+assert(fifthOpposed.powerFactor<fifthOpposed.cosPhi,
+ "La distorsion debe separar el factor de potencia real del cos phi");
+console.log("OK: P, Q1, S, cos phi, f.d.p., THD U/I y D* con quinto armonico de potencia negativa");
