@@ -16,7 +16,7 @@ try {
     const fill=CanvasRenderingContext2D.prototype.fillText;
     CanvasRenderingContext2D.prototype.fillText=function(value,...args){
       const label=String(value);
-      if(/^(?:P |p\(t\) |Pmax |PRMS |Q |S |cosφ |f\.d\.p\. |u\(t\) |Umax |URMS |Umed |i\(t\) |Imax |IRMS |Imed |THD U |THD I |D\\* )/.test(label)){
+      if(/^(?:P |p\(t\) |Pmax |PRMS |Q |S |cosφ |f\.d\.p\. |u\(t\) |Umax |URMS |Umed |i\(t\) |Imax |IRMS |Imed |THD U |THD I |D\* )/.test(label)){
         const rows=window.__labWattPaint||(window.__labWattPaint=[]);
         rows.push(label);
         if(rows.length>240)rows.splice(0,rows.length-120);
