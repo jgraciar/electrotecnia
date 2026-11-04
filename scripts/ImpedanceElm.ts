@@ -36,7 +36,8 @@ export class ImpedanceElm extends CompositeElm {
     constructor(xa:number, ya:number, xb?:number, yb?:number, f?:number, st?:StringTokenizer) {
         if (xb === undefined) super(xa,ya);
         else super(xa,ya,xb,yb!,f!);
-        this.noDiagonal=true;
+        // Permitir orientación libre, incluida la diagonal, como elemento de dos bornes.
+        this.noDiagonal=false;
         // Un nuevo elemento arranca como resistencia de 10 Ω a 50 Hz,
         // siempre dentro del editor de impedancia para CA.
         if (st !== undefined) {
