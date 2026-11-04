@@ -8,6 +8,9 @@ export type PowerReading = {
     s: number | null;
     q: number | null;
     period: number | null;
+    // cosφ de las componentes fundamentales; f.d.p. = P/S total.
+    cosPhi: number | null;
+    powerFactor: number | null;
 };
 
 export class LabPowerMeasurement {
@@ -42,7 +45,7 @@ export class LabPowerMeasurement {
     measure(force: "auto" | "dc" | "ac" = "auto"): PowerReading {
         const a = this.samples.slice(this.start);
         if (a.length < 2 || a[a.length-1].t - a[0].t < 0.018)
-            return {kind: "pending", p: 0, q: null, s: null, period: null};
+            return {kind: "pending", p: 0, q: null, s: null, period: null, cosPhi: null, powerFactor: null};
         const end = a[a.length - 1].t;
         const recent = this.interval(a, Math.max(a[0].t, end - 0.15), end);
         const stats = this.stats(recent);
@@ -60,9 +63,9 @@ export class LabPowerMeasurement {
         const ac = force === "ac" || (force === "auto" &&
             (variableV || (vRms < 1e-7 && variableI)));
         if (force === "dc" || (enough && !ac))
-            return {kind: "dc", p: stats.p, q: null, s: null, period: null};
+            return {kind: "dc", p: stats.p, q: null, s: null, period: null, cosPhi: null, powerFactor: null};
         if (!enough)
-            return {kind: "pending", p: stats.p, q: null, s: null, period: null};
+            return {kind: "pending", p: stats.p, q: null, s: null, period: null, cosPhi: null, powerFactor: null};
 
         const full = this.interval(a, Math.max(a[0].t, end - 0.55), end);
         const sv = this.stats(full);
@@ -92,7 +95,18 @@ export class LabPowerMeasurement {
                     const wave = this.stats(cycle, T, t0);
                     const s = Math.sqrt(Math.max(0,wave.vv)) * Math.sqrt(Math.max(0,wave.ii));
                     const q = (wave.vc*wave.is - wave.vs*wave.ic)/2;
-                    return {kind: "ac", p: wave.p, s, q, period: T};
+                    const v1 = Math.hypot(wave.vc, wave.vs);
+                    const i1 = Math.hypot(wave.ic, wave.is);
+                    // Desfase entre componentes fundamentales, no P/S total.
+                    const cosPhi = v1 > 1e-9 && i1 > 1e-9
+                        ? Math.max(-1, Math.min(1,
+                            (wave.vc*wave.ic+wave.vs*wave.is)/(v1*i1)))
+                        : null;
+                    // f.d.p. verdadero: potencia activa total / potencia
+                    // aparente total (incluye armónicos de U e I).
+                    const powerFactor = s > 1e-12
+                        ? Math.max(-1,Math.min(1,wave.p/s)) : null;
+                    return {kind: "ac", p: wave.p, s, q, period: T, cosPhi, powerFactor};
                 }
             }
         }
@@ -101,7 +115,7 @@ export class LabPowerMeasurement {
         // muy corta de onda como si ya fuera una lectura estabilizada.
         return {kind: "ac", p: stats.p,
             s: end-a[0].t >= 0.055 ? vRms*iRms : null,
-            q: null, period: null};
+            q: null, period: null, cosPhi: null, powerFactor: null};
     }
 
     // Lecturas temporales de tensión, intensidad y potencia instantánea.
