@@ -41,5 +41,16 @@ const b=ui.indexOf(');',a+toolbarStart.length);
 if(a<0||b<0||!ui.slice(a,b).includes('startCircuitText'))throw Error('Toolbar startup block not found');
 ui=ui.slice(0,a)+toolbarStart+'!this.hideMenu && !noEditing && !hideSidebar'+ui.slice(b);
 writeFileSync(uiSource,ui);
+// La API opcional de Dropbox se descargaba de forma síncrona antes del motor.
+// En móviles o redes donde el recurso externo no responde bloqueaba la carga
+// del CircuitJS incrustado. "async" mantiene Dropbox sin bloquear el HTML.
+const htmlSource=source.replace(/CirSim\\.ts$/, 'circuitjs.html');
+if(htmlSource===source)throw Error('No se encuentra circuitjs.html');
+let html=readFileSync(htmlSource,'utf8');
+const dropbox='<script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js"';
+if(html.split(dropbox).length!==2)
+    throw Error('Ha cambiado el script de Dropbox en circuitjs.html');
+html=html.replace(dropbox,'<script type="text/javascript" async src="https://www.dropbox.com/static/api/2/dropins.js"');
+writeFileSync(htmlSource,html);
 writeFileSync(source,ts);
-console.log('Embedded Aron startup with',meterCount,'wattmeters showing P/Q/S:',xml.length,'bytes');
+console.log('Embedded Aron startup with',meterCount,'wattmeters showing P/Q/S:',xml.length,'bytes; Dropbox no bloqueante');
