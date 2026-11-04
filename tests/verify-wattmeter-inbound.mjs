@@ -434,6 +434,22 @@ try {
     await mobile.addInitScript(recordPaint);
     await mobile.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
     await mobile.locator('button[data-mode="falstad"]').click();
+    // El circuito está por debajo de los controles en móviles.
+    // Forzar su entrada en el área visible detecta errores de carga diferida.
+    await mobile.locator("#circuit-frame").scrollIntoViewIfNeeded();
+    await mobile.waitForFunction(()=>window.LabCircuit?.isIntegrated?.(),null,{timeout:60000});
+    const mobileDiagnostic=await mobile.evaluate(()=>{
+      const frame=document.querySelector("#circuit-frame");
+      const scroll=document.querySelector(".circuit-frame-scroll");
+      const api=frame?.contentWindow?.CircuitJS1;
+      const tags=api?Array.from(new DOMParser().parseFromString(
+        api.exportCircuit(),"application/xml").querySelectorAll("WattmeterTrue")):[];
+      return {viewport:window.innerWidth,frameWidth:frame?.clientWidth,
+        scrollWidth:scroll?.scrollWidth,clientWidth:scroll?.clientWidth,
+        loaded:!!api,masks:tags.map(x=>x.getAttribute("labPowerMask")),
+        startup:frame?.getAttribute("loading")};
+    });
+    console.log("Diagnóstico de CircuitJS incrustado en móvil",mobileDiagnostic);
     await mobile.waitForFunction(()=>{
       const f=document.querySelector("#circuit-frame"),s=document.querySelector(".circuit-frame-scroll");
       const api=f?.contentWindow?.CircuitJS1;
@@ -441,7 +457,7 @@ try {
       const doc=new DOMParser().parseFromString(api.exportCircuit(),"application/xml");
       const tags=Array.from(doc.querySelectorAll("WattmeterTrue"));
       return tags.length===2 && tags.every(el=>el.getAttribute("labPowerMask")==="7");
-    },null,{timeout:150000});
+    },null,{timeout:45000});
     await mobile.waitForFunction(()=>{
       const labels=document.querySelector("#circuit-frame")?.contentWindow?.__labWattPaint||[];
       return ["P ","Q ","S "].every(p=>labels.some(t=>t.startsWith(p))) &&
