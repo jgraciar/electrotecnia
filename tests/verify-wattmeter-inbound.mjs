@@ -116,8 +116,8 @@ try {
   },null,{timeout:90000});
   console.log("Aron con el motor real",await page.evaluate(()=>window.LabCircuit.getAronReadings()));
 
-  // Comprobar que el motor real ofrece P, Q y S en la ficha del vatímetro,
-  // además de conservar las máscaras de visualización en el XML.
+  // El archivo original de Wulflemm solo solicita P (máscara por defecto);
+  // no debe forzarse Q ni S sin que estén seleccionadas.
   const instrumentInfo=await page.evaluate(()=>{
     const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
     return Array.from(sim.getElements()).filter(e=>e.getType()==="WattmeterTrueElm")
@@ -127,12 +127,12 @@ try {
   for(const info of instrumentInfo){
     assert(info.some(line=>/^P = /.test(line)),
       "El instrumento no muestra P promedio: "+JSON.stringify(info));
-    assert(info.some(line=>/^Q \(fundamental\) = /.test(line)),
-      "El instrumento no muestra Q fundamental: "+JSON.stringify(info));
-    assert(info.some(line=>/^S = /.test(line)),
-      "El instrumento no muestra S aparente: "+JSON.stringify(info));
+    assert(!info.some(line=>/^Q \(fundamental\) = /.test(line)),
+      "Q no debe estar activa por defecto en Wulflemm original: "+JSON.stringify(info));
+    assert(!info.some(line=>/^S = /.test(line)),
+      "S no debe estar activa por defecto en Wulflemm original: "+JSON.stringify(info));
   }
-  console.log("Pantalla de magnitudes P/Q/S disponible para ambos vatímetros");
+  console.log("XML Wulflemm original: solo P en el vatímetro, sin Q ni S seleccionadas");
 
 
   // Opciones propias: se deben guardar y reabrir en el laboratorio,
@@ -160,6 +160,15 @@ try {
   assert.equal(saved.attr[0]?.mask,"7");
   assert.deepEqual(saved.attr,saved.second,"Perdida de preferencias P/Q/S al guardar y abrir");
   console.log("Preferencias locales persistentes tras guardar y abrir",saved.attr);
+  const extendedInfo=await page.evaluate(()=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(sim.getElements()).filter(x=>x.getType()==="WattmeterTrueElm")
+      .map(x=>x.getInfo());
+  });
+  assert(extendedInfo[0].some(line=>/^Q \(fundamental\) = /.test(line)) &&
+    extendedInfo[0].some(line=>/^S = /.test(line)),
+    "Con máscara 7 deben verse P, Q y S: "+JSON.stringify(extendedInfo[0]));
+  console.log("Máscara 7: P/Q/S disponibles en información del vatímetro");
   // Las siete selecciones no vacias deben serializarse de forma estable.
   const modes=await page.evaluate(original=>{
     const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
