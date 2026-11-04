@@ -172,3 +172,15 @@ assert.equal(waveformVoltage.kind,"ac");
 assert(Math.abs(waveformVoltage.period-.02)<.001,
  "Una tensión con 5.º armónico no debe confundirse con 250 Hz");
 console.log("OK: periodo de red frente a formas de onda muy deformadas");
+
+
+// Cruces por cero espurios: el quinto armónico supera al umbral
+// que provoca varios cruces ascendentes en cada ciclo de 50 Hz.
+const multipleCrossings=measure(t=>230*sin(t)+180*Math.SQRT2*Math.sin(5*omega*t),
+ t=>10*sin(t));
+assert.equal(multipleCrossings.kind,"ac");
+assert(Math.abs(multipleCrossings.period-.02)<.001,
+ "Cruces armónicos espurios: se debe recuperar la fundamental de 50 Hz");
+assert(Math.abs(multipleCrossings.thdVoltage-180/230)<.025,
+ "THD U incorrecto tras identificar la fundamental");
+console.log("OK: quinto armónico intenso con cruces por cero adicionales");
