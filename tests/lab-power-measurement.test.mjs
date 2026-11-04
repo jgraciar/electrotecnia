@@ -27,6 +27,10 @@ assert.equal(rl.kind,"ac");
 approx("P carga RL",rl.p,voltage*current*Math.cos(phi));
 approx("Q1 inductiva",rl.q,voltage*current*Math.sin(phi));
 approx("S carga RL",rl.s,voltage*current);
+assert(Math.abs(rl.cosPhi-Math.cos(phi))<0.015,
+    "cos φ de carga RL debe ser el desfase de las fundamentales");
+assert(Math.abs(rl.powerFactor-rl.cosPhi)<0.015,
+    "En régimen sinusoidal, cos φ y f.d.p. deben coincidir");
 
 const capacitor=measure(t=>voltage*sin(t),t=>current*sin(t,Math.PI/2));
 assert.equal(capacitor.kind,"ac");
@@ -38,11 +42,33 @@ const resistive=measure(t=>voltage*sin(t),t=>current*sin(t));
 approx("P resistiva",resistive.p,voltage*current);
 approx("Q1 resistiva",resistive.q,0);
 approx("S resistiva",resistive.s,voltage*current);
+assert(Math.abs(resistive.cosPhi-1)<0.005);
+assert(Math.abs(resistive.powerFactor-1)<0.005);
 
 const nonSine=measure(t=>voltage*sin(t)+30*sin(3*t),t=>current*sin(t));
 approx("P distorsion",nonSine.p,voltage*current);
 approx("Q1 distorsion",nonSine.q,0);
 assert.ok(nonSine.s>voltage*current,"La potencia aparente debe incluir distorsion");
+assert(Math.abs(nonSine.cosPhi-1)<0.02,
+    "Distorsión de tensión no debe cambiar el desfase fundamental");
+assert(nonSine.powerFactor<nonSine.cosPhi-0.002,
+    "El f.d.p. verdadero debe incluir la distorsión de tensión");
+
+const harmonicCurrent=measure(t=>voltage*sin(t),
+    t=>current*sin(t,-phi) + 4*Math.SQRT2*Math.sin(3*omega*t));
+assert.equal(harmonicCurrent.kind,"ac");
+assert(Math.abs(harmonicCurrent.cosPhi-Math.cos(phi))<0.015,
+    "cos φ debe permanecer ligado a la fundamental con corriente armónica");
+const expectedFdp=Math.cos(phi)*current/Math.hypot(current,4);
+assert(Math.abs(harmonicCurrent.powerFactor-expectedFdp)<0.015,
+    "f.d.p. debe usar P/S total, incluyendo el armónico tercero");
+assert(harmonicCurrent.powerFactor<harmonicCurrent.cosPhi-0.10,
+    "Con distorsión el factor de potencia real debe distinguirse de cos φ");
+const generator=measure(t=>voltage*sin(t),t=>-current*sin(t));
+assert(generator.powerFactor < -0.98 && generator.cosPhi < -0.98,
+    "Con inversión de corriente deben conservarse los signos");
+assert.equal(dc.cosPhi,null,"cos φ no definido en continua");
+assert.equal(dc.powerFactor,null,"f.d.p. no definido por convenio con S=0 en CC");
 
 const transient=measure(()=>12,t=>1.2+0.4*Math.exp(-t*10));
 assert.equal(transient.kind,"dc","Transitorio con tension CC no debe interpretarse como CA");
@@ -103,3 +129,5 @@ assert(powerOut);
 approx("Potencia generada con signo",powerOut.mean.p,-14.4);
 approx("Pico algebraico negativo",powerOut.peak.p,-14.4);
 console.log("OK: lectura instantánea, pico, RMS y media de U/I/p; ventana y signos");
+
+console.log("OK: cos φ fundamental y f.d.p. P/S en CA sinusoidal, armónica, inversa y CC");
