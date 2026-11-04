@@ -113,7 +113,7 @@ export class ImpedanceElm extends CompositeElm {
 
     setPoints():void {
         super.setPoints();
-        this.calcLeads(36);
+        this.calcLeads(16);
         if(this.posts?.length===2) {
             this.setPost(0,this.point1);
             this.setPost(1,this.point2);
@@ -121,7 +121,7 @@ export class ImpedanceElm extends CompositeElm {
     }
 
     draw(g:Graphics):void {
-        this.setBbox(this.point1,this.point2,18);
+        this.setBbox(this.point1,this.point2,8);
         this.draw2Leads(g);
         this.setPowerColor(g,false);
         g.save();
@@ -129,8 +129,8 @@ export class ImpedanceElm extends CompositeElm {
         const cy=(this.point1.y+this.point2.y)/2;
         g.context.translate(cx,cy);
         g.context.rotate(Math.atan2(this.dy,this.dx));
-        g.context.strokeRect(-18,-13,36,26);
-        g.setFont(new Font("SansSerif",0,16));
+        g.context.strokeRect(-16,-6,32,12);
+        g.setFont(new Font("SansSerif",0,12));
         g.context.textBaseline="middle";
         g.context.textAlign="center";
         g.drawString("Z",0,0);
