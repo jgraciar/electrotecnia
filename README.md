@@ -452,3 +452,40 @@ La comparación numérica de la web presenta las mismas unidades y conserva el
 cálculo físico en amperios, voltios y vatios. No se aplica ninguna escala ficticia
 a los valores eléctricos. Las pruebas unitarias comprueban los campos de escala
 del archivo de circuito y GitHub Actions verifica las medidas del simulador.
+
+
+## Impedancia Z de corriente alterna (modelo propio)
+
+El menú **Componentes pasivos** de la copia integrada de CircuitJS incorpora
+**Add Impedance Z (AC, series RLC)**. Es un componente de dos bornes, representado
+con una Z, que utiliza los modelos físicos internos de resistencia, bobina y
+condensador conectados **en serie**. Sus tres modos de entrada son:
+
+- **|Z| y φ:** módulo en Ω y argumento en grados, con −90° ≤ φ ≤ +90° para una carga pasiva. Calcula R y una bobina si X > 0 o un condensador si X < 0.
+- **R y X:** valores en Ω. X > 0 representa inductancia y X < 0 representa capacidad.
+- **R, L y C:** resistencia en Ω, inductancia en H y capacidad en F; L y C pueden coexistir y los valores omitidos se representan con 0.
+
+El elemento **solo se permite en corriente alterna**: exige una frecuencia de
+referencia estrictamente positiva, rechaza el análisis de punto de trabajo en CC
+y detiene la simulación cuando se detectan únicamente fuentes de CC. Puede
+insertarse antes de colocar la fuente, para facilitar el montaje. En circuitos
+mixtos con fuente de CA el motor conserva el comportamiento temporal real de
+los componentes, incluidos armónicos y transitorios; no se reemplaza Z por
+una resistencia ficticia.
+
+La frecuencia de referencia sirve para convertir |Z|/φ o R/X a componentes
+físicos. **Si cambia la frecuencia de una fuente de CA**, R, L y C permanecen
+constantes y la impedancia real varía según
+Z(f) = R + j(2πfL − 1/(2πfC)), omitiendo cada término ausente.
+Si se modifica la frecuencia de referencia en el editor polar o rectangular,
+se recalculan L o C para mantener la impedancia especificada a esa frecuencia.
+En el modo R/L/C se conservan los valores físicos al modificar f0.
+
+**Archivos:** el XML propio conserva un elemento Impedance con modo,
+f0, r, l y c. Los importadores estándar de Falstad y Wulflemm no conocen
+esta etiqueta. Para obtener un fichero compatible debe utilizarse el botón
+**Exportar circuito con RLC estándar**, que sustituye cada Z por los elementos
+r, l y c correspondientes sin cambiar el circuito de trabajo. Cuando varios
+elementos necesitan más espacio del que ocupa Z o hay una sonda directamente
+asociada a ella, la exportación se rechaza con un mensaje para evitar
+modificaciones silenciosas de la topología o del significado de la medida.
