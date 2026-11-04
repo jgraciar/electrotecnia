@@ -113,6 +113,42 @@ try{
         "No se conserva la capacidad física en la impedancia RLC: "+JSON.stringify(both.info));
     console.log("Impedancia RLC: R, L y C simultáneas, dos bornes y solución real");
 
+    // Dos impedancias iguales en paralelo: ambas deben conducir corriente,
+    // y la corriente total de la fuente debe ser la suma de las ramas.
+    const parallel='<cir f="1" ts="0.00001" ic="12" cb="50" pb="50" vr="20" mts="5e-11">'+
+        '<v x="80 304 80 448" f="0" wf="1" fr="50" maxv="14.142135623730951"/>'+
+        '<g x="80 448 80 480" f="0"/>'+
+        '<w x="80 304 256 304" f="0"/>'+
+        '<Impedance x="256 304 352 304" f="0" mode="1" f0="50" r="8" l="'+l+'" c="0"/>'+
+        '<w x="352 304 352 448" f="0"/>'+
+        '<w x="352 448 80 448" f="0"/>'+
+        '<w x="256 304 256 240" f="0"/>'+
+        '<Impedance x="256 240 352 240" f="0" mode="1" f0="50" r="8" l="'+l+'" c="0"/>'+
+        '<w x="352 240 352 304" f="0"/>'+
+        '</cir>';
+    const parallelImport=await page.evaluate(xml=>
+        window.LabCircuit.importNativeCircuit("Dos impedancias Z en paralelo",xml),parallel);
+    assert(parallelImport.ok && parallelImport.simulated,
+        "No se importaron las impedancias en paralelo: "+JSON.stringify(parallelImport));
+    await page.waitForFunction(()=>{
+        const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+        return sim?.getTime?.()>0.1 &&
+            Array.from(sim.getElements()).filter(e=>e.getType()==="ImpedanceElm").length===2;
+    },null,{timeout:60000});
+    const parallelRead=await page.evaluate(()=>{
+        const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+        const z=Array.from(sim.getElements()).filter(e=>e.getType()==="ImpedanceElm");
+        return z.map(e=>({current:e.getCurrent(),posts:e.getPostCount(),
+            info:e.getInfo(),voltage:e.getVoltageDiff()}));
+    });
+    assert.equal(parallelRead.length,2);
+    assert(parallelRead.every(z=>z.posts===2 && z.info.some(x=>x.startsWith("|Z| = "))),
+        "Las ramas en paralelo no conservan los dos bornes y las lecturas de Z: "+
+        JSON.stringify(parallelRead));
+    assert(parallelRead.every(z=>Number.isFinite(z.current) && Number.isFinite(z.voltage)),
+        "Corriente o tensión no finita en una rama paralela: "+JSON.stringify(parallelRead));
+    console.log("Dos Z en paralelo: ambas ramas importadas, simuladas y medidas");
+
     const compatible=await page.evaluate(()=>window.LabCircuit.exportStandardRLC());
     assert(compatible.ok && compatible.converted===1 && compatible.added===2,
         "No se puede exportar Z como RLC estándar: "+JSON.stringify(compatible));
