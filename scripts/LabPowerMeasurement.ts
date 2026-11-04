@@ -115,18 +115,21 @@ export class LabPowerMeasurement {
             let T=crossings[crossings.length-1]-crossings[crossings.length-2];
             if(candidates.length){
                 const scale=Math.max(1e-12,rms*rms);
-                let best=Infinity;
-                for(const candidate of candidates){
+                const scores=candidates.map(candidate=>{
                     let error=0;
                     for(let k=0;k<32;k++){
                         const t=t1-candidate*(k+0.5)/32;
                         const difference=sampleAt(t)-sampleAt(t-candidate);
                         error+=difference*difference/scale;
                     }
-                    // Preferir la coincidencia de onda completa frente
-                    // a cruces espurios; desempatar por periodo menor.
-                    if(error<best-1e-8){best=error;T=candidate;}
-                }
+                    return {candidate,error};
+                });
+                const best=Math.min(...scores.map(x=>x.error));
+                // Los múltiplos exactos de T también se autocorrelacionan.
+                // Elegir el MENOR periodo con error indistinguible del mínimo,
+                // evitando seleccionar 13 ciclos por ruido de redondeo.
+                const near=scores.filter(x=>x.error<=best+0.001);
+                T=Math.min(...near.map(x=>x.candidate));
             }
             const t0=t1-T;
             if (T >= 0.0005 && T <= this.history / 1.5 && end-t1 <= 2*T) {
