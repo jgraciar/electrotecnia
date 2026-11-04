@@ -9,10 +9,10 @@ if(!/^<cir(?:\s|>)/.test(originalXml.trimStart()))throw Error('Invalid original 
 // Solo en el diseño de arranque: ambos vatímetros muestran P, Q y S.
 // El archivo de referencia externo permanece intacto para comprobar su importación.
 let meterCount=0;
-const xml=originalXml.replace(/<WattmeterTrue\\b[^>]*\\/>/g, tag=>{
+const xml=originalXml.replace(/<WattmeterTrue\b[^>]*\/>/g, tag=>{
   meterCount++;
-  if(!/\\bmeter="1"/.test(tag))throw Error('Modo de vatímetro inesperado en el circuito Aron');
-  return tag.replace(/\\s*\\/>$/, ' labCurrentMode="2" labPowerMask="7"/>');
+  if(!/\bmeter="1"/.test(tag))throw Error('Modo de vatímetro inesperado en el circuito Aron');
+  return tag.replace(/\s*\/>$/, ' labCurrentMode="2" labPowerMask="7"/>');
 });
 if(meterCount!==2)throw Error('El diseño inicial debe contener exactamente dos vatímetros de Aron');
 const anchor='        this.transform = [0, 0, 0, 0, 0, 0];';
