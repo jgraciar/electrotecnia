@@ -457,12 +457,12 @@ try {
     const meter=Array.from(api.getElements()).find(e=>e.getType()==="WattmeterTrueElm");
     return {info:meter.getInfo(),xml:api.exportCircuit()};
   });
-  assert(dcReading.info.some(line=>/^Q \(fundamental\) = 0 var$/.test(line)));
+  assert(dcReading.info.some(line=>/^Q \(fundamental\) = 0 VAr$/.test(line)));
   assert(dcReading.info.some(line=>/^S = 0 VA$/.test(line)));
   const pString=dcReading.info.find(line=>/^P = /.test(line));
   assert(pString && !/P = 0(?:\s|$)/.test(pString),
     "La potencia activa CC debe mostrar su valor real: "+JSON.stringify(dcReading.info));
-  console.log("Continua: P real, Q=0 var y S=0 VA al seleccionar las casillas");
+  console.log("Continua: P real, Q=0 VAr y S=0 VA al seleccionar las casillas");
 
   // Al cargar otro vatímetro en CC sin máscara explícita, Q y S
   // siguen disponibles en el editor, pero empiezan sin seleccionar.
