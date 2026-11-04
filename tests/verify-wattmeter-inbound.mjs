@@ -10,6 +10,21 @@ assert.equal((original.match(/<WattmeterTrue /g)||[]).length,2);
 const browser = await chromium.launch({headless:true});
 try {
   const page = await browser.newPage({viewport:{width:1440,height:950}});
+  // Prueba de lo realmente pintado en el lienzo de CircuitJS; comprobar
+  // solo atributos XML no detecta una vista incrustada que recorte las lecturas.
+  const recordPaint=()=>{
+    const fill=CanvasRenderingContext2D.prototype.fillText;
+    CanvasRenderingContext2D.prototype.fillText=function(value,...args){
+      const label=String(value);
+      if(/^(?:P |p\(t\) |Q |S )/.test(label)){
+        const rows=window.__labWattPaint||(window.__labWattPaint=[]);
+        rows.push(label);
+        if(rows.length>240)rows.splice(0,rows.length-120);
+      }
+      return fill.call(this,value,...args);
+    };
+  };
+  await page.addInitScript(recordPaint);
   page.on("pageerror",error=>console.error("Error del navegador:",error.message));
   await page.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
   await page.locator('button[data-mode="falstad"]').click();
@@ -48,6 +63,13 @@ try {
     });
   },null,{timeout:90000});
   console.log("Inicio: ambos vatímetros Aron presentan P, Q y S activas");
+  await page.waitForFunction(()=>{
+    const drawn=document.querySelector("#circuit-frame")?.contentWindow?.__labWattPaint||[];
+    return ["P ","Q ","S "].every(prefix=>drawn.filter(text=>text.startsWith(prefix)).length>=2) &&
+      drawn.some(text=>text.startsWith("Q ")&&!text.includes("...")) &&
+      drawn.some(text=>text.startsWith("S ")&&!text.includes("..."));
+  },null,{timeout:30000});
+  console.log("Vista incrustada: texto de P, Q y S realmente dibujado en el lienzo");
 
   // Archivo original de Wulflemm: carga de circuito y dos vatimetros reconocidos.
   const incoming = await page.evaluate(xml=>{
@@ -340,6 +362,76 @@ try {
   console.log("Ediciones rechazadas sin perder valores eléctricos previos");
 
 
+
+
+  // Comprobar CC en un circuito realmente alimentado en continua.
+  const dcCircuit = '<cir f="1" ts="0.00001" ic="10" cb="50" pb="50" vr="5" mts="5e-11">'+
+    '<v x="80 304 80 448" f="0" wf="0" fr="40" maxv="12"/>'+
+    '<g x="80 448 80 480" f="0"/>'+
+    '<w x="80 304 336 304" f="0"/>'+
+    '<WattmeterTrue x="336 304 448 304" f="0" w="32" meter="1" labCurrentMode="1" labPowerMask="7"/>'+
+    '<w x="448 304 512 304" f="0"/>'+
+    '<r x="512 304 512 448" f="0" r="12"/>'+
+    '<w x="512 448 80 448" f="0"/>'+
+    '<w x="336 336 80 304" f="0"/>'+
+    '<w x="448 336 512 448" f="0"/></cir>';
+  const dcImport=await page.evaluate(xml=>window.LabCircuit.importWulflemmXml(xml),dcCircuit);
+  assert(dcImport.ok && dcImport.elements===9,
+    "No se abre el circuito CC de medida: "+JSON.stringify(dcImport));
+  await page.waitForFunction(()=>{
+    const w=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    const meter=Array.from(w?.getElements()||[]).find(e=>e.getType()==="WattmeterTrueElm");
+    const info=meter?.getInfo()||[];
+    return w?.getTime()>0.08 && info.some(x=>/^P = /.test(x));
+  },null,{timeout:30000});
+  const dcReading=await page.evaluate(()=>{
+    const api=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    const meter=Array.from(api.getElements()).find(e=>e.getType()==="WattmeterTrueElm");
+    return {info:meter.getInfo(),xml:api.exportCircuit()};
+  });
+  assert(dcReading.info.some(line=>/^Q \(fundamental\) = 0 var$/.test(line)));
+  assert(dcReading.info.some(line=>/^S = 0 VA$/.test(line)));
+  const pString=dcReading.info.find(line=>/^P = /.test(line));
+  assert(pString && !/P = 0(?:\s|$)/.test(pString),
+    "La potencia activa CC debe mostrar su valor real: "+JSON.stringify(dcReading.info));
+  console.log("Continua: P real, Q=0 var y S=0 VA al seleccionar las casillas");
+
+  // Al cargar otro vatímetro en CC sin máscara explícita, Q y S
+  // siguen disponibles en el editor, pero empiezan sin seleccionar.
+  const defaultDc=dcCircuit.replace(' labPowerMask="7"','');
+  const defaultRead=await page.evaluate(xml=>{
+    const loaded=window.LabCircuit.importWulflemmXml(xml);
+    const api=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    const elem=new DOMParser().parseFromString(api.exportCircuit(),"application/xml")
+      .querySelector("WattmeterTrue");
+    return {loaded,mask:elem?.getAttribute("labPowerMask"),mode:elem?.getAttribute("labCurrentMode")};
+  },defaultDc);
+  assert(defaultRead.loaded.ok && defaultRead.mask===null && defaultRead.mode==="1",
+    "Las potencias Q y S deberían estar desmarcadas por defecto en continua");
+  console.log("Continua: Q y S desmarcadas por defecto, seleccionables en propiedades");
+
+  // Repetir comprobación del circuito incrustado en un móvil, donde antes
+  // se veía solo la potencia activa por falta de espacio para el dibujo.
+  const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,deviceScaleFactor:2});
+  try {
+    await mobile.addInitScript(recordPaint);
+    await mobile.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
+    await mobile.locator('button[data-mode="falstad"]').click();
+    await mobile.waitForFunction(()=>{
+      const f=document.querySelector("#circuit-frame"),s=document.querySelector(".circuit-frame-scroll");
+      const api=f?.contentWindow?.CircuitJS1;
+      if(!api || !s || f.clientWidth<780 || s.scrollWidth<=s.clientWidth)return false;
+      const doc=new DOMParser().parseFromString(api.exportCircuit(),"application/xml");
+      const tags=Array.from(doc.querySelectorAll("WattmeterTrue"));
+      return tags.length===2 && tags.every(el=>el.getAttribute("labPowerMask")==="7");
+    },null,{timeout:150000});
+    await mobile.waitForFunction(()=>{
+      const labels=document.querySelector("#circuit-frame")?.contentWindow?.__labWattPaint||[];
+      return ["P ","Q ","S "].every(p=>labels.some(t=>t.startsWith(p))) &&
+        labels.some(t=>t.startsWith("Q ")&&!t.includes("..."));
+    },null,{timeout:90000});
+    console.log("Móvil 390 px: vista incrustada con desplazamiento y P/Q/S dibujadas");
+  } finally { await mobile.close(); }
 
 
 } finally {
