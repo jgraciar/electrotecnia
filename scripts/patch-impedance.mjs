@@ -29,4 +29,17 @@ replaceOnce(menus,
     '            "Add Inductor",                 "InductorElm",',
     '            "Add Inductor",                 "InductorElm",\n'+
     '            "Add Impedance Z (AC, series RLC)", "ImpedanceElm",');
-console.log("Impedancia CA Z registrada y añadida a Componentes pasivos; modelo de CircuitJS conservado");
+// Un error por alimentación exclusivamente CC detiene el motor de CircuitJS.
+// Al importar otro circuito, reanudar únicamente si la parada fue provocada
+// por nuestra Z: nunca ocultar paradas del resto de elementos.
+const cir=join(dir,"CirSim.ts");
+replaceOnce(cir,
+    '        if (!subcircuitsOnly)\n            this.resetEditingContext();',
+    '        const resumeAfterImpedanceStop = !subcircuitsOnly && !!this.stopMessage?.startsWith("Impedancia Z");\n'+
+    '        if (resumeAfterImpedanceStop) this.setStopElm(null, null);\n'+
+    '        if (!subcircuitsOnly)\n            this.resetEditingContext();');
+replaceOnce(cir,
+    '                this.unsavedChanges = false;\n                this.savedFlag = true;',
+    '                this.unsavedChanges = false;\n                this.savedFlag = true;\n'+
+    '                if (resumeAfterImpedanceStop) this.setSimRunning(true);');
+console.log("Impedancia CA Z registrada; el motor se recupera al importar CA tras rechazar CC");
