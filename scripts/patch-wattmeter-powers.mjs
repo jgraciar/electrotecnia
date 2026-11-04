@@ -64,12 +64,21 @@ once('    canViewInScope(): boolean { return true; }',
 `    private getLabPowerRows(): string[] {
         const type = this.labCurrentMode === 1 ? "dc" : this.labCurrentMode === 2 ? "ac" : "auto";
         const r = this.labMeasurement.measure(type);
-        // En CC, solo potencia activa, independientemente de las casillas de CA.
-        if (r.kind === "dc" || (r.kind === "pending" && type !== "ac")) {
-            return [CircuitElm.getUnitText(this.getMeterPower(), "W")];
-        }
         const result: string[] = [];
         const mask = this.labPowerMask || 1;
+        // En CC, P se mide normalmente. Si el usuario activa Q o S se
+        // muestran a cero por convención didáctica de este instrumento.
+        // Las casillas siguen siendo seleccionables; no se calculan fasores.
+        if (r.kind === "dc" || (r.kind === "pending" && type !== "ac")) {
+            if (mask & 1) {
+                const p = this.meter === this.PM_INST ? this.getPower() : this.getMeterPower();
+                result.push((this.meter === this.PM_INST ? "p(t) " : "P ") +
+                    CircuitElm.getUnitText(p, "W"));
+            }
+            if (mask & 2) result.push("Q 0 var");
+            if (mask & 4) result.push("S 0 VA");
+            return result.length ? result : ["P " + CircuitElm.getUnitText(this.getMeterPower(), "W")];
+        }
         if (mask & 1) {
             const p = this.meter === this.PM_INST ? this.getPower() : r.p;
             result.push((this.meter === this.PM_INST ? "p(t) " : "P ") +
@@ -88,10 +97,13 @@ once('        arr[3] = "P = " + CircuitElm.getUnitText(this.getVoltageDiff() * t
         arr[4] = "P = " + CircuitElm.getUnitText(this.getAveragePower(), "W");
         const currentType = this.labCurrentMode === 1 ? "dc" : this.labCurrentMode === 2 ? "ac" : "auto";
         const powers = this.labMeasurement.measure(currentType);
-        if (powers.kind === "ac") {
-            arr[5] = "Q (fundamental) = " +
+        if (powers.kind === "dc" || (powers.kind === "pending" && currentType !== "ac")) {
+            if (this.labPowerMask & 2) arr[5] = "Q (fundamental) = 0 var";
+            if (this.labPowerMask & 4) arr[6] = "S = 0 VA";
+        } else if (powers.kind === "ac") {
+            if (this.labPowerMask & 2) arr[5] = "Q (fundamental) = " +
                 (powers.q === null ? "..." : CircuitElm.getUnitText(powers.q, "var"));
-            arr[6] = "S = " +
+            if (this.labPowerMask & 4) arr[6] = "S = " +
                 (powers.s === null ? "..." : CircuitElm.getUnitText(powers.s, "VA"));
         }`);
 
@@ -116,8 +128,7 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
             return ei;
         }
         if (n === 2) return EditInfo.createCheckbox("Potencia activa (W)", !!(this.labPowerMask & 1));
-        // Mantener visibles y operativas las casillas Q y S también en CC.
-        // Aunque se marquen, getLabPowerRows() no presenta Q ni S en continua.
+        // Casillas Q y S siempre seleccionables; en CC muestran 0 al marcarse.
         if (n === 3) return EditInfo.createCheckbox("Potencia reactiva Q (var) - fundamental", !!(this.labPowerMask & 2));
         if (n === 4) return EditInfo.createCheckbox("Potencia aparente S (VA)", !!(this.labPowerMask & 4));
         return null;
