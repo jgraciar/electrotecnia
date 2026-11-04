@@ -612,11 +612,11 @@ try {
     const api=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
     return Array.from(api.getElements()).find(e=>e.getType()==="WattmeterTrueElm").getInfo();
   });
-  const acValue=(prefix,unit)=>{
-    const line=acInfo.find(x=>x.startsWith(prefix));
+  const acValue=(prefix,unit,acInfoOverride=acInfo)=>{
+    const line=acInfoOverride.find(x=>x.startsWith(prefix));
     const match=line?.match(/(-?\d+(?:[.,]\d+)?)\s*(m?W|m?VAr|m?VA)\s*$/i);
     assert(match && match[2].toLowerCase()===unit.toLowerCase(),
-      "Lectura CA no reconocida: "+JSON.stringify({prefix,line,acInfo}));
+      "Lectura CA no reconocida: "+JSON.stringify({prefix,line,acInfo:acInfoOverride}));
     return Number(match[1].replace(",","."))/ (match[2].startsWith("m")?1000:1);
   };
   assert(Math.abs(acValue("P = ","W")-12)<0.5,
@@ -626,6 +626,38 @@ try {
   assert(Math.abs(acValue("S = ","VA")-12)<0.5,
     "Potencia aparente CA resistiva distinta de 12 VA: "+JSON.stringify(acInfo));
   console.log("CA resistiva: P=12 W, Q1=0 VAr y S=12 VA comprobados en el vatímetro");
+
+  // Carga RL serie: R=8 ohmios, XL=6 ohmios a 50 Hz,
+  // L=6/(2*pi*50) H, Uef=10 V. Por tanto Z=8+j6 ohmios,
+  // Ief=1 A, P=8 W, Q1=+6 VAr, S=10 VA y cosφ=0,8.
+  const rlCircuit=acCircuit
+    .replace('maxv="16.97056274847714"','maxv="14.142135623730951"')
+    .replace('<r x="512 304 512 448" f="0" r="12"/>',
+      '<r x="512 304 512 384" f="0" r="8"/>'+
+      '<l x="512 384 512 448" f="0" l="0.01909859317102744"/>');
+  const rlImport=await page.evaluate(xml=>window.LabCircuit.importWulflemmXml(xml),rlCircuit);
+  assert(rlImport.ok && rlImport.simulated,
+    "No se abre el circuito RL: "+JSON.stringify(rlImport));
+  await page.waitForFunction(()=>{
+    const api=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    const meter=Array.from(api?.getElements()||[]).find(e=>e.getType()==="WattmeterTrueElm");
+    const info=meter?.getInfo()||[];
+    return api?.getTime()>0.4 && ["P = ","Q (fundamental) = ","S = "]
+      .every(prefix=>info.some(x=>x.startsWith(prefix)&&!x.includes("...")));
+  },null,{timeout:45000});
+  const rlInfo=await page.evaluate(()=>{
+    const api=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(api.getElements()).find(e=>e.getType()==="WattmeterTrueElm").getInfo();
+  });
+  const rlP=acValue("P = ","W",rlInfo);
+  const rlQ=acValue("Q (fundamental) = ","VAr",rlInfo);
+  const rlS=acValue("S = ","VA",rlInfo);
+  assert(Math.abs(rlP-8)<0.5 && Math.abs(rlQ-6)<0.5 && Math.abs(rlS-10)<0.5,
+    "RL: se esperan P=8 W, Q1=+6 VAr, S=10 VA; medidas "+
+      JSON.stringify({rlP,rlQ,rlS,rlInfo}));
+  assert(Math.abs(rlP/rlS-0.8)<0.05,
+    "RL: cosφ esperado 0,8; medidas "+JSON.stringify({rlP,rlS}));
+  console.log("CA inductiva RL: P=8 W, Q1=+6 VAr, S=10 VA y cosφ=0,8 comprobados");
 
   // Al cargar otro vatímetro en CC sin máscara explícita, Q y S
   // siguen disponibles en el editor, pero empiezan sin seleccionar.
