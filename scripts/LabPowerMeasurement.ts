@@ -91,8 +91,44 @@ export class LabPowerMeasurement {
         }
         if (crossings.length >= 2) {
             const t1 = crossings[crossings.length-1];
-            const t0 = crossings[crossings.length-2];
-            const T = t1-t0;
+            // Validar la repetición de la forma de onda, no únicamente
+            // la separación entre los dos últimos cruces por cero.
+            // Un armónico intenso puede introducir cruces adicionales.
+            const reference = (variableV || !variableI) ? "v" : "i";
+            const sampleAt = (t: number): number => {
+                let lo=0,hi=full.length-1;
+                while(hi-lo>1) {
+                    const mid=(lo+hi)>>1;
+                    if(full[mid].t<t)lo=mid;else hi=mid;
+                }
+                const x=full[lo],y=full[hi];
+                const f=Math.max(0,Math.min(1,(t-x.t)/(y.t-x.t)));
+                return x[reference]+f*(y[reference]-x[reference]);
+            };
+            const candidates:number[]=[];
+            for(let j=Math.max(0,crossings.length-30);j<crossings.length-1;j++){
+                const candidate=t1-crossings[j];
+                if(candidate>=0.0005 && candidate<=this.history/1.5 &&
+                   t1-2*candidate>=full[0].t)
+                    candidates.push(candidate);
+            }
+            let T=crossings[crossings.length-1]-crossings[crossings.length-2];
+            if(candidates.length){
+                const scale=Math.max(1e-12,rms*rms);
+                let best=Infinity;
+                for(const candidate of candidates){
+                    let error=0;
+                    for(let k=0;k<32;k++){
+                        const t=t1-candidate*(k+0.5)/32;
+                        const difference=sampleAt(t)-sampleAt(t-candidate);
+                        error+=difference*difference/scale;
+                    }
+                    // Preferir la coincidencia de onda completa frente
+                    // a cruces espurios; desempatar por periodo menor.
+                    if(error<best-1e-8){best=error;T=candidate;}
+                }
+            }
+            const t0=t1-T;
             if (T >= 0.0005 && T <= this.history / 1.5 && end-t1 <= 2*T) {
                 const cycle = this.interval(a, t0, t1);
                 if (cycle.length >= 3) {
