@@ -19,10 +19,23 @@ try{
     });
     assert.equal(startup.filter(x=>x==="WattmeterTrueElm").length,2);
 
+    // El acceso rápido aparece a la derecha en el menú de pasivos.
+    // Z mayúscula evita quitar la z minúscula al diodo Zener.
+    const menuItem=await page.evaluate(()=>{
+        const doc=document.querySelector("#circuit-frame")?.contentDocument;
+        const label=Array.from(doc?.querySelectorAll(".itemLabel")??[])
+            .find(e=>e.textContent?.includes("Add Impedance Z"));
+        return {label:label?.textContent,shortcut:label?.parentElement
+            ?.querySelector(".shortcutHint")?.textContent?.trim()};
+    });
+    assert.equal(menuItem.shortcut,"Z",
+        "La impedancia debe mostrar Z a la derecha en Componentes pasivos: "+JSON.stringify(menuItem));
+    console.log("Menú de pasivos: impedancia Z con acceso rápido Mayús+Z");
+
     const f0=50, l=5/(2*Math.PI*f0);
-    const circuit=(attrs,waveform=1)=>{
+    const circuit=(attrs,waveform=1,frequency=50)=>{
         return '<cir f="1" ts="0.00001" ic="12" cb="50" pb="50" vr="20" mts="5e-11">'+
-            '<v x="80 304 80 448" f="0" wf="'+waveform+'" fr="50" maxv="14.142135623730951"/>'+
+            '<v x="80 304 80 448" f="0" wf="'+waveform+'" fr="'+frequency+'" maxv="14.142135623730951"/>'+
             '<g x="80 448 80 480" f="0"/>'+
             '<w x="80 304 256 304" f="0"/>'+
             '<Impedance x="256 304 352 304" f="0" '+attrs+'/>'+
@@ -74,6 +87,19 @@ try{
     assert.deepEqual([roundtrip.found,roundtrip.r,roundtrip.c,roundtrip.frequency,roundtrip.mode],
         [true,"8","0","50","1"],"Se pierden atributos de impedancia al guardar y abrir");
     console.log("Impedancia RL: dos terminales, corriente real y XML conservado");
+
+    // f0 del XML sigue siendo 50 Hz para la reproducibilidad, pero
+    // los valores mostrados deben leer la fuente de alimentación real.
+    const sixty=await load(circuit('mode="1" f0="50" r="8" l="'+l+'" c="0"',1,60));
+    assert(sixty.info.some(x=>x==="f de red = 60 Hz"),
+        "No se detecta automáticamente 60 Hz de la fuente: "+JSON.stringify(sixty.info));
+    assert(sixty.info.some(x=>x==="X = 6 Ω"),
+        "La reactancia mostrada debe variar con la frecuencia de red: "+JSON.stringify(sixty.info));
+    console.log("Fuente 60 Hz: frecuencia automática; X = 6 Ω sin modificar R ni L");
+    const rl50=await load(circuit('mode="1" f0="50" r="8" l="'+l+'" c="0"'));
+    assert(rl50.info.some(x=>x==="f de red = 50 Hz") &&
+        rl50.info.some(x=>x==="X = 5 Ω"),
+        "No se recupera la frecuencia de red de 50 Hz al cambiar de circuito");
 
     const cap=await load(circuit('mode="1" f0="50" r="8" l="0" c="'+(1/(2*Math.PI*50*5))+'"'));
     assert(cap.info.some(x=>/^X = -5 Ω/.test(x)),
