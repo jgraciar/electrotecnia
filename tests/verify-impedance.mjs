@@ -87,6 +87,31 @@ try{
         "No se conserva la capacidad física en la impedancia RLC: "+JSON.stringify(both.info));
     console.log("Impedancia RLC: R, L y C simultáneas, dos bornes y solución real");
 
+    const compatible=await page.evaluate(()=>window.LabCircuit.exportStandardRLC());
+    assert(compatible.ok && compatible.converted===1 && compatible.added===2,
+        "No se puede exportar Z como RLC estándar: "+JSON.stringify(compatible));
+    const standard=await page.evaluate(xml=>{
+        const doc=new DOMParser().parseFromString(xml,"application/xml");
+        const el=Array.from(doc.documentElement.children);
+        return {
+            custom:el.filter(e=>e.tagName==="Impedance").length,
+            resistance:el.filter(e=>e.tagName==="r").map(e=>e.getAttribute("r")),
+            inductance:el.filter(e=>e.tagName==="l").map(e=>e.getAttribute("l")),
+            capacitance:el.filter(e=>e.tagName==="c").map(e=>e.getAttribute("c")),
+            joined:el.filter(e=>["r","l","c"].includes(e.tagName)).map(e=>e.getAttribute("x"))
+        };
+    },compatible.xml);
+    assert.equal(standard.custom,0);
+    assert.deepEqual(standard.resistance,["8"]);
+    assert.deepEqual(standard.inductance,["0.1"]);
+    assert.deepEqual(standard.capacitance,["0.0001"]);
+    assert.equal(standard.joined.length,3);
+    const legacy=await page.evaluate(xml=>window.LabCircuit.importModel("RLC estándar",xml),compatible.xml);
+    assert(legacy.ok && legacy.simulated && legacy.elements===8,
+        "La exportación estándar no se puede volver a abrir: "+JSON.stringify(legacy));
+    console.log("RLC estándar: exportación en 3 elementos nativos, XML recargado sin Z");
+
+
     // Una fuente únicamente de CC no debe iniciar la simulación de Z.
     const dc=circuit('mode="1" f0="50" r="8" l="'+l+'" c="0"',0);
     const dcLoaded=await page.evaluate(xml=>window.LabCircuit.importModel("Z con fuente solo CC",xml),dc);
