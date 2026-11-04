@@ -19,6 +19,14 @@ once('    selectedValue: number = 0;',
     labCurrentMode: number = 0; // 0 auto; 1 CC; 2 CA
     labPowerMask: number = 1; // P=1, Q1=2, S=4; las tres se combinan
     labMeasurement: LabPowerMeasurement = new LabPowerMeasurement();
+    // Modos de lectura: 0 instantánea, 1 pico, 2 RMS, 3 media.
+    labPowerReadMode: number = 0;
+    labVoltageReadMode: number = 2;
+    labCurrentReadMode: number = 2;
+    labShowVoltage: boolean = false;
+    labShowCurrent: boolean = false;
+    // 0: 1 periodo; 1: 3 periodos; 2: 100ms; 3: 250ms; 4: 500ms
+    labWindowMode: number = 0;
     private labSwitchingToDC: boolean = false;`);
 once('        CircuitXMLSerializer.dumpAttr(elem, "meter", this.meter);',
 `        CircuitXMLSerializer.dumpAttr(elem, "meter", this.meter);
@@ -26,13 +34,34 @@ once('        CircuitXMLSerializer.dumpAttr(elem, "meter", this.meter);',
         if (this.labCurrentMode !== 0)
             CircuitXMLSerializer.dumpAttr(elem, "labCurrentMode", this.labCurrentMode);
         if (this.labPowerMask !== 1)
-            CircuitXMLSerializer.dumpAttr(elem, "labPowerMask", this.labPowerMask);`);
+            CircuitXMLSerializer.dumpAttr(elem, "labPowerMask", this.labPowerMask);
+        // Solo se escriben preferencias distintas a las del archivo clásico.
+        if (this.labPowerReadMode !== (this.meter === this.PM_INST ? 0 : 3))
+            CircuitXMLSerializer.dumpAttr(elem, "labPowerReadMode", this.labPowerReadMode);
+        if (this.labVoltageReadMode !== 2)
+            CircuitXMLSerializer.dumpAttr(elem, "labVoltageReadMode", this.labVoltageReadMode);
+        if (this.labCurrentReadMode !== 2)
+            CircuitXMLSerializer.dumpAttr(elem, "labCurrentReadMode", this.labCurrentReadMode);
+        if (this.labShowVoltage)
+            CircuitXMLSerializer.dumpAttr(elem, "labShowVoltage", 1);
+        if (this.labShowCurrent)
+            CircuitXMLSerializer.dumpAttr(elem, "labShowCurrent", 1);
+        if (this.labWindowMode !== 0)
+            CircuitXMLSerializer.dumpAttr(elem, "labWindowMode", this.labWindowMode);`);
 once('        this.meter = xml.parseIntAttr("meter", this.meter);',
 `        this.meter = xml.parseIntAttr("meter", this.meter);
         // La ausencia de estas opciones es normal en todos los archivos Wulflemm.
         this.labCurrentMode = Math.max(0, Math.min(2, xml.parseIntAttr("labCurrentMode", 0)));
         this.labPowerMask = xml.parseIntAttr("labPowerMask", 1) & 7;
         if (!this.labPowerMask) this.labPowerMask = 1;
+        const limitMode = (n: number, max: number) => Math.max(0, Math.min(max, n));
+        this.labPowerReadMode = limitMode(
+            xml.parseIntAttr("labPowerReadMode", this.meter === this.PM_INST ? 0 : 3), 3);
+        this.labVoltageReadMode = limitMode(xml.parseIntAttr("labVoltageReadMode", 2), 3);
+        this.labCurrentReadMode = limitMode(xml.parseIntAttr("labCurrentReadMode", 2), 3);
+        this.labShowVoltage = xml.parseIntAttr("labShowVoltage", 0) === 1;
+        this.labShowCurrent = xml.parseIntAttr("labShowCurrent", 0) === 1;
+        this.labWindowMode = limitMode(xml.parseIntAttr("labWindowMode", 0), 4);
         this.labMeasurement.clear();`);
 once('        const str = CircuitElm.getUnitText(this.getMeterPower(), "W");\n        g.save();\n        let fsize = 15;\n        let w;\n        // adjust font size to fit\n        while (true) {\n            g.setFont(new Font("SansSerif", 0, fsize));\n            w = Math.trunc(g.context.measureText(str).width);\n            if (w < this.maxTextLen)\n                break;\n            fsize--;\n        }\n        g.setColor(CircuitElm.whiteColor);\n        g.context.textBaseline = "middle";\n        g.drawString(str, this.center.x - Math.trunc(w/2), this.center.y);\n        g.restore();',
 `        const rows = this.getLabPowerRows();
