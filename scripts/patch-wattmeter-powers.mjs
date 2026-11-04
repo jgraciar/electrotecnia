@@ -27,6 +27,9 @@ once('    selectedValue: number = 0;',
     labShowCurrent: boolean = false;
     labShowCosPhi: boolean = false;
     labShowPowerFactor: boolean = false;
+    labShowTHDU: boolean = false;
+    labShowTHDI: boolean = false;
+    labShowDistortion: boolean = false;
     // 0: 1 periodo; 1: 3 periodos; 2: 100ms; 3: 250ms; 4: 500ms
     labWindowMode: number = 0;
     private labSwitchingToDC: boolean = false;`);
@@ -52,6 +55,9 @@ once('        CircuitXMLSerializer.dumpAttr(elem, "meter", this.meter);',
             CircuitXMLSerializer.dumpAttr(elem, "labShowCosPhi", 1);
         if (this.labShowPowerFactor)
             CircuitXMLSerializer.dumpAttr(elem, "labShowPowerFactor", 1);
+        if (this.labShowTHDU) CircuitXMLSerializer.dumpAttr(elem, "labShowTHDU", 1);
+        if (this.labShowTHDI) CircuitXMLSerializer.dumpAttr(elem, "labShowTHDI", 1);
+        if (this.labShowDistortion) CircuitXMLSerializer.dumpAttr(elem, "labShowDistortion", 1);
         if (this.labWindowMode !== 0)
             CircuitXMLSerializer.dumpAttr(elem, "labWindowMode", this.labWindowMode);`);
 once('        this.meter = xml.parseIntAttr("meter", this.meter);',
@@ -69,6 +75,9 @@ once('        this.meter = xml.parseIntAttr("meter", this.meter);',
         this.labShowCurrent = xml.parseIntAttr("labShowCurrent", 0) === 1;
         this.labShowCosPhi = xml.parseIntAttr("labShowCosPhi", 0) === 1;
         this.labShowPowerFactor = xml.parseIntAttr("labShowPowerFactor", 0) === 1;
+        this.labShowTHDU = xml.parseIntAttr("labShowTHDU", 0) === 1;
+        this.labShowTHDI = xml.parseIntAttr("labShowTHDI", 0) === 1;
+        this.labShowDistortion = xml.parseIntAttr("labShowDistortion", 0) === 1;
         this.labWindowMode = limitMode(xml.parseIntAttr("labWindowMode", 0), 4);
         this.labMeasurement.clear();`);
 once('        const str = CircuitElm.getUnitText(this.getMeterPower(), "W");\n        g.save();\n        let fsize = 15;\n        let w;\n        // adjust font size to fit\n        while (true) {\n            g.setFont(new Font("SansSerif", 0, fsize));\n            w = Math.trunc(g.context.measureText(str).width);\n            if (w < this.maxTextLen)\n                break;\n            fsize--;\n        }\n        g.setColor(CircuitElm.whiteColor);\n        g.context.textBaseline = "middle";\n        g.drawString(str, this.center.x - Math.trunc(w/2), this.center.y);\n        g.restore();',
@@ -148,6 +157,12 @@ once('    canViewInScope(): boolean { return true; }',
             result.push("cosφ " + (electrical.kind === "dc" ? "—" : ratio(electrical.cosPhi)));
         if (this.labShowPowerFactor)
             result.push("f.d.p. " + (electrical.kind === "dc" ? "—" : ratio(electrical.powerFactor)));
+        if (this.labShowTHDU)
+            result.push("THD U " + (electrical.thdVoltage == null ? "..." : ratio(electrical.thdVoltage*100)+" %"));
+        if (this.labShowTHDI)
+            result.push("THD I " + (electrical.thdCurrent == null ? "..." : ratio(electrical.thdCurrent*100)+" %"));
+        if (this.labShowDistortion)
+            result.push("D* " + print(electrical.distortionResidual ?? null,"VA"));
         if (this.labShowVoltage) {
             const n = values ? values[this.labVoltageReadMode].v : null;
             result.push(["u(t) ", "Umax ", "URMS ", "Umed "][this.labVoltageReadMode]+print(n,"V"));
@@ -200,7 +215,13 @@ once('        arr[3] = "P = " + CircuitElm.getUnitText(this.getVoltageDiff() * t
                 (powers.kind === "dc" ? "—" : fraction(powers.cosPhi));
         if (this.labShowPowerFactor)
             arr[line++] = "f.d.p. real (P/S) = " +
-                (powers.kind === "dc" ? "—" : fraction(powers.powerFactor));`);
+                (powers.kind === "dc" ? "—" : fraction(powers.powerFactor));
+        if (this.labShowTHDU) arr[line++] = "THD tension = " +
+            (powers.thdVoltage == null ? "..." : fraction(powers.thdVoltage*100)+" %");
+        if (this.labShowTHDI) arr[line++] = "THD corriente = " +
+            (powers.thdCurrent == null ? "..." : fraction(powers.thdCurrent*100)+" %");
+        if (this.labShowDistortion) arr[line++] = "D* residual no fundamental = " +
+            fmt(powers.distortionResidual ?? null,"VA");`);
 
 once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n            const ei = new EditInfo("Value", this.selectedValue, -1, -1);\n            ei.choice = new Choice();\n            ei.choice.add("Instantaneous Power");\n            ei.choice.add("Average Power");\n            ei.choice.select(this.meter);\n            return ei;\n        }\n        return null;\n    }\n\n    setEditValue(n: number, ei: EditInfo): void {\n        if (n === 0)\n            this.meter = ei.choice!.getSelectedIndex();\n    }',
 `    getEditInfo(n: number): EditInfo | null {
@@ -242,6 +263,9 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
         if (n === 7) return EditInfo.createCheckbox("Mostrar intensidad en el vatímetro", this.labShowCurrent);
         if (n === 10) return EditInfo.createCheckbox("Mostrar cos φ (fundamental)", this.labShowCosPhi);
         if (n === 11) return EditInfo.createCheckbox("Mostrar f.d.p. real (P/S)", this.labShowPowerFactor);
+        if (n === 12) return EditInfo.createCheckbox("Mostrar THD tension (%)", this.labShowTHDU);
+        if (n === 13) return EditInfo.createCheckbox("Mostrar THD corriente (%)", this.labShowTHDI);
+        if (n === 14) return EditInfo.createCheckbox("Mostrar D* residual no fundamental (VA)", this.labShowDistortion);
         if (n === 9) {
             const ei = new EditInfo("Ventana de cálculo de U, I y p(t)", 0, -1, -1);
             ei.choice = new Choice();
@@ -281,6 +305,9 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
         if (n === 9) this.labWindowMode = ei.choice!.getSelectedIndex();
         if (n === 10) this.labShowCosPhi = ei.checkbox!.getState();
         if (n === 11) this.labShowPowerFactor = ei.checkbox!.getState();
+        if (n === 12) this.labShowTHDU = ei.checkbox!.getState();
+        if (n === 13) this.labShowTHDI = ei.checkbox!.getState();
+        if (n === 14) this.labShowDistortion = ei.checkbox!.getState();
         if (n >= 2 && n <= 4) {
             if (this.labSwitchingToDC && n >= 3) {
                 if (n === 4) this.labSwitchingToDC = false;
