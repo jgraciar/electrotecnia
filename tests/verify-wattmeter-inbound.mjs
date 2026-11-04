@@ -581,7 +581,15 @@ try {
   const pString=dcReading.info.find(line=>/^P = /.test(line));
   assert(pString && !/P = 0(?:\s|$)/.test(pString),
     "La potencia activa CC debe mostrar su valor real: "+JSON.stringify(dcReading.info));
-  console.log("Continua: P real, Q=0 VAr y S=0 VA al seleccionar las casillas");
+  // Validación numérica de la lectura REAL del instrumento en el navegador:
+  // 12 V sobre 12 ohmios -> 1 A y 12 W (sin limitarse a comprobar P != 0).
+  const dcPowerMatch=pString.match(/^P =\\s*(-?\\d+(?:[.,]\\d+)?)\\s*(?:W|watts?)?$/i);
+  assert(dcPowerMatch,
+    "La lectura de P CC no tiene formato numérico en vatios: "+pString);
+  const dcPower=Number(dcPowerMatch[1].replace(",","."));
+  assert(Math.abs(dcPower-12)<0.3,
+    "Vatímetro CC: se esperan 12 W con 12 V y 12 ohmios, lectura "+pString);
+  console.log("Continua: P = 12 W verificados en la interfaz, Q=0 VAr y S=0 VA");
 
   // Al cargar otro vatímetro en CC sin máscara explícita, Q y S
   // siguen disponibles en el editor, pero empiezan sin seleccionar.
