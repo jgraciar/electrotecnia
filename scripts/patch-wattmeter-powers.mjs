@@ -116,16 +116,23 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
             return ei;
         }
         if (n === 2) return EditInfo.createCheckbox("Potencia activa (W)", !!(this.labPowerMask & 1));
-        const dc = this.labCurrentMode === 1 ||
-            (this.labCurrentMode === 0 && this.labMeasurement.measure("auto").kind === "dc");
-        if (dc) return null;
+        // Mantener visibles y operativas las casillas Q y S también en CC.
+        // Aunque se marquen, getLabPowerRows() no presenta Q ni S en continua.
         if (n === 3) return EditInfo.createCheckbox("Potencia reactiva Q (var) - fundamental", !!(this.labPowerMask & 2));
         if (n === 4) return EditInfo.createCheckbox("Potencia aparente S (VA)", !!(this.labPowerMask & 4));
         return null;
     }
 
     setEditValue(n: number, ei: EditInfo): void {
-        if (n === 0) this.labCurrentMode = ei.choice!.getSelectedIndex();
+        if (n === 0) {
+            const mode = ei.choice!.getSelectedIndex();
+            if (mode === 1 && this.labCurrentMode !== 1) {
+                // Al pasar a CC, Q y S se desmarcan por defecto.
+                // El usuario puede marcarlas después, sin mostrar lectura.
+                this.labPowerMask = 1;
+            }
+            this.labCurrentMode = mode;
+        }
         if (n === 1) this.meter = ei.choice!.getSelectedIndex();
         if (n >= 2 && n <= 4) {
             const bit = 1 << (n-2);
