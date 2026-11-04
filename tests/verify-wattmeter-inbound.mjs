@@ -785,6 +785,66 @@ try {
       JSON.stringify({dCos,dFdp,distortedRlInfo}));
   console.log("RL con quinto armónico: P, Q1, S, cosφ y f.d.p. real contrastados");
 
+  // Rectificador real de media onda: diodo en serie con R=10 ohmios,
+  // fuente de 10 V RMS a 50 Hz. La corriente pulsante contiene CC y
+  // armónicos; la tensión de alimentación permanece sinusoidal.
+  // La caída directa del diodo se mide, sin suponer un diodo ideal.
+  const rectifierCircuit=acCircuit
+    .replace('<r x="512 304 512 448" f="0" r="12"/>',
+      '<d x="512 304 512 368" f="0"/>'+
+      '<r x="512 368 512 448" f="0" r="10"/>')
+    .replace('labPowerMask="7"',
+      'labPowerMask="7" labShowTHDU="1" labShowTHDI="1"'+
+      ' labShowCosPhi="1" labShowPowerFactor="1"');
+  assert(rectifierCircuit!==acCircuit,"No se ha generado el rectificador");
+  const rectifierImport=await page.evaluate(xml=>
+    window.LabCircuit.importWulflemmXml(xml),rectifierCircuit);
+  assert(rectifierImport.ok && rectifierImport.simulated,
+    "No se abre el rectificador: "+JSON.stringify(rectifierImport));
+  await page.waitForFunction(()=>{
+    const api=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    const meter=Array.from(api?.getElements()||[]).find(e=>e.getType()==="WattmeterTrueElm");
+    const info=meter?.getInfo()||[];
+    return api?.getTime()>0.4 && ["P = ","S = ","THD tension = ",
+      "THD corriente = ","cos φ (fundamental) = ",
+      "f.d.p. real (P/S) = "].every(prefix=>
+      info.some(x=>x.startsWith(prefix)&&!x.includes("...")));
+  },null,{timeout:45000});
+  const rectifierInfo=await page.evaluate(()=>{
+    const api=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(api.getElements()).find(e=>e.getType()==="WattmeterTrueElm").getInfo();
+  });
+  const rectifierP=acValue("P = ","W",rectifierInfo);
+  const rectifierS=acValue("S = ","VA",rectifierInfo);
+  const rectifierFactor=prefix=>{
+    const line=rectifierInfo.find(x=>x.startsWith(prefix));
+    const match=line?.match(/(-?\d+(?:[.,]\d+)?)/);
+    assert(match,"Lectura del rectificador ilegible: "+JSON.stringify({prefix,line,rectifierInfo}));
+    return Number(match[1].replace(",","."));
+  };
+  const rectifierCos=rectifierFactor("cos φ (fundamental) = ");
+  const rectifierFdp=rectifierFactor("f.d.p. real (P/S) = ");
+  // La lectura de THD del rectificador se extrae de su propio instrumento.
+  const rectifierThd=prefix=>{
+    const line=rectifierInfo.find(x=>x.startsWith(prefix));
+    const match=line?.match(/(-?\d+(?:[.,]\d+)?)\s*%/);
+    assert(match,"THD del rectificador ilegible: "+JSON.stringify({prefix,line,rectifierInfo}));
+    return Number(match[1].replace(",","."));
+  };
+  const rectifierThdVoltage=rectifierThd("THD tension = ");
+  const rectifierThdCurrent=rectifierThd("THD corriente = ");
+  assert(rectifierP>0 && rectifierS>=rectifierP && rectifierS<15,
+    "Potencias no físicas en el rectificador: "+JSON.stringify({rectifierP,rectifierS,rectifierInfo}));
+  assert(Math.abs(rectifierThdVoltage)<3 && rectifierThdCurrent>30,
+    "La tensión debe ser sinusoidal y la corriente deformada: "+
+      JSON.stringify({rectifierThdVoltage,rectifierThdCurrent,rectifierInfo}));
+  assert(rectifierCos>0.9 && rectifierCos<=1.01 &&
+    rectifierFdp>0 && rectifierFdp<rectifierCos-0.08 &&
+    Math.abs(rectifierFdp-rectifierP/rectifierS)<0.04,
+    "El factor de potencia debe reflejar la distorsión: "+
+      JSON.stringify({rectifierCos,rectifierFdp,rectifierP,rectifierS,rectifierInfo}));
+  console.log("Rectificador de media onda: corriente deformada, cosφ y f.d.p. separados");
+
   // Al cargar otro vatímetro en CC sin máscara explícita, Q y S
   // siguen disponibles en el editor, pero empiezan sin seleccionar.
   const defaultDc=dcCircuit.replace(' labPowerMask="7"','');
