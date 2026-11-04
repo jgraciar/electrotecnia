@@ -11,6 +11,10 @@ export type PowerReading = {
     // cosφ de las componentes fundamentales; f.d.p. = P/S total.
     cosPhi: number | null;
     powerFactor: number | null;
+    thdVoltage?: number | null;
+    thdCurrent?: number | null;
+    distortionResidual?: number | null;
+    harmonicPower?: number | null;
 };
 
 export class LabPowerMeasurement {
@@ -106,7 +110,41 @@ export class LabPowerMeasurement {
                     // aparente total (incluye armónicos de U e I).
                     const powerFactor = s > 1e-12
                         ? Math.max(-1,Math.min(1,wave.p/s)) : null;
-                    return {kind: "ac", p: wave.p, s, q, period: T, cosPhi, powerFactor};
+                    // Fourier temporal de las señales reales: amplitudes RMS de
+                    // los armónicos 1..H, sin añadir distorsión artificial.
+                    // Se limita H por Nyquist y por el muestreo disponible.
+                    const maxStep=Math.max(...cycle.slice(1).map((x,j)=>x.t-cycle[j].t));
+                    const H=Math.max(1,Math.min(25,Math.floor(T/(2*maxStep))));
+                    const spectral=(field: "v" | "i")=>{
+                        const result:{rms:number; cos:number; sin:number}[]=[];
+                        for(let h=1;h<=H;h++){
+                            let co=0,si=0;
+                            const omega=2*Math.PI*h/T;
+                            for(let j=1;j<cycle.length;j++){
+                                const a=cycle[j-1],b=cycle[j],dt=b.t-a.t;
+                                const va=a[field],vb=b[field];
+                                co+=dt*(va*Math.cos(omega*(a.t-t0))+vb*Math.cos(omega*(b.t-t0)))/T;
+                                si+=dt*(va*Math.sin(omega*(a.t-t0))+vb*Math.sin(omega*(b.t-t0)))/T;
+                            }
+                            co*=2;si*=2;
+                            result.push({rms:Math.hypot(co,si)/Math.SQRT2,cos:co,sin:si});
+                        }
+                        return result;
+                    };
+                    const vs=spectral("v"),is=spectral("i");
+                    const thd=(harmonics:typeof vs)=>{
+                        const fundamental=harmonics[0].rms;
+                        return fundamental>1e-9
+                            ? Math.hypot(...harmonics.slice(1).map(h=>h.rms))/fundamental
+                            : null;
+                    };
+                    const harmonicPower=vs.reduce((sum,v,h)=>h===0?sum:
+                        sum+(v.cos*is[h].cos+v.sin*is[h].sin)/2,0);
+                    // D* es potencia residual no fundamental, NO Budeanu.
+                    const distortionResidual=Math.sqrt(Math.max(0,s*s-wave.p*wave.p-q*q));
+                    return {kind:"ac",p:wave.p,s,q,period:T,cosPhi,powerFactor,
+                        thdVoltage:thd(vs),thdCurrent:thd(is),
+                        distortionResidual,harmonicPower};
                 }
             }
         }
