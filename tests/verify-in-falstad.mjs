@@ -508,11 +508,12 @@ try {
     return {found,counts,success:false};
   });
   console.log("MAPA EDITORES CIRCUITJS",JSON.stringify(editorGrid));
+  const wattmeterPoint=editorGrid.found.find(x=>x.editor==="Wattmeter")||{x:460,y:30};
 
-  const wattmeterGui=await page.evaluate(()=>{
+  const wattmeterGui=await page.evaluate(({x,y})=>{
     const d=document.getElementById("circuit-frame").contentDocument;
     const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
-    const r=canvas.getBoundingClientRect(),x=430,y=30;
+    const r=canvas.getBoundingClientRect();
     canvas.dispatchEvent(new MouseEvent("mousemove",{bubbles:true,view:d.defaultView,
       clientX:r.x+x,clientY:r.y+y}));
     canvas.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,
@@ -526,23 +527,23 @@ try {
       e.textContent?.trim()==="Cancel"&&e.getBoundingClientRect().width>0);
     cancel?.click();
     return {opened,fields,dialogText:opened?body.slice(-700):null};
-  });
+  },wattmeterPoint);
   console.log("EDITOR VATÍMETRO WULFLEMM",JSON.stringify(wattmeterGui));
 
-  const wattmeterModeRoundtrip=await page.evaluate(()=>{
+  const wattmeterModeRoundtrip=await page.evaluate(({x,y})=>{
     const d=document.getElementById("circuit-frame").contentDocument;
     const api=d.defaultView.CircuitJS1;
     const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
-    const r=canvas.getBoundingClientRect(),x=430,y=30;
+    const r=canvas.getBoundingClientRect();
     canvas.dispatchEvent(new MouseEvent("mousemove",{bubbles:true,view:d.defaultView,
       clientX:r.x+x,clientY:r.y+y}));
     canvas.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,
       view:d.defaultView,clientX:r.x+x,clientY:r.y+y,button:0,detail:2}));
     const select=Array.from(d.querySelectorAll("select")).find(e=>
-      e.getBoundingClientRect().width>10&&Array.from(e.options).some(o=>o.text.includes("Instantaneous Power")));
+      e.getBoundingClientRect().width>10&&Array.from(e.options).some(o=>/Instantanea p\\(t\\)|Instantaneous Power/i.test(o.text)));
     if(!select)return {error:"Wattmeter mode selector not found"};
     const options=Array.from(select.options).map(o=>({value:o.value,text:o.text}));
-    const instant=Array.from(select.options).find(o=>o.text.includes("Instantaneous Power"));
+    const instant=Array.from(select.options).find(o=>/Instantanea p\\(t\\)|Instantaneous Power/i.test(o.text));
     select.value=instant.value;
     select.dispatchEvent(new Event("change",{bubbles:true}));
     const ok=Array.from(d.querySelectorAll("button")).find(e=>
@@ -559,7 +560,7 @@ try {
     api.importCircuit(xml);
     const after=read();
     return {options,before,after};
-  });
+  },wattmeterPoint);
   console.log("ROUNDTRIP MODO VATÍMETRO GUI",JSON.stringify(wattmeterModeRoundtrip));
 
   if(JSON.stringify(wattmeterModeRoundtrip.before?.map(e=>e.meter))!==JSON.stringify(["0","1"]))
