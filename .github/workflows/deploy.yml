@@ -34,6 +34,7 @@ jobs:
           node --check laboratorio/bridge.js
           node --check laboratorio/wulflemm-xml.js
           node --check laboratorio/wulflemm-ui.js
+          node --check laboratorio/impedance-export.js
           node laboratorio/tests/wattmeter-average.test.js
           node laboratorio/tests/wulflemm-structure.test.js
           node laboratorio/tests/wulflemm-xml-diagnostics.test.js
@@ -86,7 +87,7 @@ jobs:
       - name: Preparar sitio estático de GitHub Pages
         run: |
           mkdir -p public/circuitjs
-          cp laboratorio/index.html laboratorio/styles.css laboratorio/app.js laboratorio/lab-circuits.js laboratorio/bridge.js laboratorio/wulflemm-xml.js laboratorio/wulflemm-ui.js laboratorio/sce-practices.js laboratorio/curriculum.js laboratorio/networks-solar-curriculum.js laboratorio/networks-solar-practices.js laboratorio/practices.js laboratorio/publications-data.js laboratorio/paraninfo-activities.js laboratorio/textbook-exercises.js laboratorio/textbook-curriculum.js laboratorio/textbook-ui.js laboratorio/publications.js laboratorio/LICENSE public/
+          cp laboratorio/index.html laboratorio/styles.css laboratorio/app.js laboratorio/lab-circuits.js laboratorio/bridge.js laboratorio/wulflemm-xml.js laboratorio/wulflemm-ui.js laboratorio/impedance-export.js laboratorio/sce-practices.js laboratorio/curriculum.js laboratorio/networks-solar-curriculum.js laboratorio/networks-solar-practices.js laboratorio/practices.js laboratorio/publications-data.js laboratorio/paraninfo-activities.js laboratorio/textbook-exercises.js laboratorio/textbook-curriculum.js laboratorio/textbook-ui.js laboratorio/publications.js laboratorio/LICENSE public/
           mkdir -p public/tests/fixtures
           cp laboratorio/tests/fixtures/wulflemm-aron.xml public/tests/fixtures/
           cp -a circuitjs-src/ts/dist/. public/circuitjs/
@@ -100,6 +101,7 @@ jobs:
           test -f public/textbook-ui.js
           test -f public/publications.js
           test -f public/lab-circuits.js
+          test -f public/impedance-export.js
           test -f public/sce-practices.js
           test -f public/curriculum.js
           test -f public/networks-solar-curriculum.js
