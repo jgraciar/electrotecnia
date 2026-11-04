@@ -286,13 +286,14 @@ try {
   const guiEdit=await page.evaluate(()=>{
     const frame=document.getElementById("circuit-frame");
     const d=frame.contentDocument;
-    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
+    if(!canvas)return {error:"Falta el lienzo de CircuitJS"};
     const r=Array.from(new DOMParser().parseFromString(frame.contentWindow.CircuitJS1.exportCircuit(),"application/xml").documentElement.children)
       .filter(n=>n.tagName==="r").find(n=>{
         const p=n.getAttribute("x").trim().split(/\s+/).map(Number);
         return (p[1]+p[3])/2<canvas.height-30;
       });
-    if(!canvas||!r)return {error:"Faltan lienzo o resistencia"};
+    if(!r)return {error:"No hay resistencia medible en el lienzo"};
     const xy=r.getAttribute("x").trim().split(/\s+/).map(Number);
     const rect=canvas.getBoundingClientRect();
     return {x:rect.x+(xy[0]+xy[2])/2,y:rect.y+(xy[1]+xy[3])/2,
@@ -302,7 +303,7 @@ try {
   const circuitFrame=page.frameLocator("#circuit-frame");
   await page.evaluate(({x,y})=>{
     const d=document.getElementById("circuit-frame").contentDocument;
-    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
     for(const type of ["mousemove","mousedown","mouseup","click","mousemove","mousedown","mouseup","click","dblclick"])
       canvas.dispatchEvent(new MouseEvent(type,{bubbles:true,cancelable:true,view:d.defaultView,
         clientX:x,clientY:y,button:0,buttons:type==="mousedown"?1:0,detail:type==="dblclick"?2:1}));
@@ -329,7 +330,7 @@ try {
   // Registrar las coordenadas que recibe realmente el lienzo.
   const eventCoordinates=await page.evaluate(({x,y})=>{
     const d=document.getElementById("circuit-frame").contentDocument;
-    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
     const rect=canvas.getBoundingClientRect();
     const values=[];
     const listener=e=>values.push({type:e.type,clientX:e.clientX,clientY:e.clientY,
@@ -357,7 +358,7 @@ try {
   // y observar si CircuitJS crea un editor al hacer doble clic.
   const canvasProbe=await page.evaluate(()=>{
     const d=document.getElementById("circuit-frame").contentDocument;
-    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
     const r=canvas.getBoundingClientRect();
     const emit=(type,x,y)=>canvas.dispatchEvent(new MouseEvent(type,{
       bubbles:true,cancelable:true,view:d.defaultView,clientX:r.x+x,clientY:r.y+y,
@@ -416,7 +417,7 @@ try {
   // Probar la posición transformada obtenida del SVG y comprobar el diálogo.
   const transformedClick=await page.evaluate(()=>{
     const d=document.getElementById("circuit-frame").contentDocument;
-    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
     const rect=canvas.getBoundingClientRect();
     const x=726,y=90;
     for(const type of ["mousemove","mousedown","mouseup","click","mousemove","mousedown","mouseup","click","dblclick"])
@@ -442,7 +443,7 @@ try {
     const cancel=Array.from(d.querySelectorAll("button")).find(e=>
       e.textContent?.trim()==="Cancel"&&e.getBoundingClientRect().width>0);
     cancel?.click();
-    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
     const rect=canvas.getBoundingClientRect();
     // Resistencia XML: (752,304)-(720,352), transformada SVG (-10,-238).
     // El centro cae en (726,90), ocupado por una bobina: barrer alrededor
@@ -469,7 +470,7 @@ try {
   // la selección de elementos, evitando abrir docenas de diálogos.
   const hoverProbe=await page.evaluate(()=>{
     const d=document.getElementById("circuit-frame").contentDocument;
-    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
     const r=canvas.getBoundingClientRect(),hits=[];
     let last="";
     for(let y=24;y<400;y+=24){
@@ -486,7 +487,7 @@ try {
 
   const editorGrid=await page.evaluate(()=>{
     const d=document.getElementById("circuit-frame").contentDocument;
-    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
     const r=canvas.getBoundingClientRect(),found=[],counts={};
     for(let y=30;y<=390;y+=30){
       for(let x=40;x<=900;x+=30){
@@ -510,7 +511,7 @@ try {
 
   const wattmeterGui=await page.evaluate(()=>{
     const d=document.getElementById("circuit-frame").contentDocument;
-    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
     const r=canvas.getBoundingClientRect(),x=430,y=30;
     canvas.dispatchEvent(new MouseEvent("mousemove",{bubbles:true,view:d.defaultView,
       clientX:r.x+x,clientY:r.y+y}));
@@ -531,7 +532,7 @@ try {
   const wattmeterModeRoundtrip=await page.evaluate(()=>{
     const d=document.getElementById("circuit-frame").contentDocument;
     const api=d.defaultView.CircuitJS1;
-    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
     const r=canvas.getBoundingClientRect(),x=430,y=30;
     canvas.dispatchEvent(new MouseEvent("mousemove",{bubbles:true,view:d.defaultView,
       clientX:r.x+x,clientY:r.y+y}));
@@ -572,7 +573,7 @@ try {
 
   const resistorGui=await page.evaluate(()=>{
     const d=document.getElementById("circuit-frame").contentDocument;
-    const canvas=Array.from(d.querySelectorAll("canvas")).find(c=>c.width===952&&c.height===448);
+    const canvas=Array.from(d.querySelectorAll("canvas")).filter(c=>c.width>400&&c.height>200).sort((a,b)=>b.width*b.height-a.width*a.height)[0];
     const r=canvas.getBoundingClientRect(),x=760,y=60;
     canvas.dispatchEvent(new MouseEvent("mousemove",{bubbles:true,view:d.defaultView,
       clientX:r.x+x,clientY:r.y+y}));
