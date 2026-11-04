@@ -66,9 +66,10 @@ once('        this.meter = xml.parseIntAttr("meter", this.meter);',
 once('        const str = CircuitElm.getUnitText(this.getMeterPower(), "W");\n        g.save();\n        let fsize = 15;\n        let w;\n        // adjust font size to fit\n        while (true) {\n            g.setFont(new Font("SansSerif", 0, fsize));\n            w = Math.trunc(g.context.measureText(str).width);\n            if (w < this.maxTextLen)\n                break;\n            fsize--;\n        }\n        g.setColor(CircuitElm.whiteColor);\n        g.context.textBaseline = "middle";\n        g.drawString(str, this.center.x - Math.trunc(w/2), this.center.y);\n        g.restore();',
 `        const rows = this.getLabPowerRows();
         g.save();
-        // Evitar el solapamiento vertical cuando se muestran varias potencias.
-        // La bobina ocupa 32 px de altura en el modelo de cuatro bornes.
-        let fsize = rows.length >= 3 ? 9 : rows.length === 2 ? 12 : 14;
+        // El tamaño se adapta a 1-5 lecturas, dejando siempre P/Q/S activas
+        // en el circuito de Aron. U e I son opcionales por falta de espacio.
+        let fsize = rows.length >= 5 ? 7 : rows.length === 4 ? 8 :
+            rows.length === 3 ? 9 : rows.length === 2 ? 12 : 14;
         while (fsize > 7) {
             g.setFont(new Font("SansSerif", 0, fsize));
             if (rows.every(s => g.context.measureText(s).width < this.maxTextLen))
@@ -91,34 +92,54 @@ once('        const p = this.getPower();\n        const dt = CircuitElm.sim.time
         this.labMeasurement.add(CircuitElm.sim.t, this.getVoltageDiff(), this.getCurrent());
         const dt = CircuitElm.sim.timeStep;`);
 once('    canViewInScope(): boolean { return true; }',
-`    private getLabPowerRows(): string[] {
+`    private getLabWindowSeconds(period: number | null): number {
+        const T = period !== null && period >= 0.0005 && period <= 0.5 ? period : 0.02;
+        switch(this.labWindowMode) {
+            case 0: return T;
+            case 1: return 3*T;
+            case 2: return 0.1;
+            case 3: return 0.25;
+            default: return 0.5;
+        }
+    }
+
+    private getLabPowerRows(): string[] {
         const type = this.labCurrentMode === 1 ? "dc" : this.labCurrentMode === 2 ? "ac" : "auto";
-        const r = this.labMeasurement.measure(type);
+        const electrical = this.labMeasurement.measure(type);
+        const temporal = this.labMeasurement.getWindowReadings(
+            this.getLabWindowSeconds(electrical.period));
+        const labels = ["instantanea", "pico", "RMS", "media"];
+        const values = temporal ? [temporal.instantaneous,temporal.peak,
+            temporal.rms,temporal.mean] : null;
+        const choice = this.labPowerReadMode;
+        const power = choice === 0 ? this.getPower() :
+            values ? values[choice].p : null;
         const result: string[] = [];
         const mask = this.labPowerMask || 1;
-        // En CC, P se mide normalmente. Si el usuario activa Q o S se
-        // muestran a cero por convención didáctica de este instrumento.
-        // Las casillas siguen siendo seleccionables; no se calculan fasores.
-        if (r.kind === "dc" || (r.kind === "pending" && type !== "ac")) {
-            if (mask & 1) {
-                const p = this.meter === this.PM_INST ? this.getPower() : this.getMeterPower();
-                result.push((this.meter === this.PM_INST ? "p(t) " : "P ") +
-                    CircuitElm.getUnitText(p, "W"));
-            }
+        const powerLabel = ["p(t) ", "pmax ", "pRMS ", "P "][choice];
+        const print = (value: number | null, unit: string) =>
+            value === null ? "..." : CircuitElm.getUnitText(value,unit);
+        if (mask & 1)
+            result.push(powerLabel + print(power,"W"));
+        if (electrical.kind === "dc" || (electrical.kind === "pending" && type !== "ac")) {
+            // Convención solicitada para continua, siempre seleccionables.
             if (mask & 2) result.push("Q 0 var");
             if (mask & 4) result.push("S 0 VA");
-            return result.length ? result : ["P " + CircuitElm.getUnitText(this.getMeterPower(), "W")];
+        } else {
+            if (mask & 2) result.push("Q " + print(electrical.q,"var"));
+            if (mask & 4) result.push("S " + print(electrical.s,"VA"));
         }
-        if (mask & 1) {
-            const p = this.meter === this.PM_INST ? this.getPower() : r.p;
-            result.push((this.meter === this.PM_INST ? "p(t) " : "P ") +
-                CircuitElm.getUnitText(p, "W"));
+        // Lecturas suplementarias opcionales, desactivadas de origen para
+        // mantener el dibujo de Aron P/Q/S sin ocupar espacio adicional.
+        if (this.labShowVoltage) {
+            const n = values ? values[this.labVoltageReadMode].v : null;
+            result.push(["u(t) ", "Umax ", "URMS ", "Umed "][this.labVoltageReadMode]+print(n,"V"));
         }
-        if (mask & 2)
-            result.push("Q " + (r.q == null ? "..." : CircuitElm.getUnitText(r.q, "var")));
-        if (mask & 4)
-            result.push("S " + (r.s == null ? "..." : CircuitElm.getUnitText(r.s, "VA")));
-        return result.length ? result : [CircuitElm.getUnitText(this.getMeterPower(),"W")];
+        if (this.labShowCurrent) {
+            const n = values ? values[this.labCurrentReadMode].i : null;
+            result.push(["i(t) ", "Imax ", "IRMS ", "Imed "][this.labCurrentReadMode]+print(n,"A"));
+        }
+        return result.length ? result : ["P "+CircuitElm.getUnitText(this.getMeterPower(),"W")];
     }
 
     canViewInScope(): boolean { return true; }`);
