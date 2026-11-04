@@ -150,8 +150,8 @@ try{
     console.log("Dos Z en paralelo: ambas ramas importadas, simuladas y medidas");
 
     const compatible=await page.evaluate(()=>window.LabCircuit.exportStandardRLC());
-    assert(compatible.ok && compatible.converted===1 && compatible.added===2,
-        "No se puede exportar Z como RLC estándar: "+JSON.stringify(compatible));
+    assert(compatible.ok && compatible.converted===2 && compatible.added===2,
+        "No se pueden exportar ambas Z como RLC estándar: "+JSON.stringify(compatible));
     const standard=await page.evaluate(xml=>{
         const doc=new DOMParser().parseFromString(xml,"application/xml");
         const el=Array.from(doc.documentElement.children);
@@ -160,18 +160,21 @@ try{
             resistance:el.filter(e=>e.tagName==="r").map(e=>e.getAttribute("r")),
             inductance:el.filter(e=>e.tagName==="l").map(e=>e.getAttribute("l")),
             capacitance:el.filter(e=>e.tagName==="c").map(e=>e.getAttribute("c")),
-            joined:el.filter(e=>["r","l","c"].includes(e.tagName)).map(e=>e.getAttribute("x"))
+            joined:el.filter(e=>["r","l","c"].includes(e.tagName)).map(e=>e.getAttribute("x")),
+            count:el.length
         };
     },compatible.xml);
     assert.equal(standard.custom,0);
-    assert.deepEqual(standard.resistance,["8"]);
-    assert.deepEqual(standard.inductance,["0.1"]);
-    assert.deepEqual(standard.capacitance,["0.0001"]);
-    assert.equal(standard.joined.length,3);
-    const legacy=await page.evaluate(xml=>window.LabCircuit.importNativeCircuit("RLC estándar",xml),compatible.xml);
-    assert(legacy.ok && legacy.simulated && legacy.elements===8,
-        "La exportación estándar no se puede volver a abrir: "+JSON.stringify(legacy));
-    console.log("RLC estándar: exportación en 3 elementos nativos, XML recargado sin Z");
+    assert.deepEqual(standard.resistance,["8","8"]);
+    assert.equal(standard.inductance.length,2);
+    assert(standard.inductance.every(x=>Math.abs(Number(x)-l)<1e-10),
+        "No se conservan las inductancias de las dos ramas: "+JSON.stringify(standard));
+    assert.deepEqual(standard.capacitance,[]);
+    assert.equal(standard.joined.length,4);
+    const legacy=await page.evaluate(xml=>window.LabCircuit.importNativeCircuit("RLC estándar en paralelo",xml),compatible.xml);
+    assert(legacy.ok && legacy.simulated && legacy.elements===standard.count,
+        "La exportación estándar en paralelo no se puede volver a abrir: "+JSON.stringify(legacy));
+    console.log("Dos Z en paralelo: exportadas como 2 R y 2 L nativos, XML recargado sin Z");
 
 
     // Una fuente únicamente de CC no debe iniciar la simulación de Z.
