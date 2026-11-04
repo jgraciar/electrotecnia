@@ -41,12 +41,14 @@ export class LabPowerMeasurement {
 
     measure(force: "auto" | "dc" | "ac" = "auto"): PowerReading {
         const a = this.samples.slice(this.start);
-        if (a.length < 2 || a[a.length-1].t - a[0].t < 0.045)
+        if (a.length < 2 || a[a.length-1].t - a[0].t < 0.018)
             return {kind: "pending", p: 0, q: null, s: null, period: null};
         const end = a[a.length - 1].t;
         const recent = this.interval(a, Math.max(a[0].t, end - 0.15), end);
         const stats = this.stats(recent);
-        const enough = recent.length >= 3 && end - recent[0].t > 0.055;
+        // Se puede empezar a buscar un periodo completo sin esperar 55 ms.
+        // El cálculo exacto de Q y S exige dos cruces ascendentes consecutivos.
+        const enough = recent.length >= 3 && end - recent[0].t > 0.020;
         const dv = Math.sqrt(Math.max(0, stats.vv - stats.v * stats.v));
         const di = Math.sqrt(Math.max(0, stats.ii - stats.i * stats.i));
         const vRms = Math.sqrt(Math.max(0, stats.vv));
@@ -95,7 +97,11 @@ export class LabPowerMeasurement {
             }
         }
         // No inventar Q cuando no se ha identificado un periodo completo.
-        return {kind: "ac", p: stats.p, s: vRms*iRms, q: null, period: null};
+        // Sin periodo identificado, no presentar una S basada en una fracción
+        // muy corta de onda como si ya fuera una lectura estabilizada.
+        return {kind: "ac", p: stats.p,
+            s: end-a[0].t >= 0.055 ? vRms*iRms : null,
+            q: null, period: null};
     }
 
     private interval(data: PowerSample[], lo: number, hi: number): PowerSample[] {
