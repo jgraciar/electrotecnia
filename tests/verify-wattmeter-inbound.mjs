@@ -178,6 +178,44 @@ try {
     "El valor f.d.p. no está dibujado sobre el vatímetro");
   console.log("cosφ fundamental y f.d.p. P/S: valores independientes, visibles y persistentes");
 
+  // Nuevas lecturas armónicas: XML, información y dibujo real del medidor.
+  const harmonicsXml=original.replace(
+    /(<WattmeterTrue\\b[^>]*\\bmeter="1")\\s*\\/>/,
+    '$1 labCurrentMode="2" labPowerMask="7"'+
+    ' labShowTHDU="1" labShowTHDI="1" labShowDistortion="1"/>');
+  assert.notEqual(harmonicsXml,original,"No se creó el circuito de prueba armónica");
+  const harmonicSaved=await page.evaluate(xml=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    sim.importCircuit(xml);
+    const saved=sim.exportCircuit();
+    const doc=new DOMParser().parseFromString(saved,"application/xml");
+    const first=doc.querySelector("WattmeterTrue");
+    sim.importCircuit(saved);
+    const second=new DOMParser().parseFromString(sim.exportCircuit(),"application/xml")
+      .querySelector("WattmeterTrue");
+    return ["labShowTHDU","labShowTHDI","labShowDistortion"].map(key=>
+      [first?.getAttribute(key),second?.getAttribute(key)]);
+  },harmonicsXml);
+  assert.deepEqual(harmonicSaved,[["1","1"],["1","1"],["1","1"]],
+    "Las opciones armónicas no sobreviven a exportación/importación XML");
+  await page.waitForFunction(()=>{
+    const w=document.querySelector("#circuit-frame")?.contentWindow;
+    const sim=w?.CircuitJS1;
+    if(!sim || sim.getTime()<0.12)return false;
+    const meter=Array.from(sim.getElements()).find(e=>e.getType()==="WattmeterTrueElm");
+    const info=meter?.getInfo()||[];
+    return ["THD tension = ","THD corriente = ","D* residual no fundamental = "]
+      .every(prefix=>info.some(line=>line.startsWith(prefix)&&!line.endsWith("...")));
+  },null,{timeout:90000});
+  const harmonicPaint=await page.evaluate(()=>{
+    const w=document.querySelector("#circuit-frame").contentWindow;
+    return (w.__labWattPaint||[]).slice(-180);
+  });
+  assert(["THD U ","THD I ","D* "].every(prefix=>
+    harmonicPaint.some(line=>line.startsWith(prefix))),
+    "No se dibujan todas las magnitudes armónicas en el vatímetro");
+  console.log("THD U/I y D*: XML persistente, cálculo disponible y dibujo verificado");
+
   // Archivo original de Wulflemm: carga de circuito y dos vatimetros reconocidos.
   const incoming = await page.evaluate(xml=>{
     const imported=window.LabCircuit.importWulflemmXml(xml);
