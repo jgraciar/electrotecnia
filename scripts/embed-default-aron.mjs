@@ -9,12 +9,18 @@ if(!/^<cir(?:\s|>)/.test(originalXml.trimStart()))throw Error('Invalid original 
 // Solo en el diseño de arranque: ambos vatímetros muestran P, Q y S.
 // El archivo de referencia externo permanece intacto para comprobar su importación.
 let meterCount=0;
-const xml=originalXml.replace(/<WattmeterTrue\b[^>]*\/>/g, tag=>{
+const maskedXml=originalXml.replace(/<WattmeterTrue\b[^>]*\/>/g, tag=>{
   meterCount++;
   if(!/\bmeter="1"/.test(tag))throw Error('Modo de vatímetro inesperado en el circuito Aron');
   return tag.replace(/\s*\/>$/, ' labCurrentMode="2" labPowerMask="7"/>');
 });
 if(meterCount!==2)throw Error('El diseño inicial debe contener exactamente dos vatímetros de Aron');
+// El fichero Wulflemm original usa un paso de 1 µs: medir unos tres periodos
+// a 60 Hz exige decenas de miles de iteraciones. Solo para el diseño inicial,
+// 10 µs permite 1667 muestras por periodo sin ralentizar Q ni S.
+const xml=maskedXml.replace(/^(<cir\b[^>]*\bts=")0\.000001(")/,
+  '$10.00001$2');
+if(xml===maskedXml)throw Error('No se ha localizado el paso de simulación del diseño inicial');
 const anchor='        this.transform = [0, 0, 0, 0, 0, 0];';
 if(!ts.includes(anchor))throw Error('Upstream CircuitJS startup hook has changed');
 const injection=`        // Laboratory default: embedded Aron circuit with P, Q and S on both wattmeters.
