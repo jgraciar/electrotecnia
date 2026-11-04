@@ -31,7 +31,7 @@ try{
             '</cir>';
     };
     const load=async(xml)=>{
-        const imported=await page.evaluate(xml=>window.LabCircuit.importModel("Prueba impedancia CA",xml),xml);
+        const imported=await page.evaluate(xml=>window.LabCircuit.importNativeCircuit("Prueba impedancia CA",xml),xml);
         assert(imported.ok && imported.simulated && imported.elements===6,
             "No se importó la impedancia completa: "+JSON.stringify(imported));
         await page.waitForFunction(()=>{
@@ -106,7 +106,7 @@ try{
     assert.deepEqual(standard.inductance,["0.1"]);
     assert.deepEqual(standard.capacitance,["0.0001"]);
     assert.equal(standard.joined.length,3);
-    const legacy=await page.evaluate(xml=>window.LabCircuit.importModel("RLC estándar",xml),compatible.xml);
+    const legacy=await page.evaluate(xml=>window.LabCircuit.importNativeCircuit("RLC estándar",xml),compatible.xml);
     assert(legacy.ok && legacy.simulated && legacy.elements===8,
         "La exportación estándar no se puede volver a abrir: "+JSON.stringify(legacy));
     console.log("RLC estándar: exportación en 3 elementos nativos, XML recargado sin Z");
@@ -114,7 +114,7 @@ try{
 
     // Una fuente únicamente de CC no debe iniciar la simulación de Z.
     const dc=circuit('mode="1" f0="50" r="8" l="'+l+'" c="0"',0);
-    const dcLoaded=await page.evaluate(xml=>window.LabCircuit.importModel("Z con fuente solo CC",xml),dc);
+    const dcLoaded=await page.evaluate(xml=>window.LabCircuit.importNativeCircuit("Z con fuente solo CC",xml),dc);
     assert(dcLoaded.ok && dcLoaded.simulated);
     await page.waitForTimeout(700);
     const dcTime=await page.evaluate(
