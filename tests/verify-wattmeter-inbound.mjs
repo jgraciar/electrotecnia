@@ -468,11 +468,26 @@ try {
       const tags=Array.from(doc.querySelectorAll("WattmeterTrue"));
       return tags.length===2 && tags.every(el=>el.getAttribute("labPowerMask")==="7");
     },null,{timeout:45000});
-    await mobile.waitForFunction(()=>{
-      const labels=document.querySelector("#circuit-frame")?.contentWindow?.__labWattPaint||[];
-      return ["P ","Q ","S "].every(p=>labels.some(t=>t.startsWith(p))) &&
-        labels.some(t=>t.startsWith("Q ")&&!t.includes("..."));
-    },null,{timeout:90000});
+    try {
+      await mobile.waitForFunction(()=>{
+        const labels=document.querySelector("#circuit-frame")?.contentWindow?.__labWattPaint||[];
+        return ["P ","Q ","S "].every(p=>labels.some(t=>t.startsWith(p))) &&
+          labels.some(t=>t.startsWith("Q ")&&!t.includes("..."));
+      },null,{timeout:15000});
+    } catch(error) {
+      const diagnosis=await mobile.evaluate(()=>{
+        const w=document.querySelector("#circuit-frame")?.contentWindow;
+        const sim=w?.CircuitJS1;
+        return {running:sim?.isRunning?.(),time:sim?.getTime?.(),timestep:sim?.getTimeStep?.(),
+          drawn:(w?.__labWattPaint||[]).slice(-20),
+          ready:w?.document?.readyState,
+          frameInnerWidth:w?.innerWidth,frameInnerHeight:w?.innerHeight,
+          canvasCount:w?.document?.querySelectorAll("canvas").length,
+          bodyVisibility:w?.document?.visibilityState};
+      });
+      console.error("Diagnóstico del pintado móvil tras inicializar",diagnosis);
+      throw error;
+    }
     console.log("Móvil 390 px: vista incrustada con desplazamiento y P/Q/S dibujadas");
   } finally { await mobile.close(); }
 
