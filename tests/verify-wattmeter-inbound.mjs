@@ -733,6 +733,58 @@ try {
     "THD U/I esperada 50 %: "+JSON.stringify({hThdU,hThdI,harmonicInfo}));
   console.log("Quinto armónico: P=S=12,5, Q1=0, THD U=THD I=50 %");
 
+  // Ensayo con desfase y distorsión: U1=10 V RMS a 50 Hz,
+  // U5=5 V RMS a 250 Hz, R=8 ohmios y XL1=6 ohmios.
+  // I1=1 A, I5=5/sqrt(8²+30²) A. P incluye ambas frecuencias,
+  // Q1 solo la fundamental; cosφ1=0,8 y P/S es inferior.
+  const distortedRlCircuit=harmonicCircuit
+    .replace('<r x="512 304 512 448" f="0" r="10"/>',
+      '<r x="512 304 512 384" f="0" r="8"/>'+
+      '<l x="512 384 512 448" f="0" l="0.01909859317102744"/>')
+    .replace('labShowTHDI="1"',
+      'labShowTHDI="1" labShowCosPhi="1" labShowPowerFactor="1"');
+  assert(distortedRlCircuit!==harmonicCircuit,
+    "No se ha construido la carga RL con quinto armónico");
+  const distortedRlImport=await page.evaluate(xml=>
+    window.LabCircuit.importWulflemmXml(xml),distortedRlCircuit);
+  assert(distortedRlImport.ok && distortedRlImport.simulated,
+    "No se abre la carga RL con armónicos: "+JSON.stringify(distortedRlImport));
+  await page.waitForFunction(()=>{
+    const api=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    const meter=Array.from(api?.getElements()||[]).find(e=>e.getType()==="WattmeterTrueElm");
+    const info=meter?.getInfo()||[];
+    return api?.getTime()>0.4 && ["P = ","Q (fundamental) = ","S = ",
+      "cos φ (fundamental) = ","f.d.p. real (P/S) = "].every(prefix=>
+      info.some(x=>x.startsWith(prefix)&&!x.includes("...")));
+  },null,{timeout:45000});
+  const distortedRlInfo=await page.evaluate(()=>{
+    const api=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(api.getElements()).find(e=>e.getType()==="WattmeterTrueElm").getInfo();
+  });
+  const dP=acValue("P = ","W",distortedRlInfo);
+  const dQ=acValue("Q (fundamental) = ","VAr",distortedRlInfo);
+  const dS=acValue("S = ","VA",distortedRlInfo);
+  const expectedDistortedP=8+25*8/(8**2+30**2);
+  const expectedDistortedS=Math.hypot(10,5)*Math.hypot(1,5/Math.hypot(8,30));
+  const readFactor=prefix=>{
+    const line=distortedRlInfo.find(x=>x.startsWith(prefix));
+    const match=line?.match(/(-?\d+(?:[.,]\d+)?)/);
+    assert(match,"Factor no reconocible: "+JSON.stringify({prefix,line,distortedRlInfo}));
+    return Number(match[1].replace(",","."));
+  };
+  const dCos=readFactor("cos φ (fundamental) = ");
+  const dFdp=readFactor("f.d.p. real (P/S) = ");
+  assert(Math.abs(dP-expectedDistortedP)<0.5 &&
+    Math.abs(dQ-6)<0.5 && Math.abs(dS-expectedDistortedS)<0.5,
+    "Potencias RL armónicas incorrectas: "+JSON.stringify({
+      dP,dQ,dS,expectedDistortedP,expectedDistortedS,distortedRlInfo}));
+  assert(Math.abs(dCos-0.8)<0.05 &&
+    Math.abs(dFdp-expectedDistortedP/expectedDistortedS)<0.05 &&
+    dCos-dFdp>0.04,
+    "cosφ fundamental y f.d.p. real deben diferir: "+
+      JSON.stringify({dCos,dFdp,distortedRlInfo}));
+  console.log("RL con quinto armónico: P, Q1, S, cosφ y f.d.p. real contrastados");
+
   // Al cargar otro vatímetro en CC sin máscara explícita, Q y S
   // siguen disponibles en el editor, pero empiezan sin seleccionar.
   const defaultDc=dcCircuit.replace(' labPowerMask="7"','');
