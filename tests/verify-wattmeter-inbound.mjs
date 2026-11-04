@@ -614,7 +614,7 @@ try {
   });
   const acValue=(prefix,unit)=>{
     const line=acInfo.find(x=>x.startsWith(prefix));
-    const match=line?.match(/(-?\\d+(?:[.,]\\d+)?)\\s*(m?W|m?VAr|m?VA)\\s*$/i);
+    const match=line?.match(/(-?\d+(?:[.,]\d+)?)\s*(m?W|m?VAr|m?VA)\s*$/i);
     assert(match && match[2].toLowerCase()===unit.toLowerCase(),
       "Lectura CA no reconocida: "+JSON.stringify({prefix,line,acInfo}));
     return Number(match[1].replace(",","."))/ (match[2].startsWith("m")?1000:1);
