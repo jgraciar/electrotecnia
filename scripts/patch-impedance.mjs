@@ -35,7 +35,7 @@ replaceOnce(menus,
 const cir=join(dir,"CirSim.ts");
 replaceOnce(cir,
     '        if (!subcircuitsOnly)\n            this.resetEditingContext();',
-    '        const resumeAfterImpedanceStop = !subcircuitsOnly && !!this.stopMessage?.startsWith("Impedancia Z");\n'+
+    '        const resumeAfterImpedanceStop = !subcircuitsOnly && /impedancia Z/i.test(this.stopMessage ?? "");\n'+
     '        if (resumeAfterImpedanceStop) this.setStopElm(null, null);\n'+
     '        if (!subcircuitsOnly)\n            this.resetEditingContext();');
 replaceOnce(cir,
