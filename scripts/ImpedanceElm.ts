@@ -52,6 +52,30 @@ export class ImpedanceElm extends CompositeElm {
     getDumpType():number { return 1553; }
     getXmlDumpType():string { return "Impedance"; }
     getElmType():string { return "Impedancia Z (solo CA)"; }
+    // La tecla z minúscula ya pertenece al diodo Zener; Z es Mayús+Z.
+    getShortcut():number { return 'Z'.charCodeAt(0); }
+
+    // Si todas las fuentes de CA del circuito tienen una frecuencia base
+    // común (con posibles armónicos enteros), utilizarla para leer Z.
+    // Sin fuente identificable o con frecuencias incompatibles, mantener f0.
+    private sourceFrequency():number | null {
+        const sources=(CircuitElm.app?.elmList ?? [])
+            .filter(e=>e instanceof VoltageElm &&
+                e.waveform !== VoltageElm.WF_DC &&
+                e.waveform !== VoltageElm.WF_VAR &&
+                e.waveform !== VoltageElm.WF_NOISE &&
+                Number.isFinite(e.frequency) && e.frequency>0) as VoltageElm[];
+        if(!sources.length) return null;
+        const base=Math.min(...sources.map(e=>e.frequency));
+        return sources.every(e=>{
+            const ratio=e.frequency/base;
+            return Math.abs(ratio-Math.round(ratio))<1e-6;
+        }) ? base : null;
+    }
+
+    private activeFrequency():number {
+        return this.sourceFrequency() ?? this.referenceFrequency;
+    }
 
     private values():RLCValues {
         return {r:this.resistance,l:this.inductance,c:this.capacitance};
@@ -113,7 +137,7 @@ export class ImpedanceElm extends CompositeElm {
         this.doDots(g);
         this.drawPosts(g);
         if(this.showValues()) {
-            const z=atFrequency(this.values(),this.referenceFrequency);
+            const z=atFrequency(this.values(),this.activeFrequency());
             this.drawValues(g,CircuitElm.getShortUnitText(z.modulus,"Ω"),16);
         }
     }
@@ -183,7 +207,7 @@ export class ImpedanceElm extends CompositeElm {
     }
 
     getInfo(arr:string[]):void {
-        const z=atFrequency(this.values(),this.referenceFrequency);
+        const z=atFrequency(this.values(),this.activeFrequency());
         arr[0]="impedancia Z (solo CA, serie RLC)";
         this.getBasicInfo(arr);
         arr[3]="|Z| = "+CircuitElm.getUnitText(z.modulus,"Ω");
@@ -192,7 +216,9 @@ export class ImpedanceElm extends CompositeElm {
         arr[6]="X = "+CircuitElm.getUnitText(z.x,"Ω");
         arr[7]="L = "+CircuitElm.getUnitText(this.inductance,"H");
         arr[8]="C = "+CircuitElm.getUnitText(this.capacitance,"F");
-        arr[9]="f0 = "+CircuitElm.getUnitText(this.referenceFrequency,"Hz");
+        const auto=this.sourceFrequency();
+        arr[9]=(auto!==null ? "f de red = " : "f0 (referencia) = ") +
+            CircuitElm.getUnitText(this.activeFrequency(),"Hz");
     }
 
     getScopeText(v:number):string {
@@ -212,8 +238,21 @@ export class ImpedanceElm extends CompositeElm {
             ei.newDialog=true;
             return ei;
         }
-        if(n===1) return new EditInfo("Frecuencia de referencia CA (Hz)",this.referenceFrequency,0,0);
-        const z=atFrequency(this.values(),this.referenceFrequency);
+        if(n===1) {
+            const auto=this.sourceFrequency();
+            if(auto!==null) {
+                // Campo informativo de solo lectura; no se cambia el origen
+                // de la frecuencia mediante el editor de la carga.
+                const ei=new EditInfo("Frecuencia CA detectada de la fuente",0,-1,-1);
+                ei.choice=new Choice();
+                ei.choice.add(CircuitElm.getUnitText(auto,"Hz") + " (automática)");
+                ei.choice.select(0);
+                return ei;
+            }
+            return new EditInfo("Frecuencia de referencia CA (Hz; sin fuente única)",
+                this.referenceFrequency,0,0);
+        }
+        const z=atFrequency(this.values(),this.activeFrequency());
         if(this.entryMode===0) {
             if(n===2)return new EditInfo("Módulo |Z| (Ω)",z.modulus,0,0);
             if(n===3)return new EditInfo("Argumento φ (°)",z.argument,-90,90);
@@ -242,6 +281,7 @@ export class ImpedanceElm extends CompositeElm {
         if(this.ignoreOldDialog) return;
         try {
             if(n===1) {
+                if(this.sourceFrequency()!==null) return; // valor automático de la red
                 validateFrequency(ei.value);
                 const x=atFrequency(this.values(),this.referenceFrequency).x;
                 if(this.entryMode!==2) {
@@ -255,18 +295,22 @@ export class ImpedanceElm extends CompositeElm {
                 return;
             }
             if(this.entryMode===0 && (n===2 || n===3)) {
-                const z=atFrequency(this.values(),this.referenceFrequency);
+                const freq=this.activeFrequency();
+                const z=atFrequency(this.values(),freq);
                 const magnitude=n===2?ei.value:z.modulus;
                 const angle=n===3?ei.value:z.argument;
-                const v=fromPolar(magnitude,angle,this.referenceFrequency);
+                const v=fromPolar(magnitude,angle,freq);
+                this.referenceFrequency=freq;
                 this.resistance=v.r;
                 this.inductance=v.l;
                 this.capacitance=v.c;
                 this.rebuild();
             } else if(this.entryMode===1 && (n===2 || n===3)) {
-                const z=atFrequency(this.values(),this.referenceFrequency);
+                const freq=this.activeFrequency();
+                const z=atFrequency(this.values(),freq);
                 const v=fromRectangular(n===2?ei.value:this.resistance,
-                    n===3?ei.value:z.x,this.referenceFrequency);
+                    n===3?ei.value:z.x,freq);
+                this.referenceFrequency=freq;
                 this.resistance=v.r;
                 this.inductance=v.l;
                 this.capacitance=v.c;
