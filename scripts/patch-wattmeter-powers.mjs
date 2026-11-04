@@ -18,7 +18,8 @@ once('    selectedValue: number = 0;',
     // Preferencias locales de presentacion. No afectan a las conexiones ni a la simulacion.
     labCurrentMode: number = 0; // 0 auto; 1 CC; 2 CA
     labPowerMask: number = 1; // P=1, Q1=2, S=4; las tres se combinan
-    labMeasurement: LabPowerMeasurement = new LabPowerMeasurement();`);
+    labMeasurement: LabPowerMeasurement = new LabPowerMeasurement();
+    private labSwitchingToDC: boolean = false;`);
 once('        CircuitXMLSerializer.dumpAttr(elem, "meter", this.meter);',
 `        CircuitXMLSerializer.dumpAttr(elem, "meter", this.meter);
         // Atributos optativos: los XML originales de Wulflemm carecen de ellos.
@@ -141,11 +142,18 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
                 // Al pasar a CC, Q y S se desmarcan por defecto.
                 // El usuario puede marcarlas después, sin mostrar lectura.
                 this.labPowerMask = 1;
+                // EditDialog aplica aún las casillas anteriores antes de
+                // reconstruirse. Evitar que reactive Q y S en ese paso.
+                this.labSwitchingToDC = true;
             }
             this.labCurrentMode = mode;
         }
         if (n === 1) this.meter = ei.choice!.getSelectedIndex();
         if (n >= 2 && n <= 4) {
+            if (this.labSwitchingToDC && n >= 3) {
+                if (n === 4) this.labSwitchingToDC = false;
+                return;
+            }
             const bit = 1 << (n-2);
             const mask = ei.checkbox!.getState()
                 ? this.labPowerMask | bit : this.labPowerMask & ~bit;
