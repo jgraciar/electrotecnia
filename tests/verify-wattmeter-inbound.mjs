@@ -19,6 +19,36 @@ try {
     return api && api.getTime?.()>=0.03;
   },null,{timeout:90000});
 
+  // El circuito que aparece al iniciar debe llevar las tres potencias
+  // activadas en AMBOS vatímetros, sin necesitar cambiar sus propiedades.
+  const startup=await page.evaluate(()=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    const xml=sim.exportCircuit();
+    const meters=Array.from(new DOMParser().parseFromString(xml,"application/xml")
+      .querySelectorAll("WattmeterTrue"));
+    return {
+      count:meters.length,
+      modes:meters.map(x=>x.getAttribute("labCurrentMode")),
+      masks:meters.map(x=>x.getAttribute("labPowerMask"))
+    };
+  });
+  assert.equal(startup.count,2,"El circuito inicial debe mostrar los dos vatímetros de Aron");
+  assert.deepEqual(startup.modes,["2","2"],"Los dos vatímetros iniciales deben detectar CA forzada");
+  assert.deepEqual(startup.masks,["7","7"],"Al iniciar deben estar activas P, Q y S");
+
+  await page.waitForFunction(()=>{
+    const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    if(!sim || sim.getTime()<0.06)return false;
+    const meters=Array.from(sim.getElements()).filter(x=>x.getType()==="WattmeterTrueElm");
+    return meters.length===2 && meters.every(x=>{
+      const info=x.getInfo();
+      return info.some(v=>/^P = /.test(v)) &&
+        info.some(v=>/^Q \(fundamental\) = /.test(v)) &&
+        info.some(v=>/^S = /.test(v));
+    });
+  },null,{timeout:90000});
+  console.log("Inicio: ambos vatímetros Aron presentan P, Q y S activas");
+
   // Archivo original de Wulflemm: carga de circuito y dos vatimetros reconocidos.
   const incoming = await page.evaluate(xml=>{
     const imported=window.LabCircuit.importWulflemmXml(xml);
