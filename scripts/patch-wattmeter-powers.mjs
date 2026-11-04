@@ -25,6 +25,8 @@ once('    selectedValue: number = 0;',
     labCurrentReadMode: number = 2;
     labShowVoltage: boolean = false;
     labShowCurrent: boolean = false;
+    labShowCosPhi: boolean = false;
+    labShowPowerFactor: boolean = false;
     // 0: 1 periodo; 1: 3 periodos; 2: 100ms; 3: 250ms; 4: 500ms
     labWindowMode: number = 0;
     private labSwitchingToDC: boolean = false;`);
@@ -46,6 +48,10 @@ once('        CircuitXMLSerializer.dumpAttr(elem, "meter", this.meter);',
             CircuitXMLSerializer.dumpAttr(elem, "labShowVoltage", 1);
         if (this.labShowCurrent)
             CircuitXMLSerializer.dumpAttr(elem, "labShowCurrent", 1);
+        if (this.labShowCosPhi)
+            CircuitXMLSerializer.dumpAttr(elem, "labShowCosPhi", 1);
+        if (this.labShowPowerFactor)
+            CircuitXMLSerializer.dumpAttr(elem, "labShowPowerFactor", 1);
         if (this.labWindowMode !== 0)
             CircuitXMLSerializer.dumpAttr(elem, "labWindowMode", this.labWindowMode);`);
 once('        this.meter = xml.parseIntAttr("meter", this.meter);',
@@ -61,16 +67,19 @@ once('        this.meter = xml.parseIntAttr("meter", this.meter);',
         this.labCurrentReadMode = limitMode(xml.parseIntAttr("labCurrentReadMode", 2), 3);
         this.labShowVoltage = xml.parseIntAttr("labShowVoltage", 0) === 1;
         this.labShowCurrent = xml.parseIntAttr("labShowCurrent", 0) === 1;
+        this.labShowCosPhi = xml.parseIntAttr("labShowCosPhi", 0) === 1;
+        this.labShowPowerFactor = xml.parseIntAttr("labShowPowerFactor", 0) === 1;
         this.labWindowMode = limitMode(xml.parseIntAttr("labWindowMode", 0), 4);
         this.labMeasurement.clear();`);
 once('        const str = CircuitElm.getUnitText(this.getMeterPower(), "W");\n        g.save();\n        let fsize = 15;\n        let w;\n        // adjust font size to fit\n        while (true) {\n            g.setFont(new Font("SansSerif", 0, fsize));\n            w = Math.trunc(g.context.measureText(str).width);\n            if (w < this.maxTextLen)\n                break;\n            fsize--;\n        }\n        g.setColor(CircuitElm.whiteColor);\n        g.context.textBaseline = "middle";\n        g.drawString(str, this.center.x - Math.trunc(w/2), this.center.y);\n        g.restore();',
 `        const rows = this.getLabPowerRows();
         g.save();
-        // El tamaño se adapta a 1-5 lecturas, dejando siempre P/Q/S activas
-        // en el circuito de Aron. U e I son opcionales por falta de espacio.
-        let fsize = rows.length >= 5 ? 7 : rows.length === 4 ? 8 :
+        // P/Q/S permanecen visibles en el circuito Aron. Los indicadores
+        // extra se compactan si el usuario los activa todos.
+        let fsize = rows.length >= 7 ? 6 : rows.length === 6 ? 7 :
+            rows.length === 5 ? 7 : rows.length === 4 ? 8 :
             rows.length === 3 ? 9 : rows.length === 2 ? 12 : 14;
-        while (fsize > 7) {
+        while (fsize > 6) {
             g.setFont(new Font("SansSerif", 0, fsize));
             if (rows.every(s => g.context.measureText(s).width < this.maxTextLen))
                 break;
@@ -115,7 +124,8 @@ once('    canViewInScope(): boolean { return true; }',
             values ? values[choice].p : null;
         const result: string[] = [];
         const mask = this.labPowerMask || 1;
-        const powerLabel = ["p(t) ", "pmax ", "pRMS ", "P "][choice];
+        // Reservamos p(t) exclusivamente para potencia instantánea.
+        const powerLabel = ["p(t) ", "Pmax ", "PRMS ", "P "][choice];
         const print = (value: number | null, unit: string) =>
             value === null ? "..." : CircuitElm.getUnitText(value,unit);
         if (mask & 1)
@@ -130,6 +140,14 @@ once('    canViewInScope(): boolean { return true; }',
         }
         // Lecturas suplementarias opcionales, desactivadas de origen para
         // mantener el dibujo de Aron P/Q/S sin ocupar espacio adicional.
+        // Indicadores adimensionales distintos: cosφ usa solo la
+        // fundamental; f.d.p. = P/S incluye toda la distorsión.
+        const ratio = (value: number | null) =>
+            value === null ? "..." : CircuitElm.showFormat.format(value);
+        if (this.labShowCosPhi)
+            result.push("cosφ " + (electrical.kind === "dc" ? "—" : ratio(electrical.cosPhi)));
+        if (this.labShowPowerFactor)
+            result.push("f.d.p. " + (electrical.kind === "dc" ? "—" : ratio(electrical.powerFactor)));
         if (this.labShowVoltage) {
             const n = values ? values[this.labVoltageReadMode].v : null;
             result.push(["u(t) ", "Umax ", "URMS ", "Umed "][this.labVoltageReadMode]+print(n,"V"));
@@ -192,8 +210,8 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
             const ei = new EditInfo("Lectura de potencia activa", this.selectedValue, -1, -1);
             ei.choice = new Choice();
             ei.choice.add("Instantanea p(t)");
-            ei.choice.add("Pico pmax");
-            ei.choice.add("Eficaz pRMS");
+            ei.choice.add("Pico Pmax");
+            ei.choice.add("Eficaz PRMS");
             ei.choice.add("Activa media P");
             ei.choice.select(this.labPowerReadMode);
             return ei;
@@ -214,6 +232,8 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
             return ei;
         }
         if (n === 7) return EditInfo.createCheckbox("Mostrar intensidad en el vatímetro", this.labShowCurrent);
+        if (n === 10) return EditInfo.createCheckbox("Mostrar cos φ (fundamental)", this.labShowCosPhi);
+        if (n === 11) return EditInfo.createCheckbox("Mostrar f.d.p. real (P/S)", this.labShowPowerFactor);
         if (n === 9) {
             const ei = new EditInfo("Ventana de cálculo de U, I y p(t)", 0, -1, -1);
             ei.choice = new Choice();
@@ -251,6 +271,8 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
         if (n === 7) this.labShowCurrent = ei.checkbox!.getState();
         if (n === 8) this.labCurrentReadMode = ei.choice!.getSelectedIndex();
         if (n === 9) this.labWindowMode = ei.choice!.getSelectedIndex();
+        if (n === 10) this.labShowCosPhi = ei.checkbox!.getState();
+        if (n === 11) this.labShowPowerFactor = ei.checkbox!.getState();
         if (n >= 2 && n <= 4) {
             if (this.labSwitchingToDC && n >= 3) {
                 if (n === 4) this.labSwitchingToDC = false;
