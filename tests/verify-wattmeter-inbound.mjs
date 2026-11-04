@@ -659,6 +659,38 @@ try {
     "RL: cosφ esperado 0,8; medidas "+JSON.stringify({rlP,rlS}));
   console.log("CA inductiva RL: P=8 W, Q1=+6 VAr, S=10 VA y cosφ=0,8 comprobados");
 
+  // Carga RC serie: R=8 ohmios, XC=-6 ohmios a 50 Hz,
+  // C=1/(2*pi*50*6) F, Uef=10 V. Z=8-j6 ohmios,
+  // Ief=1 A, P=8 W, Q1=-6 VAr, S=10 VA, cosφ=0,8.
+  const rcCircuit=rlCircuit.replace(
+    '<l x="512 384 512 448" f="0" l="0.01909859317102744"/>',
+    '<c x="512 384 512 448" f="0" c="0.0005305164769729845"/>');
+  assert(rcCircuit!==rlCircuit,"No se ha sustituido la bobina por el condensador");
+  const rcImport=await page.evaluate(xml=>window.LabCircuit.importWulflemmXml(xml),rcCircuit);
+  assert(rcImport.ok && rcImport.simulated,
+    "No se abre el circuito RC: "+JSON.stringify(rcImport));
+  await page.waitForFunction(()=>{
+    const api=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    const meter=Array.from(api?.getElements()||[]).find(e=>e.getType()==="WattmeterTrueElm");
+    const info=meter?.getInfo()||[];
+    return api?.getTime()>0.4 && ["P = ","Q (fundamental) = ","S = "]
+      .every(prefix=>info.some(x=>x.startsWith(prefix)&&!x.includes("...")));
+  },null,{timeout:45000});
+  const rcInfo=await page.evaluate(()=>{
+    const api=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(api.getElements()).find(e=>e.getType()==="WattmeterTrueElm").getInfo();
+  });
+  const rcP=acValue("P = ","W",rcInfo);
+  const rcQ=acValue("Q (fundamental) = ","VAr",rcInfo);
+  const rcS=acValue("S = ","VA",rcInfo);
+  assert(Math.abs(rcP-8)<0.5 && Math.abs(rcQ+6)<0.5 && Math.abs(rcS-10)<0.5,
+    "RC: se esperan P=8 W, Q1=-6 VAr, S=10 VA; medidas "+
+      JSON.stringify({rcP,rcQ,rcS,rcInfo}));
+  assert(Math.abs(rcP/rcS-0.8)<0.05,
+    "RC: cosφ esperado 0,8; medidas "+JSON.stringify({rcP,rcS}));
+  assert(rlQ>0 && rcQ<0,"La potencia reactiva debe cambiar de signo entre RL y RC");
+  console.log("CA capacitiva RC: P=8 W, Q1=-6 VAr, S=10 VA y cosφ=0,8 comprobados");
+
   // Al cargar otro vatímetro en CC sin máscara explícita, Q y S
   // siguen disponibles en el editor, pero empiezan sin seleccionar.
   const defaultDc=dcCircuit.replace(' labPowerMask="7"','');
