@@ -160,6 +160,14 @@ try {
   assert.equal(saved.attr[0]?.mask,"7");
   assert.deepEqual(saved.attr,saved.second,"Perdida de preferencias P/Q/S al guardar y abrir");
   console.log("Preferencias locales persistentes tras guardar y abrir",saved.attr);
+  await page.waitForFunction(()=>{
+    const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    if(!sim || sim.getTime()<0.025)return false;
+    const meter=Array.from(sim.getElements()).find(e=>e.getType()==="WattmeterTrueElm");
+    const lines=meter?.getInfo()||[];
+    return lines.some(line=>/^Q \\(fundamental\\) = /.test(line)) &&
+      lines.some(line=>/^S = /.test(line));
+  },null,{timeout:30000});
   const extendedInfo=await page.evaluate(()=>{
     const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
     return Array.from(sim.getElements()).filter(x=>x.getType()==="WattmeterTrueElm")
