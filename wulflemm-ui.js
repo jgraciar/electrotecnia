@@ -2,6 +2,7 @@
 (() => {
   const file=document.getElementById("wulflemmXmlFile");
   const save=document.getElementById("wulflemmXmlSave");
+  const standard=document.getElementById("impedanceStandardSave");
   const status=document.getElementById("wulflemmXmlStatus");
   const component=document.getElementById("wulflemmComponent");
   const attribute=document.getElementById("wulflemmAttribute");
@@ -64,6 +65,17 @@
   if(apply)apply.addEventListener("click",()=>{
     const result=window.LabCircuit?.updateWulflemmAttribute(Number(component.value),attribute.value.trim(),value.value);
     status.textContent=result?.message||"No se pudo modificar el atributo.";
+  });
+  if(standard)standard.addEventListener("click",()=>{
+    const result=window.LabCircuit?.exportStandardRLC?.();
+    if(!result?.ok){status.textContent=result?.message||"No se puede exportar el circuito.";return;}
+    const url=URL.createObjectURL(new Blob([result.xml],{type:"application/xml;charset=utf-8"}));
+    const link=document.createElement("a");
+    link.href=url;link.download="circuito-RLC-estandar.xml";
+    link.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    status.textContent="XML compatible exportado: "+result.converted+
+      " impedancia(s) Z convertida(s) en componentes R, L y C estándar.";
   });
   save.addEventListener("click",()=>{
     const result=window.LabCircuit?.exportWulflemmXml();
