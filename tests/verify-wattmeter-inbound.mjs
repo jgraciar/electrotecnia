@@ -591,6 +591,42 @@ try {
     "Vatímetro CC: se esperan 12 W con 12 V y 12 ohmios, lectura "+pString);
   console.log("Continua: P = 12 W verificados en la interfaz, Q=0 VAr y S=0 VA");
 
+  // CA resistiva: fuente de amplitud 12*sqrt(2) V a 50 Hz y R=12 ohmios.
+  // Valores analíticos independientes: Uef=12 V, Ief=1 A,
+  // P=S=12 y Q1=0. Se comprueba la lectura real de getInfo().
+  const acCircuit=dcCircuit
+    .replace('wf="0" fr="40" maxv="12"',
+      'wf="1" fr="50" maxv="16.97056274847714"')
+    .replace('labCurrentMode="1"','labCurrentMode="2"');
+  const acImport=await page.evaluate(xml=>window.LabCircuit.importWulflemmXml(xml),acCircuit);
+  assert(acImport.ok && acImport.simulated,
+    "No se abre la carga resistiva en CA: "+JSON.stringify(acImport));
+  await page.waitForFunction(()=>{
+    const api=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    const meter=Array.from(api?.getElements()||[]).find(e=>e.getType()==="WattmeterTrueElm");
+    const info=meter?.getInfo()||[];
+    return api?.getTime()>0.2 && ["P = ","Q (fundamental) = ","S = "]
+      .every(prefix=>info.some(x=>x.startsWith(prefix)&&!x.includes("...")));
+  },null,{timeout:45000});
+  const acInfo=await page.evaluate(()=>{
+    const api=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(api.getElements()).find(e=>e.getType()==="WattmeterTrueElm").getInfo();
+  });
+  const acValue=(prefix,unit)=>{
+    const line=acInfo.find(x=>x.startsWith(prefix));
+    const match=line?.match(/(-?\\d+(?:[.,]\\d+)?)\\s*(m?W|m?VAr|m?VA)\\s*$/i);
+    assert(match && match[2].toLowerCase()===unit.toLowerCase(),
+      "Lectura CA no reconocida: "+JSON.stringify({prefix,line,acInfo}));
+    return Number(match[1].replace(",","."))/ (match[2].startsWith("m")?1000:1);
+  };
+  assert(Math.abs(acValue("P = ","W")-12)<0.5,
+    "Potencia activa CA resistiva distinta de 12 W: "+JSON.stringify(acInfo));
+  assert(Math.abs(acValue("Q (fundamental) = ","VAr"))<0.5,
+    "Potencia reactiva de carga resistiva distinta de cero: "+JSON.stringify(acInfo));
+  assert(Math.abs(acValue("S = ","VA")-12)<0.5,
+    "Potencia aparente CA resistiva distinta de 12 VA: "+JSON.stringify(acInfo));
+  console.log("CA resistiva: P=12 W, Q1=0 VAr y S=12 VA comprobados en el vatímetro");
+
   // Al cargar otro vatímetro en CC sin máscara explícita, Q y S
   // siguen disponibles en el editor, pero empiezan sin seleccionar.
   const defaultDc=dcCircuit.replace(' labPowerMask="7"','');
