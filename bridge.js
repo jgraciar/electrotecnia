@@ -338,6 +338,23 @@
       return {ok:false,message:"Error al exportar: "+error.message};
     }
   }
+  // Exportación explícita sin pérdida silenciosa: la impedancia Z local se
+  // descompone en elementos estándar R/L/C que admiten Falstad y Wulflemm.
+  function exportStandardRLC(){
+    const live=exportNativeCircuit();
+    if(!live.ok)return live;
+    if(live.format!=="circuitjs-xml")
+      return {ok:false,message:"La conversión RLC requiere el XML actual del circuito."};
+    if(!window.LabImpedanceExport?.convert)
+      return {ok:false,message:"No está cargado el exportador de impedancias CA."};
+    try {
+      const result=window.LabImpedanceExport.convert(live.dump);
+      return {ok:true,...result,format:"circuitjs-xml",simulated:true};
+    }catch(error){
+      return {ok:false,message:"No se ha exportado el circuito: "+error.message};
+    }
+  }
+
   function importNativeCircuit(filename,dump){
     return importModel(filename,dump);
   }
@@ -453,6 +470,7 @@
     getInstrumentReadings,
     getAronReadings,
     exportNativeCircuit,
+    exportStandardRLC,
     importNativeCircuit,
     importWulflemmXml,
     exportWulflemmXml,
