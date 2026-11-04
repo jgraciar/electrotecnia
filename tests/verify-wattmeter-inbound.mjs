@@ -209,12 +209,28 @@ try {
   },null,{timeout:90000});
   // Esperar un repintado posterior a la importación. getInfo() puede
   // actualizarse antes de que el lienzo haya dibujado las nuevas filas.
-  await page.waitForFunction(()=>{
-    const w=document.querySelector("#circuit-frame")?.contentWindow;
-    const drawn=w?.__labWattPaint||[];
-    return ["THD U ","THD I ","D* "].every(prefix=>
-      drawn.some(line=>line.startsWith(prefix)));
-  },null,{timeout:30000});
+  try {
+    await page.waitForFunction(()=>{
+      const w=document.querySelector("#circuit-frame")?.contentWindow;
+      const drawn=w?.__labWattPaint||[];
+      return ["THD U ","THD I ","D* "].every(prefix=>
+        drawn.some(line=>line.startsWith(prefix)));
+    },null,{timeout:30000});
+  } catch(error) {
+    const diagnostic=await page.evaluate(()=>{
+      const w=document.querySelector("#circuit-frame")?.contentWindow;
+      const sim=w?.CircuitJS1;
+      const meter=sim && Array.from(sim.getElements())
+        .find(e=>e.getType()==="WattmeterTrueElm");
+      return {
+        painted:(w?.__labWattPaint||[]).slice(-100),
+        meterInfo:meter?.getInfo?.(),
+        xml:sim?.exportCircuit?.()?.match(/<WattmeterTrue[^>]*>/g)
+      };
+    });
+    throw new Error("Faltan magnitudes armónicas en el lienzo: "+
+      JSON.stringify(diagnostic),{cause:error});
+  }
   const harmonicPaint=await page.evaluate(()=>{
     const w=document.querySelector("#circuit-frame").contentWindow;
     return (w.__labWattPaint||[]).slice(-180);
