@@ -463,7 +463,7 @@ try {
     await mobile.waitForFunction(()=>{
       const f=document.querySelector("#circuit-frame"),s=document.querySelector(".circuit-frame-scroll");
       const api=f?.contentWindow?.CircuitJS1;
-      if(!api || !s || f.clientWidth<780 || s.scrollWidth<=s.clientWidth)return false;
+      if(!api || !s || f.offsetWidth<780 || s.scrollWidth<=s.clientWidth)return false;
       const doc=new DOMParser().parseFromString(api.exportCircuit(),"application/xml");
       const tags=Array.from(doc.querySelectorAll("WattmeterTrue"));
       return tags.length===2 && tags.every(el=>el.getAttribute("labPowerMask")==="7");
