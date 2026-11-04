@@ -122,10 +122,10 @@ once('    canViewInScope(): boolean { return true; }',
             result.push(powerLabel + print(power,"W"));
         if (electrical.kind === "dc" || (electrical.kind === "pending" && type !== "ac")) {
             // Convención solicitada para continua, siempre seleccionables.
-            if (mask & 2) result.push("Q 0 var");
+            if (mask & 2) result.push("Q 0 VAr");
             if (mask & 4) result.push("S 0 VA");
         } else {
-            if (mask & 2) result.push("Q " + print(electrical.q,"var"));
+            if (mask & 2) result.push("Q " + print(electrical.q,"VAr"));
             if (mask & 4) result.push("S " + print(electrical.s,"VA"));
         }
         // Lecturas suplementarias opcionales, desactivadas de origen para
@@ -155,7 +155,7 @@ once('        arr[3] = "P = " + CircuitElm.getUnitText(this.getVoltageDiff() * t
         let line = 5;
         if (this.labPowerMask & 2) {
             const q = powers.kind === "dc" || (powers.kind === "pending" && currentType !== "ac")
-                ? "0 var" : fmt(powers.q,"var");
+                ? "0 VAr" : fmt(powers.q,"VAr");
             arr[line++] = "Q (fundamental) = " + q;
         }
         if (this.labPowerMask & 4) {
@@ -200,7 +200,7 @@ once('    getEditInfo(n: number): EditInfo | null {\n        if (n === 0) {\n   
         }
         if (n === 2) return EditInfo.createCheckbox("Potencia activa (W)", !!(this.labPowerMask & 1));
         // Casillas Q y S siempre seleccionables; en CC muestran 0 al marcarse.
-        if (n === 3) return EditInfo.createCheckbox("Potencia reactiva Q (var) - fundamental", !!(this.labPowerMask & 2));
+        if (n === 3) return EditInfo.createCheckbox("Potencia reactiva Q (VAr) - fundamental", !!(this.labPowerMask & 2));
         if (n === 4) return EditInfo.createCheckbox("Potencia aparente S (VA)", !!(this.labPowerMask & 4));
         if (n === 5) return EditInfo.createCheckbox("Mostrar tensión en el vatímetro", this.labShowVoltage);
         if (n === 6 || n === 8) {
