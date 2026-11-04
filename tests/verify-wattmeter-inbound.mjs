@@ -845,6 +845,66 @@ try {
       JSON.stringify({rectifierCos,rectifierFdp,rectifierP,rectifierS,rectifierInfo}));
   console.log("Rectificador de media onda: corriente deformada, cosφ y f.d.p. separados");
 
+  // Puente rectificador de onda completa con cuatro diodos y carga R.
+  // El vatímetro mide en el lado CA; los cuatro diodos forman las ramas
+  // A->P, B->P, N->A y N->B. Las diagonales se cruzan sin conexión.
+  const bridgeCircuit=acCircuit
+    .replace('<r x="512 304 512 448" f="0" r="12"/>',
+      '<d x="512 304 640 304" f="0"/>'+
+      '<d x="512 448 640 304" f="0"/>'+
+      '<d x="640 448 512 304" f="0"/>'+
+      '<d x="640 448 512 448" f="0"/>'+
+      '<r x="640 304 640 448" f="0" r="10"/>')
+    .replace('labPowerMask="7"',
+      'labPowerMask="7" labShowTHDU="1" labShowTHDI="1"'+
+      ' labShowCosPhi="1" labShowPowerFactor="1"');
+  assert(bridgeCircuit!==acCircuit,"No se ha generado el puente rectificador");
+  const bridgeImport=await page.evaluate(xml=>
+    window.LabCircuit.importWulflemmXml(xml),bridgeCircuit);
+  assert(bridgeImport.ok && bridgeImport.simulated,
+    "No se abre el puente rectificador: "+JSON.stringify(bridgeImport));
+  await page.waitForFunction(()=>{
+    const api=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    const meter=Array.from(api?.getElements()||[]).find(e=>e.getType()==="WattmeterTrueElm");
+    const info=meter?.getInfo()||[];
+    return api?.getTime()>0.4 && ["P = ","Q (fundamental) = ","S = ",
+      "THD tension = ","THD corriente = ","cos φ (fundamental) = ",
+      "f.d.p. real (P/S) = "].every(prefix=>
+      info.some(x=>x.startsWith(prefix)&&!x.includes("...")));
+  },null,{timeout:45000});
+  const bridgeInfo=await page.evaluate(()=>{
+    const api=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(api.getElements()).find(e=>e.getType()==="WattmeterTrueElm").getInfo();
+  });
+  const bP=acValue("P = ","W",bridgeInfo);
+  const bQ=acValue("Q (fundamental) = ","VAr",bridgeInfo);
+  const bS=acValue("S = ","VA",bridgeInfo);
+  const bridgeNumeric=prefix=>{
+    const line=bridgeInfo.find(x=>x.startsWith(prefix));
+    const match=line?.match(/(-?\d+(?:[.,]\d+)?)/);
+    assert(match,"Lectura del puente ilegible: "+JSON.stringify({prefix,line,bridgeInfo}));
+    return Number(match[1].replace(",","."));
+  };
+  const bCos=bridgeNumeric("cos φ (fundamental) = ");
+  const bFdp=bridgeNumeric("f.d.p. real (P/S) = ");
+  const bThdU=bridgeNumeric("THD tension = ");
+  const bThdI=bridgeNumeric("THD corriente = ");
+  // Referencia independiente: puente ideal con diodos reales de caída
+  // directa. La potencia debe superar la media onda y permanecer por
+  // debajo de los 12 W del circuito resistivo sin diodos.
+  assert(bP>rectifierP*1.35 && bP<12.5 && bS>=bP && bS<13,
+    "Potencias incoherentes en puente completo: "+
+      JSON.stringify({bP,bQ,bS,rectifierP,bridgeInfo}));
+  assert(Math.abs(bQ)<1.2 && Math.abs(bThdU)<3 && bThdI>3,
+    "Puente: tensión sinusoidal, Q1 aproximadamente nula y corriente distorsionada: "+
+      JSON.stringify({bQ,bThdU,bThdI,bridgeInfo}));
+  assert(bCos>0.9 && bCos<=1.01 &&
+    bFdp>0 && bFdp<=bCos+0.02 &&
+    Math.abs(bFdp-bP/bS)<0.04,
+    "Puente: cosφ y factor de potencia incoherentes: "+
+      JSON.stringify({bCos,bFdp,bP,bS,bridgeInfo}));
+  console.log("Puente de onda completa: P, Q1, S, THD y f.d.p. contrastados");
+
   // Al cargar otro vatímetro en CC sin máscara explícita, Q y S
   // siguen disponibles en el editor, pero empiezan sin seleccionar.
   const defaultDc=dcCircuit.replace(' labPowerMask="7"','');
