@@ -9,6 +9,8 @@ import { CompositeElm } from "./CompositeElm";
 import { ResistorElm } from "./ResistorElm";
 import { InductorElm } from "./InductorElm";
 import { CapacitorElm } from "./CapacitorElm";
+import { VoltageElm } from "./VoltageElm";
+import { CurrentElm } from "./CurrentElm";
 import { CircuitXMLSerializer } from "./CircuitXMLSerializer";
 import { CircuitXMLDeserializer } from "./CircuitXMLDeserializer";
 import { EditInfo } from "./EditInfo";
@@ -129,6 +131,21 @@ export class ImpedanceElm extends CompositeElm {
     preStamp():void {
         if (this.doDcAnalysis()) {
             CircuitElm.sim.stop("La impedancia Z solo está disponible en CA",this);
+            return;
+        }
+        // Se rechazan circuitos excitados exclusivamente con fuentes de CC,
+        // pero se permite añadir el elemento antes de colocar la fuente CA.
+        // Si coexisten CA y CC, se respeta la simulación temporal de R/L/C.
+        const others=CircuitElm.sim.elmList;
+        const allVoltage=others.filter(e=>e instanceof VoltageElm) as VoltageElm[];
+        const hasAC=allVoltage.some(e=>
+            e.waveform !== VoltageElm.WF_DC &&
+            e.waveform !== VoltageElm.WF_VAR &&
+            e.frequency > 0);
+        const hasDCSource=allVoltage.length>0 ||
+            others.some(e=>e instanceof CurrentElm);
+        if (hasDCSource && !hasAC) {
+            CircuitElm.sim.stop("Impedancia Z: se requiere una fuente de CA (no admite circuito solo CC)",this);
             return;
         }
         super.preStamp();
