@@ -180,7 +180,7 @@ try {
 
   // Nuevas lecturas armónicas: XML, información y dibujo real del medidor.
   const harmonicsXml=original.replace(
-    /(<WattmeterTrue\\b[^>]*\\bmeter="1")\\s*\\/>/,
+    /(<WattmeterTrue\b[^>]*\bmeter="1")\s*\/>/,
     '$1 labCurrentMode="2" labPowerMask="7"'+
     ' labShowTHDU="1" labShowTHDI="1" labShowDistortion="1"/>');
   assert.notEqual(harmonicsXml,original,"No se creó el circuito de prueba armónica");
