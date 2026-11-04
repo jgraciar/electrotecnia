@@ -540,10 +540,10 @@ try {
     canvas.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,
       view:d.defaultView,clientX:r.x+x,clientY:r.y+y,button:0,detail:2}));
     const select=Array.from(d.querySelectorAll("select")).find(e=>
-      e.getBoundingClientRect().width>10&&Array.from(e.options).some(o=>/Instantanea p\\(t\\)|Instantaneous Power/i.test(o.text)));
+      e.getBoundingClientRect().width>10&&Array.from(e.options).some(o=>/Instantanea p\(t\)|Instantaneous Power/i.test(o.text)));
     if(!select)return {error:"Wattmeter mode selector not found"};
     const options=Array.from(select.options).map(o=>({value:o.value,text:o.text}));
-    const instant=Array.from(select.options).find(o=>/Instantanea p\\(t\\)|Instantaneous Power/i.test(o.text));
+    const instant=Array.from(select.options).find(o=>/Instantanea p\(t\)|Instantaneous Power/i.test(o.text));
     select.value=instant.value;
     select.dispatchEvent(new Event("change",{bubbles:true}));
     const ok=Array.from(d.querySelectorAll("button")).find(e=>
