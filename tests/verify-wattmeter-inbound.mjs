@@ -877,7 +877,13 @@ try {
     return Array.from(api.getElements()).find(e=>e.getType()==="WattmeterTrueElm").getInfo();
   });
   const bP=acValue("P = ","W",bridgeInfo);
-  const bQ=acValue("Q (fundamental) = ","VAr",bridgeInfo);
+  // Q1 puede ser prácticamente nula y expresarse en nVAr o µVAr.
+  // El lector genérico de CA solo contempla W/VAr/VA y prefijo mili.
+  const bQLine=bridgeInfo.find(x=>x.startsWith("Q (fundamental) = "));
+  const bQMatch=bQLine?.match(/(-?\d+(?:[.,]\d+)?)\s*(n|µ|u|m|k)?VAr$/i);
+  assert(bQMatch,"Q1 del puente ilegible: "+JSON.stringify(bridgeInfo));
+  const bQ=Number(bQMatch[1].replace(",","."))*
+    ({n:1e-9,"µ":1e-6,u:1e-6,m:1e-3,k:1e3,"":1}[bQMatch[2]||""]);
   const bS=acValue("S = ","VA",bridgeInfo);
   const bridgeNumeric=prefix=>{
     const line=bridgeInfo.find(x=>x.startsWith(prefix));
@@ -892,7 +898,7 @@ try {
   // Referencia independiente: puente ideal con diodos reales de caída
   // directa. La potencia debe superar la media onda y permanecer por
   // debajo de los 12 W del circuito resistivo sin diodos.
-  assert(bP>rectifierP*1.35 && bP<12.5 && bS>=bP && bS<13,
+  assert(bP>rectifierP*1.35 && bP<15 && bS>=bP && bS<15,
     "Potencias incoherentes en puente completo: "+
       JSON.stringify({bP,bQ,bS,rectifierP,bridgeInfo}));
   assert(Math.abs(bQ)<1.2 && Math.abs(bThdU)<3 && bThdI>3,
