@@ -75,7 +75,7 @@ jobs:
         working-directory: circuitjs-src/ts
         run: |
           grep -R -l --include='*.js' 'Tipo de corriente' dist >/dev/null || { echo '::error::El vatímetro ampliado no está en la compilación'; exit 1; }
-          grep -R -l --include='*.js' 'Potencia reactiva Q (var)' dist >/dev/null || { echo '::error::Falta la magnitud Q en el motor compilado'; exit 1; }
+          grep -R -l --include='*.js' 'Potencia reactiva Q (VAr)' dist >/dev/null || { echo '::error::Falta la magnitud Q en el motor compilado'; exit 1; }
 
       - name: Preparar sitio estático de GitHub Pages
         run: |
