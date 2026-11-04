@@ -16,7 +16,7 @@ try {
     const fill=CanvasRenderingContext2D.prototype.fillText;
     CanvasRenderingContext2D.prototype.fillText=function(value,...args){
       const label=String(value);
-      if(/^(?:P |p\(t\) |pmax |pRMS |Q |S |u\(t\) |Umax |URMS |Umed |i\(t\) |Imax |IRMS |Imed )/.test(label)){
+      if(/^(?:P |p\(t\) |Pmax |PRMS |Q |S |cosφ |f\.d\.p\. |u\(t\) |Umax |URMS |Umed |i\(t\) |Imax |IRMS |Imed )/.test(label)){
         const rows=window.__labWattPaint||(window.__labWattPaint=[]);
         rows.push(label);
         if(rows.length>240)rows.splice(0,rows.length-120);
@@ -114,13 +114,69 @@ try {
       .find(e=>e.getType()==="WattmeterTrueElm")?.getInfo();
     return {info,painted:(frame.__labWattPaint||[]).slice(-80)};
   });
-  assert(modeInformation.painted.some(s=>s.startsWith("pmax ")),
+  assert(modeInformation.painted.some(s=>s.startsWith("Pmax ")),
     "El modo pico de potencia no se pinta en el lienzo");
   assert(modeInformation.painted.some(s=>s.startsWith("Umax ")),
     "El modo pico de tensión no se pinta en el lienzo");
   assert(modeInformation.painted.some(s=>s.startsWith("i(t) ")),
     "La intensidad instantánea no se pinta en el lienzo");
   console.log("Lecturas U/I/P configurables: pico e instantánea visibles; ventana 100 ms conservada");
+
+  // La potencia activa usa P en los modos medio, pico y RMS, y p(t)
+  // exclusivamente para la potencia instantánea. cosφ y f.d.p. se
+  // seleccionan de forma independiente, y se conservan en el XML.
+  const factorXml=original.replace(
+    /(<WattmeterTrue\b[^>]*\bmeter="1")\s*\/>/,
+    '$1 labCurrentMode="2" labPowerMask="7"'+
+    ' labShowCosPhi="1" labShowPowerFactor="1"/>');
+  const factorSaved=await page.evaluate(xml=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    sim.importCircuit(xml);
+    const doc=new DOMParser().parseFromString(sim.exportCircuit(),"application/xml");
+    const first=doc.querySelector("WattmeterTrue");
+    return {
+      mask:first?.getAttribute("labPowerMask"),
+      cos:first?.getAttribute("labShowCosPhi"),
+      fdp:first?.getAttribute("labShowPowerFactor"),
+      meter:first?.getAttribute("meter"),
+      labels:document.querySelector("#circuit-frame").contentWindow.__labWattPaint?.slice(-80)
+    };
+  },factorXml);
+  assert.deepEqual([factorSaved.mask,factorSaved.cos,factorSaved.fdp,factorSaved.meter],
+    ["7","1","1","1"],"Las casillas cosφ/f.d.p. no sobreviven al XML");
+  await page.waitForFunction(()=>{
+    const w=document.querySelector("#circuit-frame")?.contentWindow;
+    const sim=w?.CircuitJS1;
+    if(!sim || sim.getTime()<0.10)return false;
+    const first=Array.from(sim.getElements()).find(e=>e.getType()==="WattmeterTrueElm");
+    const info=first?.getInfo()||[];
+    const cos=info.find(s=>s.startsWith("cos φ (fundamental) = "));
+    const fdp=info.find(s=>s.startsWith("f.d.p. real (P/S) = "));
+    return cos && fdp && !cos.endsWith("...") && !fdp.endsWith("...");
+  },null,{timeout:90000});
+  const factorInfo=await page.evaluate(()=>{
+    const w=document.querySelector("#circuit-frame").contentWindow;
+    const info=Array.from(w.CircuitJS1.getElements())
+      .find(e=>e.getType()==="WattmeterTrueElm")?.getInfo()||[];
+    const value=prefix=>{
+      const line=info.find(s=>s.startsWith(prefix));
+      return line?Number(line.substring(prefix.length).trim().replace(",",".")):NaN;
+    };
+    return {
+      cos:value("cos φ (fundamental) = "),
+      fdp:value("f.d.p. real (P/S) = "),
+      info,
+      painted:(w.__labWattPaint||[]).slice(-150)
+    };
+  });
+  assert(Number.isFinite(factorInfo.cos)&&Number.isFinite(factorInfo.fdp),
+    "El motor no calcula los dos indicadores: "+JSON.stringify(factorInfo));
+  assert(Math.abs(factorInfo.cos)<=1.001&&Math.abs(factorInfo.fdp)<=1.001);
+  assert(factorInfo.painted.some(s=>s.startsWith("cosφ ")),
+    "El valor cosφ no está dibujado sobre el vatímetro");
+  assert(factorInfo.painted.some(s=>s.startsWith("f.d.p. ")),
+    "El valor f.d.p. no está dibujado sobre el vatímetro");
+  console.log("cosφ fundamental y f.d.p. P/S: valores independientes, visibles y persistentes");
 
   // Archivo original de Wulflemm: carga de circuito y dos vatimetros reconocidos.
   const incoming = await page.evaluate(xml=>{
