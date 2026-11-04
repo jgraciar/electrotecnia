@@ -16,7 +16,7 @@ try {
     const fill=CanvasRenderingContext2D.prototype.fillText;
     CanvasRenderingContext2D.prototype.fillText=function(value,...args){
       const label=String(value);
-      if(/^(?:P |p\(t\) |Q |S )/.test(label)){
+      if(/^(?:P |p\(t\) |pmax |pRMS |Q |S |u\(t\) |Umax |URMS |Umed |i\(t\) |Imax |IRMS |Imed )/.test(label)){
         const rows=window.__labWattPaint||(window.__labWattPaint=[]);
         rows.push(label);
         if(rows.length>240)rows.splice(0,rows.length-120);
@@ -70,6 +70,57 @@ try {
       drawn.some(text=>text.startsWith("S ")&&!text.includes("..."));
   },null,{timeout:30000});
   console.log("Vista incrustada: texto de P, Q y S realmente dibujado en el lienzo");
+
+  // Selección nueva de lectura pico, tensión pico, intensidad instantánea y
+  // ventana de 100 ms. Debe sobrevivir al XML y mostrarse en el motor real.
+  const extendedModeXml=original.replace(
+    /(<WattmeterTrue\b[^>]*\bmeter="1")\s*\/>/,
+    '$1 labCurrentMode="2" labPowerMask="7" labPowerReadMode="1"'+
+    ' labVoltageReadMode="1" labCurrentReadMode="0"'+
+    ' labShowVoltage="1" labShowCurrent="1" labWindowMode="2"/>');
+  assert.notEqual(extendedModeXml,original);
+  const advancedModes=await page.evaluate(xml=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    sim.importCircuit(xml);
+    const doc=new DOMParser().parseFromString(sim.exportCircuit(),"application/xml");
+    const meter=doc.querySelector("WattmeterTrue");
+    return {
+      count:doc.querySelectorAll("WattmeterTrue").length,
+      power:meter?.getAttribute("labPowerReadMode"),
+      voltage:meter?.getAttribute("labVoltageReadMode"),
+      current:meter?.getAttribute("labCurrentReadMode"),
+      showVoltage:meter?.getAttribute("labShowVoltage"),
+      showCurrent:meter?.getAttribute("labShowCurrent"),
+      window:meter?.getAttribute("labWindowMode")
+    };
+  },extendedModeXml);
+  assert.equal(advancedModes.count,2);
+  assert.deepEqual([
+    advancedModes.power,advancedModes.voltage,advancedModes.current,
+    advancedModes.showVoltage,advancedModes.showCurrent,advancedModes.window
+  ],["1","1","0","1","1","2"],"No se conservan modos y ventana del vatímetro");
+  await page.waitForFunction(()=>{
+    const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    if(!sim||sim.getTime()<0.13)return false;
+    const meter=Array.from(sim.getElements()).find(e=>e.getType()==="WattmeterTrueElm");
+    const info=meter?.getInfo()||[];
+    return info.some(s=>s.startsWith("Lectura P [pico] = ")&&!s.endsWith("...")) &&
+      info.some(s=>s.startsWith("U [pico] = ")&&!s.endsWith("...")) &&
+      info.some(s=>s.startsWith("I [instantánea] = ")&&!s.endsWith("..."));
+  },null,{timeout:90000});
+  const modeInformation=await page.evaluate(()=>{
+    const frame=document.querySelector("#circuit-frame").contentWindow;
+    const info=Array.from(frame.CircuitJS1.getElements())
+      .find(e=>e.getType()==="WattmeterTrueElm")?.getInfo();
+    return {info,painted:(frame.__labWattPaint||[]).slice(-80)};
+  });
+  assert(modeInformation.painted.some(s=>s.startsWith("pmax ")),
+    "El modo pico de potencia no se pinta en el lienzo");
+  assert(modeInformation.painted.some(s=>s.startsWith("Umax ")),
+    "El modo pico de tensión no se pinta en el lienzo");
+  assert(modeInformation.painted.some(s=>s.startsWith("i(t) ")),
+    "La intensidad instantánea no se pinta en el lienzo");
+  console.log("Lecturas U/I/P configurables: pico e instantánea visibles; ventana 100 ms conservada");
 
   // Archivo original de Wulflemm: carga de circuito y dos vatimetros reconocidos.
   const incoming = await page.evaluate(xml=>{
