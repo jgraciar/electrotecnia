@@ -1198,6 +1198,12 @@ try {
     await mobile.bringToFront();
     await mobile.addInitScript(recordPaint);
     await mobile.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
+    // La vista móvil tiene almacenamiento independiente y muestra su propia configuración inicial.
+    const mobileInitialAccept=mobile.locator("#lab-start-accept");
+    if(await mobileInitialAccept.isVisible()) {
+      await mobileInitialAccept.click();
+      await mobile.waitForLoadState("domcontentloaded");
+    }
     await mobile.locator('button[data-mode="falstad"]').click();
     // El circuito está por debajo de los controles en móviles.
     // Forzar su entrada en el área visible detecta errores de carga diferida.
