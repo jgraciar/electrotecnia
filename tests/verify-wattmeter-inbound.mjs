@@ -134,6 +134,35 @@ try {
   assert(Math.abs(aronTotal-expectedUnbalancedAron)<Math.max(1,expectedUnbalancedAron*0.08),
     "La suma P1+P2 no coincide con la potencia analítica de las tres ramas: "+
     JSON.stringify({aronPower,aronTotal,expectedUnbalancedAron,xAron,aronResult}));
+  // Referencia exacta para estrella desequilibrada SIN neutro de carga.
+  // El punto estrella flota: Vn = sum(Yk Vk)/sum(Yk). El cálculo anterior
+  // con 120 V por rama solo es una aproximación cuando hay desequilibrio.
+  const complex=(re,im=0)=>({re,im});
+  const addC=(a,b)=>complex(a.re+b.re,a.im+b.im);
+  const subC=(a,b)=>complex(a.re-b.re,a.im-b.im);
+  const divC=(a,b)=>complex(
+    (a.re*b.re+a.im*b.im)/(b.re*b.re+b.im*b.im),
+    (a.im*b.re-a.re*b.im)/(b.re*b.re+b.im*b.im));
+  const phases=[0,2*Math.PI/3,-2*Math.PI/3].map(angle=>
+    complex(120*Math.cos(angle),120*Math.sin(angle)));
+  const branchR=[470,1000,1000];
+  const branchY=branchR.map(R=>divC(complex(1),complex(R,xAron)));
+  const totalY=branchY.reduce(addC,complex(0));
+  const weightedV=phases.reduce((sum,v,k)=>
+    addC(sum,complex(
+      branchY[k].re*v.re-branchY[k].im*v.im,
+      branchY[k].re*v.im+branchY[k].im*v.re)),complex(0));
+  const floatingNeutral=divC(weightedV,totalY);
+  const exactAronPower=phases.reduce((sum,v,k)=>{
+    const drop=subC(v,floatingNeutral);
+    return sum+(drop.re**2+drop.im**2)*branchR[k]/
+      (branchR[k]**2+xAron**2);
+  },0);
+  assert(Math.abs(aronTotal-exactAronPower)<Math.max(1,exactAronPower*0.08),
+    "Aron desequilibrado sin neutro: P1+P2 no coincide con análisis nodal: "+
+      JSON.stringify({aronPower,aronTotal,exactAronPower,floatingNeutral}));
+  console.log("Aron sin neutro: análisis nodal independiente="+
+    exactAronPower.toFixed(3)+" W, suma de vatímetros="+aronTotal.toFixed(3)+" W");
   console.log("Aron desequilibrado: P1+P2="+aronTotal.toFixed(3)+
     " W; referencia RLC="+expectedUnbalancedAron.toFixed(3)+" W");
   console.log("Aron desequilibrado: dos vatímetros activos, carga 470/1000/1000 Ω y P total positiva");
