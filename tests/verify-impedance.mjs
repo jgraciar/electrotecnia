@@ -179,8 +179,10 @@ try{
 
 
     const rect=await load(circuit('mode="1" f0="50" r="8" l="'+l+'" c="0"'));
-    assert(rect.info.some(x=>x.startsWith("R = 8 Ω")));
-    assert(rect.info.some(x=>x.startsWith("X = 5 Ω")));
+    assert(rect.info.some(x=>/^R = 8(?:[,.]0+)? Ω/.test(x)),
+        "Resistencia de Z incorrecta: "+JSON.stringify(rect.info));
+    assert(rect.info.some(x=>/^X = 5(?:[,.]0+)? Ω/.test(x)),
+        "Reactancia de Z incorrecta: "+JSON.stringify(rect.info));
     assert(Math.abs(rect.current)>1e-8 || Math.abs(rect.voltage)>1e-8,
         "El elemento Z no participa en la simulación: "+JSON.stringify(rect));
     const roundtrip=await page.evaluate(()=>{
