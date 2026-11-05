@@ -64,7 +64,7 @@ replaceOnce(numberFormat,"    private pattern: string;",`    private pattern: st
         return parts.join(NumberFormat.decimalSeparator);
     }`);
 replaceOnce(numberFormat,"return Math.round(v).toString();","return NumberFormat.localized(Math.round(v).toString());");
-replaceOnce(numberFormat,"return v.toFixed(digits);","return NumberFormat.localized(v.toFixed(digits));");
+replaceOnce(numberFormat,"return v.toFixed(digits);","return NumberFormat.localized(parseFloatStrict(v.toFixed(digits)).toString());");
 replaceOnce(numberFormat,"return parseFloatStrict(v.toFixed(digits)).toString();","return NumberFormat.localized(parseFloatStrict(v.toFixed(digits)).toString());");
 replaceOnce(numberFormat,"return exp.replace(/E([+-]?)(\\d+)$/, (_, sign, digits) =>","return NumberFormat.localized(exp.replace(/E([+-]?)(\\d+)$/, (_, sign, digits) =>");
 replaceOnce(numberFormat,"digits.padStart(3, '0'));","digits.padStart(3, '0')));");
