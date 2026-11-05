@@ -99,19 +99,17 @@ try {
     const resistors=els.filter(e=>e.getType()==="ResistorElm");
     return {
       meters:meters.map(e=>e.getInfo()),
-      resistors:resistors.map(e=>({
-        r:e.resistance,
-        i:e.getCurrent(),
-        p:e.getCurrent()**2*e.resistance
-      })),
+      resistors:resistors.map(e=>e.getInfo()),
+      exported:sim.exportCircuit(),
       time:sim.getTime()
     };
   });
   assert.equal(aronResult.meters.length,2);
   assert.equal(aronResult.resistors.length,3,
     "El circuito Aron debe contener tres resistencias de carga");
-  assert(aronResult.resistors.some(x=>Math.abs(x.r-470)<0.01),
-    "La resistencia modificada no aparece en el circuito");
+  assert(/<r x="752 304 720 352"[^>]*r="470"/.test(aronResult.exported),
+    "La resistencia de 470 ohmios no se conserva en el XML exportado: "+
+      aronResult.exported.match(/<r [^>]+/g)?.join("; "));
   const aronPower=aronResult.meters.map(info=>acValue("P = ","W",info));
   assert(aronPower.every(Number.isFinite),
     "Potencias Aron no numéricas: "+JSON.stringify(aronResult));
