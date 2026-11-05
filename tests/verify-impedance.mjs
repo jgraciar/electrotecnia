@@ -121,6 +121,31 @@ try{
     }
     console.log("Impedancia Z: 4 modos visuales en 3 entradas; decimales y XML conservados");
 
+    // Decimales del rótulo: dos por defecto y selección persistente 0..10.
+    for(const decimals of [0,2,4,10]){
+        const attrs='mode="2" displayMode="2" displayDecimals="'+decimals+
+            '" f0="50" r="8.125" l="0.0125" c="0"';
+        await load(circuit(attrs));
+        const state=await page.evaluate(()=>{
+            const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+            const z=Array.from(sim.getElements()).find(e=>e.getType()==="ImpedanceElm");
+            const ei=z.getEditInfo(6);
+            const xml=sim.exportCircuit();
+            sim.importCircuit(xml);
+            const tag=new DOMParser().parseFromString(sim.exportCircuit(),"application/xml")
+                .querySelector("Impedance");
+            return {value:ei?.value,decimals:tag?.getAttribute("displayDecimals"),
+                r:tag?.getAttribute("r")};
+        });
+        assert.equal(state.value,decimals);
+        assert.equal(state.decimals,String(decimals));
+        assert.equal(state.r,"8.125");
+    }
+    const defaultDecimals=await load(circuit('mode="2" f0="50" r="8.125" l="0" c="0"'));
+    assert(defaultDecimals.tag.includes('displayDecimals="2"'),
+        "Por defecto deben mostrarse dos decimales");
+    console.log("Impedancia: decimales configurables 0, 2, 4, 10; defecto 2 y XML persistente");
+
     const rect=await load(circuit('mode="1" f0="50" r="8" l="'+l+'" c="0"'));
     assert(rect.info.some(x=>x.startsWith("R = 8 Ω")));
     assert(rect.info.some(x=>x.startsWith("X = 5 Ω")));
