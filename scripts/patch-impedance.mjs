@@ -144,3 +144,33 @@ replaceOnce(editDialog,'    static parseUnits(s: string): number {\n        s = 
             s=value+suffix;
         }`);
 console.log("Entrada regional: separadores decimales y de miles");
+
+replaceOnce(editDialog,'                    this.activeCol.appendChild(this.makeValueStepperRow(ei));',
+`                    this.activeCol.appendChild(this.makeValueStepperRow(ei));
+                    const hint=document.createElement("small");
+                    hint.className="lab-numeric-format-hint";
+                    hint.style.cssText="display:block;color:#68727d;font-size:11px;margin:2px 0 4px;";
+                    const decimal=NumberFormat.decimalSeparator;
+                    const grouping=NumberFormat.groupingSeparator;
+                    const example=grouping?"1"+grouping+"234"+decimal+"5678":"1234"+decimal+"5678";
+                    hint.textContent="Formato numérico: "+example+
+                        " (decimal: "+decimal+"; miles: "+(grouping||"ninguno")+")";
+                    this.activeCol.appendChild(hint);`);
+replaceOnce(editDialog,'        if (ei !== null && ei.dimensionless) return noCommaFormat(v);',
+'        if (ei !== null && ei.dimensionless) return NumberFormat.localizedInput(noCommaFormat(v));');
+const numberFormatInput=join(dir,"NumberFormat.ts");
+replaceOnce(numberFormatInput,'    private static localized(raw:string):string {',
+`    static localizedInput(raw:string):string {
+        const parts=raw.split(".");
+        if(NumberFormat.groupingSeparator && !/[eE]/.test(raw))
+            parts[0]=parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g,NumberFormat.groupingSeparator);
+        return parts.join(NumberFormat.decimalSeparator);
+    }
+    private static localized(raw:string):string {`);
+replaceOnce(editDialog,'        if (va < 1e-12) return noCommaFormat(v * 1e15) + "f";',
+'        if (va < 1e-12) return NumberFormat.localizedInput(noCommaFormat(v * 1e15)) + "f";');
+for(const [a,b] of [[1e-9,1e12,"p"],[1e-6,1e9,"n"],[1e-3,1e6,"u"],[1,1e3,"m"],[1e3,null,""],[1e6,1e-3,"k"],[1e9,1e-6,"M"]].map(x=>[x[0],x[1],x[2]])){
+    const old=a===1e3?'        if (va < 1e3)   return noCommaFormat(v);':a===1?'        if (va < 1)     return noCommaFormat(v * 1e3)  + "m";':null;
+    if(old) replaceOnce(editDialog,old,old.replace("noCommaFormat(v"+(a===1?" * 1e3":"")+")","NumberFormat.localizedInput(noCommaFormat(v"+(a===1?" * 1e3":"")+"))"));
+}
+console.log("Editor: ejemplo de formato regional junto a cada entrada numérica");
