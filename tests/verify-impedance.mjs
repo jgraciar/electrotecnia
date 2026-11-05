@@ -142,13 +142,18 @@ try{
             const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
             return !!sim?.getElements && !!sim?.importCircuit;
         },null,{timeout:90000});
+        const preImport=await page.evaluate(()=>{
+            const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+            return {time:sim.getTime(),xml:sim.exportCircuit().slice(0,500)};
+        });
         const result=await load(circuit('mode="2" f0="50" r="8.125" l="0" c="0"'));
+        console.log("Diagnóstico regional Z:",JSON.stringify({case:c,preImport,resultTag:result.tag}));
         assert(result.info.some(v=>v.includes(c.expected)),
             "Formato regional incorrecto: "+JSON.stringify({c,info:result.info}));
         // El valor físico debe conservarse al cambiar el formato regional.
         // Si la simulación lo ha modificado, registrar la discrepancia
         // explícitamente para localizar su causa, sin ocultar el fallo.
-        const parsedR=Number(result.tag.match(/\\br="([^"]+)"/)?.[1]);
+        const parsedR=Number(result.tag.match(/(?:^|\\s)r="([^"]+)"/)?.[1]);
         assert.equal(parsedR,8.125,
             "La resistencia física de Z ha cambiado tras importar con formato "+
             JSON.stringify(c)+": esperada 8.125 Ω, obtenida "+parsedR+
