@@ -69,6 +69,17 @@ replaceOnce(numberFormat,"return parseFloatStrict(v.toFixed(digits)).toString();
 replaceOnce(numberFormat,"return exp.replace(/E([+-]?)(\\d+)$/, (_, sign, digits) =>","return NumberFormat.localized(exp.replace(/E([+-]?)(\\d+)$/, (_, sign, digits) =>");
 replaceOnce(numberFormat,"digits.padStart(3, '0'));","digits.padStart(3, '0')));");
 const circuitElm=join(dir,"CircuitElm.ts");
+// Preferencia de escala SI de visualización. No modifica las magnitudes físicas.
+replaceOnce(circuitElm,
+    '        const sp = sf ? "" : " ";\\n        const va = Math.abs(v);',
+    `        const sp = sf ? "" : " ";
+        const chosenScale=typeof localStorage!=="undefined" ?
+            (localStorage.getItem("labDisplayUnitScale") ?? "auto") : "auto";
+        const factors:{[key:string]:number}={"micro":1e6,"milli":1e3,"base":1,"kilo":1e-3};
+        const prefixes:{[key:string]:string}={"micro":Locale.muString,"milli":"m","base":"","kilo":"k"};
+        if(Object.prototype.hasOwnProperty.call(factors,chosenScale) && Number.isFinite(v))
+            return CircuitElm.format(v*factors[chosenScale],sf)+sp+prefixes[chosenScale]+u;
+        const va = Math.abs(v);`);
 replaceOnce(circuitElm,"CircuitElm.decimalDigits = 3;","CircuitElm.decimalDigits = 4;");
 replaceOnce(circuitElm,"CircuitElm.shortDecimalDigits = 1;","CircuitElm.shortDecimalDigits = 4;");
 replaceOnce(circuitElm,'        CircuitElm.setDecimalDigits(CircuitElm.decimalDigits, false, false);',
