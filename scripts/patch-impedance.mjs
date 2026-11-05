@@ -149,7 +149,7 @@ replaceOnce(editDialog,'                    this.activeCol.appendChild(this.make
 `                    this.activeCol.appendChild(this.makeValueStepperRow(ei));
                     const hint=document.createElement("small");
                     hint.className="lab-numeric-format-hint";
-                    hint.style.cssText="display:block;color:#68727d;font-size:11px;margin:2px 0 4px;";
+                    hint.style.cssText="display:block;color:#68727d;font-size:9px;line-height:1.2;margin:1px 0 3px;";
                     const decimal=NumberFormat.decimalSeparator;
                     const grouping=NumberFormat.groupingSeparator;
                     const regional=decimal==="," && grouping==="."?"Europeo":
