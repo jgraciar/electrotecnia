@@ -110,7 +110,13 @@ try {
   assert(/<r x="752 304 720 352"[^>]*r="470"/.test(aronResult.exported),
     "La resistencia de 470 ohmios no se conserva en el XML exportado: "+
       aronResult.exported.match(/<r [^>]+/g)?.join("; "));
-  const aronPower=aronResult.meters.map(info=>acValue("P = ","W",info));
+  const aronPower=aronResult.meters.map(info=>{
+    const line=info.find(x=>x.startsWith("P = "));
+    const match=line?.match(/^P =\s*(-?\d+(?:[.,]\d+)?)\s*(n|µ|u|m|k)?W$/i);
+    assert(match,"Potencia Aron ilegible: "+JSON.stringify(info));
+    const multiplier={n:1e-9,"µ":1e-6,u:1e-6,m:1e-3,k:1e3,"":1};
+    return Number(match[1].replace(",","."))*multiplier[match[2]||""];
+  });
   assert(aronPower.every(Number.isFinite),
     "Potencias Aron no numéricas: "+JSON.stringify(aronResult));
   // La corriente instantánea en R no equivale a su potencia media.
