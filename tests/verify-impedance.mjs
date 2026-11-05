@@ -188,9 +188,6 @@ try{
         return !!sim?.getElements && !!sim?.importCircuit && sim.getTime()>0.03;
     },null,{timeout:90000});
 
-    // El selector de prefijos SI debe conservar sus cinco opciones.
-    const siScaleOptions=["auto","micro","milli","base","kilo"];
-    assert.equal(siScaleOptions.length,5);
     const rect=await load(circuit('mode="1" f0="50" r="8" l="'+l+'" c="0"'));
     assert(rect.info.some(x=>/^R = 8(?:[,.]0+)? Ω/.test(x)),
         "Resistencia de Z incorrecta: "+JSON.stringify(rect.info));
@@ -211,6 +208,29 @@ try{
     });
     assert.deepEqual([roundtrip.found,roundtrip.r,roundtrip.c,roundtrip.frequency,roundtrip.mode],
         [true,"8","0","50","1"],"Se pierden atributos de impedancia al guardar y abrir");
+    // Comprobar el formateador SI real y que el XML permanece idéntico.
+    const siScales=await page.evaluate(()=>{
+        const win=document.querySelector("#circuit-frame").contentWindow;
+        const sim=win.CircuitJS1;
+        const z=Array.from(sim.getElements()).find(e=>e.getType()==="ImpedanceElm");
+        if(!z)return {error:"No se encuentra Z"};
+        const xml=sim.exportCircuit();
+        const results={};
+        for(const scale of ["auto","micro","milli","base","kilo"]){
+            win.localStorage.setItem("labDisplayUnitScale",scale);
+            const info=[];z.getInfo(info);
+            results[scale]=info.find(x=>x.startsWith("R = "));
+        }
+        win.localStorage.setItem("labDisplayUnitScale","auto");
+        return {results,xmlUnchanged:xml===sim.exportCircuit()};
+    });
+    assert(siScales.xmlUnchanged,"El prefijo SI ha modificado el XML");
+    assert.match(siScales.results.auto??"",/^R = 8 Ω$/);
+    assert.match(siScales.results.micro??"",/[µμ]Ω$/);
+    assert.match(siScales.results.milli??"",/mΩ$/);
+    assert.match(siScales.results.base??"",/^R = 8 Ω$/);
+    assert.match(siScales.results.kilo??"",/kΩ$/);
+    console.log("Escalas SI: automático, micro, mili, base y kilo sin alterar XML");
     console.log("Impedancia RL: dos terminales, corriente real y XML conservado");
 
     // f0 del XML sigue siendo 50 Hz para la reproducibilidad, pero
