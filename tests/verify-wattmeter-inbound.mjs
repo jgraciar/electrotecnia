@@ -121,8 +121,21 @@ try {
     "Potencias Aron no numéricas: "+JSON.stringify(aronResult));
   // La corriente instantánea en R no equivale a su potencia media.
   // Verificación de signos y conservación energética mediante P total.
-  assert(aronPower.reduce((a,b)=>a+b,0)>0,
+  const aronTotal=aronPower.reduce((a,b)=>a+b,0);
+  assert(aronTotal>0,
     "La suma de potencias Aron debe ser positiva: "+JSON.stringify(aronResult));
+  // Referencia analítica independiente: tres ramas R-L-C serie en estrella,
+  // cada una alimentada a 120 V RMS, 60 Hz, con neutro de carga conectado.
+  // P_rama=U² R/[R²+(ωL-1/(ωC))²].
+  const omegaAron=2*Math.PI*60;
+  const xAron=omegaAron*1-1/(omegaAron*10e-6);
+  const expectedAron=[470,1000,1000].reduce((total,R)=>
+    total+120**2*R/(R**2+xAron**2),0);
+  assert(Math.abs(aronTotal-expectedAron)<Math.max(1,expectedAron*0.08),
+    "La suma P1+P2 no coincide con la potencia analítica de las tres ramas: "+
+    JSON.stringify({aronPower,aronTotal,expectedAron,xAron,aronResult}));
+  console.log("Aron desequilibrado: P1+P2="+aronTotal.toFixed(3)+
+    " W; referencia RLC="+expectedAron.toFixed(3)+" W");
   console.log("Aron desequilibrado: dos vatímetros activos, carga 470/1000/1000 Ω y P total positiva");
 
   // Selección nueva de lectura pico, tensión pico, intensidad instantánea y
