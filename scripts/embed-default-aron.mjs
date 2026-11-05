@@ -12,7 +12,11 @@ let meterCount=0;
 const maskedXml=originalXml.replace(/<WattmeterTrue\b[^>]*\/>/g, tag=>{
   meterCount++;
   if(!/\bmeter="1"/.test(tag))throw Error('Modo de vatímetro inesperado en el circuito Aron');
-  return tag.replace(/\s*\/>$/, ' labCurrentMode="2" labPowerMask="7"/>');
+  // Sustituir preferencias existentes: los atributos XML duplicados
+  // invalidan el documento y detienen la importación en el primer vatímetro.
+  let clean=tag.replace(/\s+labCurrentMode="[^"]*"/g,"")
+    .replace(/\s+labPowerMask="[^"]*"/g,"");
+  return clean.replace(/\s*\/>$/, ' labCurrentMode="2" labPowerMask="7"/>');
 });
 if(meterCount!==2)throw Error('El diseño inicial debe contener exactamente dos vatímetros de Aron');
 // El fichero Wulflemm original usa un paso de 1 µs: medir unos tres periodos
