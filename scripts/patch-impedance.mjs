@@ -71,7 +71,7 @@ replaceOnce(numberFormat,"digits.padStart(3, '0'));","digits.padStart(3, '0')));
 const circuitElm=join(dir,"CircuitElm.ts");
 // Preferencia de escala SI de visualización. No modifica las magnitudes físicas.
 replaceOnce(circuitElm,
-    '        const sp = sf ? "" : " ";\\n        const va = Math.abs(v);',
+    '        const sp = sf ? "" : " ";\n        const va = Math.abs(v);',
     `        const sp = sf ? "" : " ";
         const chosenScale=typeof localStorage!=="undefined" ?
             (localStorage.getItem("labDisplayUnitScale") ?? "auto") : "auto";
