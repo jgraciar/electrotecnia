@@ -157,7 +157,7 @@ try{
         // El valor físico debe conservarse al cambiar el formato regional.
         // Si la simulación lo ha modificado, registrar la discrepancia
         // explícitamente para localizar su causa, sin ocultar el fallo.
-        const parsedR=Number(result.tag.match(/(?:^|\\s)r="([^"]+)"/)?.[1]);
+        const parsedR=Number(result.tag.match(/(?:^|\s)r="([^"]+)"/)?.[1]);
         assert.equal(parsedR,8.125,
             "La resistencia física de Z ha cambiado tras importar con formato "+
             JSON.stringify(c)+": esperada 8.125 Ω, obtenida "+parsedR+
