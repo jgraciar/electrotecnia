@@ -337,6 +337,15 @@ try{
         "Se ha permitido simular impedancia Z con alimentación solo CC: t="+dcTime);
     console.log("CC rechazada: el circuito con únicamente fuente continua no arranca");
 
+    // Tras rechazar una fuente de CC, reiniciar simulador y puente para
+    // que el estado de parada no impida la siguiente prueba de CA.
+    await page.reload({waitUntil:"domcontentloaded"});
+    await page.locator('button[data-mode="falstad"]').click();
+    await page.waitForFunction(()=>window.LabCircuit?.isIntegrated?.(),null,{timeout:150000});
+    await page.waitForFunction(()=>{
+        const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+        return !!sim?.getElements && !!sim?.importCircuit && sim.getTime()>0.03;
+    },null,{timeout:90000});
     const restored=await load(circuit('mode="0" f0="50" r="8" l="'+l+'" c="0"'));
     assert(restored.info.some(x=>x.startsWith("φ = ")));
     console.log("CA recuperada tras rechazar CC: edición e importación siguen disponibles");
