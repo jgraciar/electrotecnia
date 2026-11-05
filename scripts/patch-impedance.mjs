@@ -185,10 +185,13 @@ const addedTranslations=ownTranslations.filter(([en])=>!existingCatalog.includes
     .map(([en,es])=>JSON.stringify(en)+"="+JSON.stringify(es)).join("\n");
 if(addedTranslations)writeFileSync(spanishCatalog,existingCatalog+"\n"+addedTranslations+"\n");
 
-// Español como idioma predeterminado del laboratorio. Se respetan el
-// parámetro ?lang= y la selección manual persistida en localStorage.
+// Conservar la detección del navegador y la preferencia manual de CircuitJS.
+// Cuando el catálogo del idioma solicitado no existe, utilizar español.
 const localeSource=join(dir,"Locale.ts");
 replaceOnce(localeSource,
-    '                lang = Locale.language();',
-    '                lang = "es";');
-console.log("Idioma inicial del laboratorio: español (es)");
+    '                // if there was an error in retrieving the\\n                // language, default to English (empty map)\\n                Locale.localizationMap = new Map<string, string>();',
+    '                // Catálogo inexistente: utilizar el español del laboratorio.\\n                await Locale.loadSpanishFallback();');
+replaceOnce(localeSource,
+    '            Locale.localizationMap = new Map<string, string>();\\n        }\\n    }\\n}',
+    '            await Locale.loadSpanishFallback();\\n        }\\n    }\\n\\n    static async loadSpanishFallback(): Promise<void> {\\n        try {\\n            const response = await fetch(moduleBaseURL + "locale/locale_es.txt");\\n            Locale.localizationMap = response.ok ? Locale.processLocale(await response.text()) : new Map<string, string>();\\n        } catch (e) {\\n            console.log("Spanish fallback locale failed", e);\\n            Locale.localizationMap = new Map<string, string>();\\n        }\\n    }\\n}');
+console.log("Idioma automático del navegador; reserva en español si no existe catálogo");
