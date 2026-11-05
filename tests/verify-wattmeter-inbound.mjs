@@ -27,6 +27,13 @@ try {
   await page.addInitScript(recordPaint);
   page.on("pageerror",error=>console.error("Error del navegador:",error.message));
   await page.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
+  // La configuración inicial bloquea los clics hasta que se confirma.
+  // Probar el flujo real de usuario antes de abrir la pestaña Falstad.
+  const initialAccept=page.locator("#lab-start-accept");
+  if(await initialAccept.isVisible()) {
+    await initialAccept.click();
+    await page.waitForLoadState("domcontentloaded");
+  }
   await page.locator('button[data-mode="falstad"]').click();
   await page.waitForFunction(()=>window.LabCircuit?.isIntegrated?.(),null,{timeout:150000});
   // Comprobar primero el estado real del circuito sin esperar a los vatímetros:
