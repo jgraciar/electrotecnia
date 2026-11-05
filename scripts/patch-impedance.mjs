@@ -184,3 +184,11 @@ const existingCatalog=readFileSync(spanishCatalog,"utf8");
 const addedTranslations=ownTranslations.filter(([en])=>!existingCatalog.includes(JSON.stringify(en)+"="))
     .map(([en,es])=>JSON.stringify(en)+"="+JSON.stringify(es)).join("\n");
 if(addedTranslations)writeFileSync(spanishCatalog,existingCatalog+"\n"+addedTranslations+"\n");
+
+// Español como idioma predeterminado del laboratorio. Se respetan el
+// parámetro ?lang= y la selección manual persistida en localStorage.
+const localeSource=join(dir,"Locale.ts");
+replaceOnce(localeSource,
+    '                lang = Locale.language();',
+    '                lang = "es";');
+console.log("Idioma inicial del laboratorio: español (es)");
