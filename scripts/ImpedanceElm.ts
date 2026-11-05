@@ -297,7 +297,7 @@ export class ImpedanceElm extends CompositeElm {
             if(n===3)return new EditInfo("Inductancia L (H), 0 = omitir",this.inductance,0,0);
             if(n===4)return new EditInfo("Capacidad C (F), 0 = omitir",this.capacitance,0,0);
         }
-        if(n===5) {
+        if(n===(this.entryMode===2?5:4)) {
             const ei=new EditInfo("Visualización del valor en el esquema",0,-1,-1);
             ei.choice=new Choice();
             ei.choice.add("Solo módulo |Z|");
