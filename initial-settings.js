@@ -30,7 +30,7 @@ function render(){
  const ds=format==="uk"?".":format==="eu"?",":decimal;
  const gs=format==="uk"?",":format==="eu"?".":grouping;
  const sample=1234.5678901234;
- const parts=sample.toFixed(digits).split(".");
+ const parts=Number(sample.toFixed(digits)).toString().split(".");
  const preview=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,gs)+(parts[1]?ds+parts[1]:"");
  const original=String(sample).split(".");
  const rawPreview=original[0].replace(/\B(?=(\d{3})+(?!\d))/g,gs)+ds+original[1];
