@@ -149,8 +149,10 @@ export class ImpedanceElm extends CompositeElm {
         this.drawPosts(g);
         if(this.showValues()) {
             const z=atFrequency(this.values(),this.activeFrequency());
+            // Usar el mismo formato SI automático que en la ficha del elemento.
+            // La fase angular permanece en grados, sin prefijos.
             const number=(v:number)=>CircuitElm.showFormat.format(v);
-            const unit=(v:number,u:string)=>number(v)+" "+u;
+            const unit=(v:number,u:string)=>CircuitElm.getUnitText(v,u);
             const shown=this.displayMode===0 ? unit(z.modulus,"Ω") :
                 this.displayMode===1 ? unit(z.modulus,"Ω")+" ∠ "+number(z.argument)+"°" :
                 this.displayMode===2 ? "R="+unit(z.r,"Ω")+"  X="+unit(z.x,"Ω") :
