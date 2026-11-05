@@ -218,7 +218,7 @@ try{
         const results={};
         for(const scale of ["auto","micro","milli","base","kilo"]){
             win.localStorage.setItem("labDisplayUnitScale",scale);
-            const info=[];z.getInfo(info);
+            const info=z.getInfo();
             results[scale]=info.find(x=>x.startsWith("R = "));
         }
         win.localStorage.setItem("labDisplayUnitScale","auto");
