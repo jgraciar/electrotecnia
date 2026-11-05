@@ -10,7 +10,11 @@ try{
     await page.waitForFunction(()=>window.LabCircuit?.isIntegrated?.(),null,{timeout:150000});
     await page.waitForFunction(()=>{
         const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
-        return sim?.getTime?.()>0.03;
+        if(!sim || sim.getTime?.()<=0.03)return false;
+        // La simulación puede avanzar antes de que se cargue el Aron inicial.
+        // Esperar también a sus dos vatímetros para evitar una carrera.
+        return Array.from(sim.getElements()).filter(e=>
+            e.getType()==="WattmeterTrueElm").length===2;
     },null,{timeout:90000});
     // El circuito Aron de inicio NO se modifica al añadir un nuevo elemento.
     const startup=await page.evaluate(()=>{
