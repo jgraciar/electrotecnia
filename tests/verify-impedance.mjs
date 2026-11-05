@@ -83,6 +83,44 @@ try{
         return check;
     };
 
+    // Los cuatro modos deben poder seleccionarse y conservarse en XML.
+    // Se comprueba también la edición decimal y la recarga del circuito.
+    for(const entryMode of [0,1,2]){
+        for(const displayMode of [0,1,2,3]){
+            const attrs='mode="'+entryMode+'" displayMode="'+displayMode+
+                '" f0="50" r="8.125" l="0.0125" c="0.000125"';
+            const result=await load(circuit(attrs));
+            assert(result.tag.includes('displayMode="'+displayMode+'"'),
+                "No se conserva la selección visual: "+result.tag);
+            assert(result.tag.includes('r="8.125"') &&
+                result.tag.includes('l="0.0125"') &&
+                result.tag.includes('c="0.000125"'),
+                "Se pierden los decimales: "+result.tag);
+            const edited=await page.evaluate(mode=>{
+                const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+                const z=Array.from(sim.getElements()).find(e=>e.getType()==="ImpedanceElm");
+                const index=z.getEditInfo(0).choice.getSelectedIndex()===2?5:4;
+                const ei=z.getEditInfo(index);
+                if(!ei?.choice)return {error:"No existe selector de visualización",index};
+                ei.choice.select(mode);
+                z.setEditValue(index,ei);
+                const xml=sim.exportCircuit();
+                sim.importCircuit(xml);
+                const tag=new DOMParser().parseFromString(sim.exportCircuit(),"application/xml")
+                    .querySelector("Impedance");
+                return {index,selected:tag?.getAttribute("displayMode"),
+                    r:tag?.getAttribute("r"),l:tag?.getAttribute("l"),
+                    c:tag?.getAttribute("c")};
+            },displayMode);
+            assert.equal(edited.selected,String(displayMode),
+                "No se guarda el modo visual editado: "+JSON.stringify(edited));
+            assert.deepEqual([edited.r,edited.l,edited.c],
+                ["8.125","0.0125","0.000125"],
+                "Se pierden decimales tras editar y reimportar: "+JSON.stringify(edited));
+        }
+    }
+    console.log("Impedancia Z: 4 modos visuales en 3 entradas; decimales y XML conservados");
+
     const rect=await load(circuit('mode="1" f0="50" r="8" l="'+l+'" c="0"'));
     assert(rect.info.some(x=>x.startsWith("R = 8 Ω")));
     assert(rect.info.some(x=>x.startsWith("X = 5 Ω")));
