@@ -137,10 +137,14 @@ try{
             frame.localStorage.setItem("decimalDigits","4");
             frame.localStorage.setItem("decimalDigitsShort","4");
         },c);
-        await page.locator("#circuit-frame").evaluate(frame=>frame.contentWindow.location.reload());
+        // Recargar la aplicación completa: el puente LabCircuit conserva una
+        // referencia al simulador y no debe apuntar al iframe anterior.
+        await page.reload({waitUntil:"domcontentloaded"});
+        await page.locator('button[data-mode="falstad"]').click();
+        await page.waitForFunction(()=>window.LabCircuit?.isIntegrated?.(),null,{timeout:150000});
         await page.waitForFunction(()=>{
             const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
-            return !!sim?.getElements && !!sim?.importCircuit;
+            return !!sim?.getElements && !!sim?.importCircuit && sim.getTime()>0.03;
         },null,{timeout:90000});
         const preImport=await page.evaluate(()=>{
             const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
