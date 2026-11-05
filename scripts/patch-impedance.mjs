@@ -116,3 +116,31 @@ replaceOnce(opts,'        if (n === 11)\n            CircuitElm.setDecimalDigits
             NumberFormat.setSeparators(NumberFormat.decimalSeparator,grouping);
         }`);
 console.log("Opciones generales: cuatro decimales y separadores numéricos");
+
+const editDialog=join(dir,"EditDialog.ts");
+replaceOnce(editDialog,'import { parseFloatStrict } from "./NumberParse";',
+'import { parseFloatStrict } from "./NumberParse";\nimport { NumberFormat } from "./NumberFormat";');
+replaceOnce(editDialog,'    static parseUnits(s: string): number {\n        s = s.trim();',
+`    static parseUnits(s: string): number {
+        s = s.trim();
+        const decimal=NumberFormat.decimalSeparator;
+        const grouping=NumberFormat.groupingSeparator;
+        // Aceptar exclusivamente el agrupamiento regional correcto.
+        // No alterar los valores internos, XML ni los sufijos de ingeniería.
+        const numeric=s.match(/^([+-]?(?:[0-9][0-9.,]*|[.,][0-9]+))(.*)$/);
+        if(numeric){
+            let value=numeric[1];
+            const suffix=numeric[2];
+            if(grouping && value.includes(grouping)){
+                const groups=value.split(decimal)[0].split(grouping);
+                if(groups.length>1 && !(groups[0].length>=1 && groups[0].length<=3 &&
+                    groups.slice(1).every(g=>/^\\d{3}$/.test(g))))
+                    throw Error("Agrupación de miles incorrecta");
+                value=value.split(grouping).join("");
+            }
+            if(decimal!==".") value=value.replace(decimal,".");
+            if((value.match(/\\./g)||[]).length>1 || !/^[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)$/.test(value))
+                throw Error("Número no válido para los separadores elegidos");
+            s=value+suffix;
+        }`);
+console.log("Entrada regional: separadores decimales y de miles");
