@@ -174,18 +174,19 @@ try{
             " Ω; XML="+result.tag);
     }
     console.log("Formato general: coma/punto, agrupación opcional, cuatro decimales y XML exacto");
-    // Restablecer valores españoles para las pruebas eléctricas restantes.
+    // Restablecer valores españoles y recrear el puente con el nuevo iframe.
     await page.evaluate(()=>{
         const frame=document.querySelector("#circuit-frame").contentWindow;
         frame.localStorage.setItem("labDecimalSeparator",",");
         frame.localStorage.setItem("labGroupingSeparator",".");
-        frame.location.reload();
     });
+    await page.reload({waitUntil:"domcontentloaded"});
+    await page.locator('button[data-mode="falstad"]').click();
+    await page.waitForFunction(()=>window.LabCircuit?.isIntegrated?.(),null,{timeout:150000});
     await page.waitForFunction(()=>{
         const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
-        return !!sim?.getElements && !!sim?.importCircuit;
+        return !!sim?.getElements && !!sim?.importCircuit && sim.getTime()>0.03;
     },null,{timeout:90000});
-
 
     const rect=await load(circuit('mode="1" f0="50" r="8" l="'+l+'" c="0"'));
     assert(rect.info.some(x=>/^R = 8(?:[,.]0+)? Ω/.test(x)),
