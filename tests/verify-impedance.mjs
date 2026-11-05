@@ -122,6 +122,46 @@ try{
         "Los valores de Z deben utilizar la coma decimal general: "+JSON.stringify(globalFormat.info));
     console.log("Impedancia: sin decimales propios y con separador regional general");
 
+    // Validación numérica de extremo a extremo: las opciones regionales
+    // cambian únicamente la presentación, no los atributos XML ni el cálculo.
+    const numericCases=[
+        {decimal:",",grouping:".",expected:"1.234,5678"},
+        {decimal:".",grouping:",",expected:"1,234.5678"},
+        {decimal:",",grouping:"",expected:"1234,5678"}
+    ];
+    for(const c of numericCases){
+        await page.evaluate(({decimal,grouping})=>{
+            const frame=document.querySelector("#circuit-frame").contentWindow;
+            frame.localStorage.setItem("labDecimalSeparator",decimal);
+            frame.localStorage.setItem("labGroupingSeparator",grouping);
+            frame.localStorage.setItem("decimalDigits","4");
+            frame.localStorage.setItem("decimalDigitsShort","4");
+        },c);
+        await page.locator("#circuit-frame").evaluate(frame=>frame.contentWindow.location.reload());
+        await page.waitForFunction(()=>{
+            const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+            return !!sim?.getElements && !!sim?.importCircuit;
+        },null,{timeout:90000});
+        const result=await load(circuit('mode="2" f0="50" r="1234.5678" l="0" c="0"'));
+        assert(result.info.some(v=>v.includes(c.expected)),
+            "Formato regional incorrecto: "+JSON.stringify({c,info:result.info}));
+        assert(result.tag.includes('r="1234.5678"'),
+            "El formato de pantalla ha alterado el valor XML: "+result.tag);
+    }
+    console.log("Formato general: coma/punto, agrupación opcional, cuatro decimales y XML exacto");
+    // Restablecer valores españoles para las pruebas eléctricas restantes.
+    await page.evaluate(()=>{
+        const frame=document.querySelector("#circuit-frame").contentWindow;
+        frame.localStorage.setItem("labDecimalSeparator",",");
+        frame.localStorage.setItem("labGroupingSeparator",".");
+        frame.location.reload();
+    });
+    await page.waitForFunction(()=>{
+        const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+        return !!sim?.getElements && !!sim?.importCircuit;
+    },null,{timeout:90000});
+
+
     const rect=await load(circuit('mode="1" f0="50" r="8" l="'+l+'" c="0"'));
     assert(rect.info.some(x=>x.startsWith("R = 8 Ω")));
     assert(rect.info.some(x=>x.startsWith("X = 5 Ω")));
