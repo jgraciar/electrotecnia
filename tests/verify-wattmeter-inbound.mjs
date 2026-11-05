@@ -280,14 +280,17 @@ try {
     a.re*b.im+a.im*b.re);
   const conjugateC=a=>complex(a.re,-a.im);
   const aronIndividualReference=(reactance)=>{
+    // La secuencia real de las fuentes del XML es A=0°, B=-120°, C=+120°.
+    // Invertir el orden cambia P1 y P2 aunque deja invariante su suma.
+    const actualPhases=[phases[0],phases[2],phases[1]];
     const ys=branchR.map(R=>divC(complex(1),complex(R,reactance)));
-    const weighted=phases.reduce((sum,v,k)=>
+    const weighted=actualPhases.reduce((sum,v,k)=>
       addC(sum,multiplyC(v,ys[k])),complex(0));
     const neutral=divC(weighted,ys.reduce(addC,complex(0)));
-    const currents=phases.map((v,k)=>
+    const currents=actualPhases.map((v,k)=>
       multiplyC(subC(v,neutral),ys[k]));
     return [0,2].map(k=>
-      multiplyC(subC(phases[k],phases[1]),conjugateC(currents[k])).re);
+      multiplyC(subC(actualPhases[k],actualPhases[1]),conjugateC(currents[k])).re);
   };
   for(const testCase of [
     {name:"RLC desequilibrado",x:xAron,measured:aronPower},
