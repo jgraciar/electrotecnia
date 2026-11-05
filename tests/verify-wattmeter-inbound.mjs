@@ -31,7 +31,11 @@ try {
   await page.waitForFunction(()=>window.LabCircuit?.isIntegrated?.(),null,{timeout:150000});
   await page.waitForFunction(()=>{
     const api=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
-    return api && api.getTime?.()>=0.03;
+    if(!api || api.getTime?.()<0.03)return false;
+    // Esperar a que el circuito de arranque esté cargado, no solo a que
+    // avance el tiempo de simulación de un circuito vacío transitorio.
+    const xml=api.exportCircuit?.()||"";
+    return (xml.match(/<WattmeterTrue\\b/g)||[]).length===2;
   },null,{timeout:90000});
 
   // El circuito que aparece al iniciar debe llevar las tres potencias
