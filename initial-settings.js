@@ -29,8 +29,11 @@ function render(){
  const t=catalogs[dialogLanguage]||catalogs.en;
  const ds=format==="uk"?".":format==="eu"?",":decimal;
  const gs=format==="uk"?",":format==="eu"?".":grouping;
- const parts=(1234.5678901234).toFixed(digits).split(".");
+ const sample=1234.5678901234;
+ const parts=sample.toFixed(digits).split(".");
  const preview=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,gs)+(parts[1]?ds+parts[1]:"");
+ const original=String(sample).split(".");
+ const rawPreview=original[0].replace(/\B(?=(\d{3})+(?!\d))/g,gs)+ds+original[1];
  document.getElementById("lab-start-modal").innerHTML='<div class="lab-start-card" role="dialog" aria-modal="true" aria-labelledby="lab-start-title"><h2 id="lab-start-title">'+esc(t[0])+'</h2><p>'+esc(t[1])+'</p><label>'+esc(t[2])+'<select id="lab-start-language">'+Object.entries(names).map(([code,name])=>'<option value="'+code+'" '+(language===code?"selected":"")+'>'+esc(name)+'</option>').join("")+'</select></label><fieldset><legend>'+esc(t[3])+'</legend>'+["eu","uk","custom"].map((v,i)=>'<label class="lab-start-choice"><input type="radio" name="lab-start-format" value="'+v+'" '+(format===v?"checked":"")+'>'+esc(t[i+4])+'</label>').join("")+'</fieldset>'+(format==="custom"?'<div class="lab-start-pair"><label>'+esc(t[8])+'<select id="lab-start-decimal"><option value="," '+(decimal===","?"selected":"")+'>,</option><option value="." '+(decimal==="."?"selected":"")+'>.</option></select></label><label>'+esc(t[9])+'<select id="lab-start-group"><option value="." '+(grouping==="."?"selected":"")+'>.</option><option value="," '+(grouping===","?"selected":"")+'>,</option><option value="" '+(grouping===""?"selected":"")+'>'+esc(t[12])+'</option></select></label></div>':"")+'<label>'+esc(t[7])+'<input id="lab-start-digits" type="number" min="0" max="12" step="1" value="'+digits+'"></label><p class="lab-start-precision">'+esc(precisionNotes[dialogLanguage]||precisionNotes.en)+'</p><div class="lab-start-preview"><small>'+esc(t[10])+'</small><strong>'+esc(preview)+'</strong></div><button type="button" id="lab-start-accept">'+esc(t[11])+'</button></div>';
  document.getElementById("lab-start-language").onchange=e=>{language=e.target.value;dialogLanguage=language;format=language==="en"?"uk":"eu";render()};
  document.querySelectorAll('input[name="lab-start-format"]').forEach(el=>el.onchange=e=>{format=e.target.value;render()});
