@@ -8,14 +8,25 @@ try{
     await page.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
     await page.locator('button[data-mode="falstad"]').click();
     await page.waitForFunction(()=>window.LabCircuit?.isIntegrated?.(),null,{timeout:150000});
+    // Diagnóstico explícito del arranque: evitar 90 s de espera silenciosa.
+    // Si falta el Aron, registrar el circuito real antes de detener la prueba.
     await page.waitForFunction(()=>{
         const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
-        if(!sim || sim.getTime?.()<=0.03)return false;
-        // La simulación puede avanzar antes de que se cargue el Aron inicial.
-        // Esperar también a sus dos vatímetros para evitar una carrera.
-        return Array.from(sim.getElements()).filter(e=>
-            e.getType()==="WattmeterTrueElm").length===2;
+        return sim?.getTime?.()>0.03;
     },null,{timeout:90000});
+    const startupDiagnostic=await page.evaluate(()=>{
+        const frame=document.querySelector("#circuit-frame");
+        const sim=frame?.contentWindow?.CircuitJS1;
+        const elements=Array.from(sim?.getElements?.()||[]);
+        return {
+            time:sim?.getTime?.(),
+            elementCount:elements.length,
+            types:elements.map(e=>e.getType()),
+            xmlStart:sim?.exportCircuit?.()?.slice(0,700),
+            frameUrl:frame?.contentWindow?.location?.href
+        };
+    });
+    console.log("Diagnóstico de arranque de CircuitJS:",JSON.stringify(startupDiagnostic));
     // El circuito Aron de inicio NO se modifica al añadir un nuevo elemento.
     const startup=await page.evaluate(()=>{
         const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
