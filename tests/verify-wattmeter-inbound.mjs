@@ -220,6 +220,58 @@ try {
     " W, W2="+inductiveP[1]+" W; total="+inductiveTotal+
     " W, referencia="+expectedInductiveTotal+" W");
 
+  // Aron capacitivo desequilibrado: C=1 µF en las tres ramas.
+  // Se contrasta P1+P2 con el cálculo nodal del neutro flotante.
+  const capacitiveAron=unbalancedAron.replace(
+    /c="0\.000009999999999999999"/g,'c="0.000001"');
+  assert((capacitiveAron.match(/<c\s[^>]*\bc="0\.000001"[^>]*\/>/g)||[]).length===3,
+    "No se han cambiado los tres condensadores del Aron capacitivo");
+  const capacitiveImport=await page.evaluate(xml=>
+    window.LabCircuit.importWulflemmXml(xml),capacitiveAron);
+  assert(capacitiveImport.ok && capacitiveImport.simulated,
+    "No se importa el Aron capacitivo: "+JSON.stringify(capacitiveImport));
+  await page.waitForFunction(()=>{
+    const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    const meters=Array.from(sim?.getElements()||[]).filter(e=>
+      e.getType()==="WattmeterTrueElm");
+    return sim?.getTime()>0.12 && meters.length===2 &&
+      meters.every(m=>m.getInfo().some(x=>x.startsWith("P = ")&&!x.includes("...")));
+  },null,{timeout:60000});
+  const capacitiveReadings=await page.evaluate(()=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(sim.getElements()).filter(e=>
+      e.getType()==="WattmeterTrueElm").map(e=>e.getInfo());
+  });
+  const capacitiveP=capacitiveReadings.map(info=>{
+    const line=info.find(x=>x.startsWith("P = "));
+    const match=line?.match(/^P =\s*(-?\d+(?:[.,]\d+)?)\s*(n|µ|u|m|k)?W$/i);
+    assert(match,"Potencia Aron capacitiva ilegible: "+JSON.stringify(info));
+    return Number(match[1].replace(",","."))*
+      ({n:1e-9,"µ":1e-6,u:1e-6,m:1e-3,k:1e3,"":1}[match[2]||""]);
+  });
+  const capacitiveTotal=capacitiveP.reduce((a,b)=>a+b,0);
+  const capacitiveX=omegaAron-1/(omegaAron*1e-6);
+  assert(capacitiveX<0,"La carga debe ser predominantemente capacitiva");
+  const capacitiveY=branchR.map(R=>divC(complex(1),complex(R,capacitiveX)));
+  const capacitiveWeighted=phases.reduce((sum,v,k)=>
+    addC(sum,complex(
+      capacitiveY[k].re*v.re-capacitiveY[k].im*v.im,
+      capacitiveY[k].re*v.im+capacitiveY[k].im*v.re)),complex(0));
+  const capacitiveNeutral=divC(capacitiveWeighted,
+    capacitiveY.reduce(addC,complex(0)));
+  const expectedCapacitiveTotal=phases.reduce((sum,v,k)=>{
+    const drop=subC(v,capacitiveNeutral);
+    return sum+(drop.re**2+drop.im**2)*branchR[k]/
+      (branchR[k]**2+capacitiveX**2);
+  },0);
+  assert(Math.abs(capacitiveTotal-expectedCapacitiveTotal)<
+    Math.max(1,expectedCapacitiveTotal*0.08),
+    "Aron capacitivo: suma de lecturas distinta del análisis nodal: "+
+    JSON.stringify({capacitiveP,capacitiveTotal,expectedCapacitiveTotal,capacitiveReadings}));
+  console.log("Aron capacitivo desequilibrado: W1="+capacitiveP[0]+
+    " W, W2="+capacitiveP[1]+" W; total="+capacitiveTotal+
+    " W, referencia="+expectedCapacitiveTotal+" W");
+
   // Selección nueva de lectura pico, tensión pico, intensidad instantánea y
   // ventana de 100 ms. Debe sobrevivir al XML y mostrarse en el motor real.
   const extendedModeXml=original.replace(
