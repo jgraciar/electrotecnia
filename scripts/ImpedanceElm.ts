@@ -27,6 +27,8 @@ export class ImpedanceElm extends CompositeElm {
     entryMode:number = 0;
     // 0 módulo, 1 módulo/ángulo, 2 R/X, 3 R/L/C.
     displayMode:number = 0;
+    // Decimales visibles en el esquema; no modifica la precisión del cálculo.
+    displayDecimals:number = 2;
     referenceFrequency:number = 50;
     resistance:number = 10;
     inductance:number = 0;
@@ -148,7 +150,7 @@ export class ImpedanceElm extends CompositeElm {
         this.drawPosts(g);
         if(this.showValues()) {
             const z=atFrequency(this.values(),this.activeFrequency());
-            const number=(v:number)=>Number(v.toPrecision(10)).toString();
+            const number=(v:number)=>v.toFixed(this.displayDecimals);
             const unit=(v:number,u:string)=>number(v)+" "+u;
             const shown=this.displayMode===0 ? unit(z.modulus,"Ω") :
                 this.displayMode===1 ? unit(z.modulus,"Ω")+" ∠ "+number(z.argument)+"°" :
@@ -206,6 +208,7 @@ export class ImpedanceElm extends CompositeElm {
         super.dumpXml(doc,elem);
         CircuitXMLSerializer.dumpAttr(elem,"mode",this.entryMode);
         CircuitXMLSerializer.dumpAttr(elem,"displayMode",this.displayMode);
+        CircuitXMLSerializer.dumpAttr(elem,"displayDecimals",this.displayDecimals);
         CircuitXMLSerializer.dumpAttr(elem,"f0",this.referenceFrequency);
         CircuitXMLSerializer.dumpAttr(elem,"r",this.resistance);
         CircuitXMLSerializer.dumpAttr(elem,"l",this.inductance);
@@ -217,6 +220,7 @@ export class ImpedanceElm extends CompositeElm {
         // recuperar su estado dinámico (corriente de L / tensión de C).
         const mode=xml.parseIntAttr("mode",this.entryMode);
         const displayMode=xml.parseIntAttr("displayMode",this.displayMode);
+        const displayDecimals=xml.parseIntAttr("displayDecimals",this.displayDecimals);
         const f0=xml.parseDoubleAttr("f0",this.referenceFrequency);
         const r=xml.parseDoubleAttr("r",this.resistance);
         const l=xml.parseDoubleAttr("l",this.inductance);
@@ -227,8 +231,11 @@ export class ImpedanceElm extends CompositeElm {
             throw Error("Modo de impedancia de CA no válido");
         if(!Number.isInteger(displayMode)||displayMode<0||displayMode>3)
             throw Error("Modo de visualización de impedancia no válido");
+        if(!Number.isInteger(displayDecimals)||displayDecimals<0||displayDecimals>10)
+            throw Error("Número de decimales no válido (0 a 10)");
         this.entryMode=mode;
         this.displayMode=displayMode;
+        this.displayDecimals=displayDecimals;
         this.referenceFrequency=f0;
         this.resistance=r;
         this.inductance=l;
@@ -307,6 +314,8 @@ export class ImpedanceElm extends CompositeElm {
             ei.choice.select(this.displayMode);
             return ei;
         }
+        if(n===(this.entryMode===2?6:5))
+            return new EditInfo("Decimales mostrados (0 a 10)",this.displayDecimals,0,10);
         return null;
     }
 
@@ -325,6 +334,12 @@ export class ImpedanceElm extends CompositeElm {
             return;
         }
         try {
+            if(n===(this.entryMode===2?6:5)) {
+                if(!Number.isInteger(ei.value)||ei.value<0||ei.value>10)
+                    throw Error("Introduce un número entero de decimales entre 0 y 10");
+                this.displayDecimals=ei.value;
+                return;
+            }
             if(n===1) {
                 if(this.sourceFrequency()!==null) return; // valor automático de la red
                 validateFrequency(ei.value);
