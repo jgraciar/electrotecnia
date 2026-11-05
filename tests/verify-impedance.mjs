@@ -63,7 +63,8 @@ try{
         const imported=await page.evaluate(xml=>window.LabCircuit.importNativeCircuit("Prueba impedancia CA",xml),xml);
         assert(imported.ok && imported.simulated && imported.elements===6,
             "No se importó la impedancia completa: "+JSON.stringify(imported));
-        const expectedTag=new DOMParser().parseFromString(xml,"application/xml").querySelector("Impedance");
+        const expectedTag=await page.evaluate(source=>new DOMParser().parseFromString(source,"application/xml").querySelector("Impedance")?.outerHTML,xml);
+        const expectedAttrs=Object.fromEntries([...expectedTag.matchAll(/(r|l|c)="([^"]+)"/g)].map(m=>[m[1],m[2]]));
         await page.waitForFunction(({r,l,c})=>{
             const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
             if(!sim || sim.getTime()<=0.1)return false;
@@ -73,8 +74,8 @@ try{
             const tag=doc.querySelector("Impedance");
             return tag?.getAttribute("r")===r && tag?.getAttribute("l")===l &&
                 tag?.getAttribute("c")===c;
-        },{r:expectedTag?.getAttribute("r"),l:expectedTag?.getAttribute("l"),
-            c:expectedTag?.getAttribute("c")},{timeout:60000});
+        },{r:expectedAttrs.r,l:expectedAttrs.l,
+            c:expectedAttrs.c},{timeout:60000});
         const check=await page.evaluate(()=>{
             const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
             const impedance=Array.from(sim.getElements()).find(x=>x.getType()==="ImpedanceElm");
