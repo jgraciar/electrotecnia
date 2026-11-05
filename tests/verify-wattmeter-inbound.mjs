@@ -172,7 +172,7 @@ try {
   // Se conservan los dos vatímetros y la topología de tres hilos.
   const inductiveAron=unbalancedAron.replace(
     /c="0\.000009999999999999999"/g,'c="0.0001"');
-  assert((inductiveAron.match(/c="0\.0001"/g)||[]).length===3,
+  assert((inductiveAron.match(/<c\s[^>]*\bc="0\.0001"[^>]*\/>/g)||[]).length===3,
     "No se han cambiado los tres condensadores del Aron inductivo");
   const inductiveImport=await page.evaluate(xml=>
     window.LabCircuit.importWulflemmXml(xml),inductiveAron);
