@@ -25,6 +25,8 @@ import { atFrequency, fromPolar, fromRectangular, validateFrequency, validateRLC
 export class ImpedanceElm extends CompositeElm {
     // 0 polar, 1 rectangular, 2 R/L/C; todos referidos a CA.
     entryMode:number = 0;
+    // 0 módulo, 1 módulo/ángulo, 2 R/X, 3 R/L/C.
+    displayMode:number = 0;
     referenceFrequency:number = 50;
     resistance:number = 10;
     inductance:number = 0;
@@ -113,7 +115,8 @@ export class ImpedanceElm extends CompositeElm {
 
     setPoints():void {
         super.setPoints();
-        this.calcLeads(16);
+        // Igual que una resistencia: los conductores terminan en las caras del símbolo.
+        this.calcLeads(32);
         if(this.posts?.length===2) {
             this.setPost(0,this.point1);
             this.setPost(1,this.point2);
@@ -129,6 +132,8 @@ export class ImpedanceElm extends CompositeElm {
         const cy=(this.point1.y+this.point2.y)/2;
         g.context.translate(cx,cy);
         g.context.rotate(Math.atan2(this.dy,this.dx));
+        // Contorno con el mismo grosor de trazo que el símbolo de resistencia.
+        g.context.lineWidth=2;
         g.context.strokeRect(-16,-6,32,12);
         g.setFont(new Font("SansSerif",0,12));
         g.context.textBaseline="middle";
@@ -143,7 +148,14 @@ export class ImpedanceElm extends CompositeElm {
         this.drawPosts(g);
         if(this.showValues()) {
             const z=atFrequency(this.values(),this.activeFrequency());
-            this.drawValues(g,CircuitElm.getShortUnitText(z.modulus,"Ω"),16);
+            const number=(v:number)=>Number(v.toPrecision(10)).toString();
+            const unit=(v:number,u:string)=>number(v)+" "+u;
+            const shown=this.displayMode===0 ? unit(z.modulus,"Ω") :
+                this.displayMode===1 ? unit(z.modulus,"Ω")+" ∠ "+number(z.argument)+"°" :
+                this.displayMode===2 ? "R="+unit(z.r,"Ω")+"  X="+unit(z.x,"Ω") :
+                "R="+unit(this.resistance,"Ω")+"  L="+unit(this.inductance,"H")+
+                    "  C="+unit(this.capacitance,"F");
+            this.drawValues(g,shown,16);
         }
     }
 
@@ -193,6 +205,7 @@ export class ImpedanceElm extends CompositeElm {
     dumpXml(doc:Document,elem:Element):void {
         super.dumpXml(doc,elem);
         CircuitXMLSerializer.dumpAttr(elem,"mode",this.entryMode);
+        CircuitXMLSerializer.dumpAttr(elem,"displayMode",this.displayMode);
         CircuitXMLSerializer.dumpAttr(elem,"f0",this.referenceFrequency);
         CircuitXMLSerializer.dumpAttr(elem,"r",this.resistance);
         CircuitXMLSerializer.dumpAttr(elem,"l",this.inductance);
@@ -203,6 +216,7 @@ export class ImpedanceElm extends CompositeElm {
         // Primero cargar los parámetros, reconstruir los componentes, después
         // recuperar su estado dinámico (corriente de L / tensión de C).
         const mode=xml.parseIntAttr("mode",this.entryMode);
+        const displayMode=xml.parseIntAttr("displayMode",this.displayMode);
         const f0=xml.parseDoubleAttr("f0",this.referenceFrequency);
         const r=xml.parseDoubleAttr("r",this.resistance);
         const l=xml.parseDoubleAttr("l",this.inductance);
@@ -211,7 +225,10 @@ export class ImpedanceElm extends CompositeElm {
         validateRLC({r,l,c});
         if(!Number.isInteger(mode)||mode<0||mode>2)
             throw Error("Modo de impedancia de CA no válido");
+        if(!Number.isInteger(displayMode)||displayMode<0||displayMode>3)
+            throw Error("Modo de visualización de impedancia no válido");
         this.entryMode=mode;
+        this.displayMode=displayMode;
         this.referenceFrequency=f0;
         this.resistance=r;
         this.inductance=l;
@@ -280,6 +297,16 @@ export class ImpedanceElm extends CompositeElm {
             if(n===3)return new EditInfo("Inductancia L (H), 0 = omitir",this.inductance,0,0);
             if(n===4)return new EditInfo("Capacidad C (F), 0 = omitir",this.capacitance,0,0);
         }
+        if(n===5) {
+            const ei=new EditInfo("Visualización del valor en el esquema",0,-1,-1);
+            ei.choice=new Choice();
+            ei.choice.add("Solo módulo |Z|");
+            ei.choice.add("Módulo |Z| y argumento φ");
+            ei.choice.add("Resistencia R y reactancia X");
+            ei.choice.add("Componentes R, L y C");
+            ei.choice.select(this.displayMode);
+            return ei;
+        }
         return null;
     }
 
@@ -293,6 +320,10 @@ export class ImpedanceElm extends CompositeElm {
             return;
         }
         if(this.ignoreOldDialog) return;
+        if(n===5) {
+            this.displayMode=ei.choice!.getSelectedIndex();
+            return;
+        }
         try {
             if(n===1) {
                 if(this.sourceFrequency()!==null) return; // valor automático de la red
