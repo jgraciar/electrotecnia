@@ -61,7 +61,7 @@ jobs:
 
       - name: Incorporar circuito original de Aron al código de CircuitJS
         run: |
-          node laboratorio/scripts/embed-default-aron.mjs circuitjs-src/ts/CirSim.ts laboratorio/tests/fixtures/wulflemm-aron.xml
+          node laboratorio/scripts/embed-default-aron.mjs circuitjs-src/ts/CirSim.ts laboratorio/tests/fixtures/sistema-iii-n-startup.xml
 
       - name: Ampliar vatimetro con potencias P, Q1 y S
         run: |
