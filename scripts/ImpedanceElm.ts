@@ -152,28 +152,38 @@ export class ImpedanceElm extends CompositeElm {
             // Usar el mismo formato SI automático que en la ficha del elemento.
             // La fase angular permanece en grados, sin prefijos.
             const number=(v:number)=>CircuitElm.showFormat.format(v);
-            const unit=(v:number,u:string)=>CircuitElm.getUnitText(v,u);
             const scale=typeof localStorage!=="undefined" ?
                 (localStorage.getItem("labDisplayUnitScale")??"auto") : "auto";
             const factors:{[key:string]:number}={micro:1e6,milli:1e3,base:1,kilo:1e-3};
             const prefixes:{[key:string]:string}={micro:"µ",milli:"m",base:"",kilo:"k"};
-            const absMax=Math.max(Math.abs(z.r),Math.abs(z.x));
-            const automatic=absMax<1e-9?{factor:1e12,prefix:"p"}:
-                absMax<1e-6?{factor:1e9,prefix:"n"}:
-                absMax<1e-3?{factor:1e6,prefix:"µ"}:
-                absMax<1?{factor:1e3,prefix:"m"}:
-                absMax<1e3?{factor:1,prefix:""}:
-                absMax<1e6?{factor:1e-3,prefix:"k"}:
-                absMax<1e9?{factor:1e-6,prefix:"M"}:{factor:1e-9,prefix:"G"};
-            const factor=factors[scale]??automatic.factor;
-            const prefix=prefixes[scale]??automatic.prefix;
+            const automatic=(value:number)=>{
+                const magnitude=Math.abs(value);
+                return magnitude<1e-9?{factor:1e12,prefix:"p"}:
+                    magnitude<1e-6?{factor:1e9,prefix:"n"}:
+                    magnitude<1e-3?{factor:1e6,prefix:"µ"}:
+                    magnitude<1?{factor:1e3,prefix:"m"}:
+                    magnitude<1e3?{factor:1,prefix:""}:
+                    magnitude<1e6?{factor:1e-3,prefix:"k"}:
+                    magnitude<1e9?{factor:1e-6,prefix:"M"}:{factor:1e-9,prefix:"G"};
+            };
+            const scaled=(value:number,unit:string)=>{
+                const selected=automatic(value);
+                const factor=factors[scale]??selected.factor;
+                const prefix=prefixes[scale]??selected.prefix;
+                return number(value*factor)+" "+prefix+unit;
+            };
+            // En forma binómica R y X comparten el mismo prefijo para
+            // conservar la unidad de toda la expresión compleja.
+            const selected=automatic(Math.max(Math.abs(z.r),Math.abs(z.x)));
+            const factor=factors[scale]??selected.factor;
+            const prefix=prefixes[scale]??selected.prefix;
             const rectangular="("+number(z.r*factor)+(z.x<0?" − j":" + j")+
                 number(Math.abs(z.x)*factor)+") "+prefix+"Ω";
             const shown=this.displayMode===0 ? rectangular :
-                this.displayMode===1 ? unit(z.modulus,"Ω")+" ∠ "+number(z.argument)+"°" :
-                this.displayMode===2 ? "R="+unit(z.r,"Ω")+"  X="+unit(z.x,"Ω") :
-                "R="+unit(this.resistance,"Ω")+"  L="+unit(this.inductance,"H")+
-                    "  C="+unit(this.capacitance,"F");
+                this.displayMode===1 ? scaled(z.modulus,"Ω")+" ∠ "+number(z.argument)+"°" :
+                this.displayMode===2 ? "R="+scaled(z.r,"Ω")+"  X="+scaled(z.x,"Ω") :
+                "R="+scaled(this.resistance,"Ω")+"  L="+scaled(this.inductance,"H")+
+                    "  C="+scaled(this.capacitance,"F");
             this.drawValues(g,shown,16);
         }
     }
