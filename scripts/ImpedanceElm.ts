@@ -320,7 +320,7 @@ export class ImpedanceElm extends CompositeElm {
             return;
         }
         if(this.ignoreOldDialog) return;
-        if(n===5) {
+        if(n===(this.entryMode===2?5:4)) {
             this.displayMode=ei.choice!.getSelectedIndex();
             return;
         }
