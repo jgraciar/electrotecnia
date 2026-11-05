@@ -152,9 +152,11 @@ replaceOnce(editDialog,'                    this.activeCol.appendChild(this.make
                     hint.style.cssText="display:block;color:#68727d;font-size:11px;margin:2px 0 4px;";
                     const decimal=NumberFormat.decimalSeparator;
                     const grouping=NumberFormat.groupingSeparator;
+                    const regional=decimal==="," && grouping==="."?"Europeo":
+                        decimal==="." && grouping===","?"Anglosajón":"Personalizado";
                     const example=grouping?"1"+grouping+"234"+decimal+"5678":"1234"+decimal+"5678";
-                    hint.textContent="Formato numérico: "+example+
-                        " (decimal: "+decimal+"; miles: "+(grouping||"ninguno")+")";
+                    hint.textContent="Formato "+regional+
+                        (regional==="Personalizado"?" (ejemplo: "+example+")":"");
                     this.activeCol.appendChild(hint);`);
 replaceOnce(editDialog,'        if (ei !== null && ei.dimensionless) return noCommaFormat(v);',
 '        if (ei !== null && ei.dimensionless) return NumberFormat.localizedInput(noCommaFormat(v));');
