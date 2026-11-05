@@ -4,6 +4,7 @@ import {chromium} from "playwright";
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:1440,height:950}});
 page.on("pageerror",e=>console.error("Error de navegador:",e.message));
+await page.addInitScript(()=>localStorage.setItem("labStartConfigured","1"));
 try{
     await page.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
     await page.locator('button[data-mode="falstad"]').click();
