@@ -5,6 +5,7 @@ import {writeFile} from "node:fs/promises";
 const browser=await chromium.launch({headless:true});
 const page=await browser.newPage({viewport:{width:1440,height:1000}});
 page.on("pageerror",err=>console.error("BROWSER:",err.message));
+await page.addInitScript(()=>localStorage.setItem("labStartConfigured","1"));
 try {
   await page.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
   // El iframe CircuitJS se carga de forma diferida y está oculto en la vista inicial.
