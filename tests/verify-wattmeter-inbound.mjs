@@ -272,6 +272,39 @@ try {
     " W, W2="+capacitiveP[1]+" W; total="+capacitiveTotal+
     " W, referencia="+expectedCapacitiveTotal+" W");
 
+  // Lecturas individuales del método de Aron mediante fasores independientes.
+  // Bobinas de intensidad en fases superior e inferior; las de tensión
+  // toman como referencia la fase central, común a ambos vatímetros.
+  // P1=Re[(Va-Vb)*conj(Ia)], P2=Re[(Vc-Vb)*conj(Ic)].
+  const multiplyC=(a,b)=>complex(a.re*b.re-a.im*b.im,
+    a.re*b.im+a.im*b.re);
+  const conjugateC=a=>complex(a.re,-a.im);
+  const aronIndividualReference=(reactance)=>{
+    const ys=branchR.map(R=>divC(complex(1),complex(R,reactance)));
+    const weighted=phases.reduce((sum,v,k)=>
+      addC(sum,multiplyC(v,ys[k])),complex(0));
+    const neutral=divC(weighted,ys.reduce(addC,complex(0)));
+    const currents=phases.map((v,k)=>
+      multiplyC(subC(v,neutral),ys[k]));
+    return [0,2].map(k=>
+      multiplyC(subC(phases[k],phases[1]),conjugateC(currents[k])).re);
+  };
+  for(const testCase of [
+    {name:"RLC desequilibrado",x:xAron,measured:aronPower},
+    {name:"inductivo",x:inductiveX,measured:inductiveP},
+    {name:"capacitivo",x:capacitiveX,measured:capacitiveP}
+  ]){
+    const expected=aronIndividualReference(testCase.x);
+    const measured=testCase.measured;
+    const error=measured.map((p,k)=>Math.abs(p-expected[k]));
+    const tolerance=Math.max(1,Math.abs(expected[0]+expected[1])*0.08);
+    assert(error.every(e=>e<tolerance),
+      "Lectura individual o signo incorrecto en Aron "+testCase.name+": "+
+      JSON.stringify({measured,expected,error,tolerance}));
+    console.log("Aron individual "+testCase.name+": W1/W2 medidos="+
+      measured.join("/")+" W, fasores="+expected.map(v=>v.toFixed(3)).join("/")+" W");
+  }
+
   // Selección nueva de lectura pico, tensión pico, intensidad instantánea y
   // ventana de 100 ms. Debe sobrevivir al XML y mostrarse en el motor real.
   const extendedModeXml=original.replace(
