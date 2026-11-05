@@ -14,6 +14,7 @@ on:
       - wulflemm-ui.js
       - index.html
       - tests/fixtures/wulflemm-aron.xml
+      - tests/fixtures/sistema-iii-n-startup.xml
       - bridge.js
       - wulflemm-xml.js
       - .github/workflows/check-wattmeter.yml
@@ -54,7 +55,7 @@ jobs:
 
       - name: Aplicar ampliacion sin alterar identificadores XML originales
         run: |
-          node laboratorio/scripts/embed-default-aron.mjs circuitjs-src/ts/CirSim.ts laboratorio/tests/fixtures/wulflemm-aron.xml
+          node laboratorio/scripts/embed-default-aron.mjs circuitjs-src/ts/CirSim.ts laboratorio/tests/fixtures/sistema-iii-n-startup.xml
           node laboratorio/scripts/patch-wattmeter-powers.mjs circuitjs-src/ts/WattmeterTrueElm.ts laboratorio/scripts/LabPowerMeasurement.ts
 
       - name: Compilar TypeScript y Vite
