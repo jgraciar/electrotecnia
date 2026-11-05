@@ -167,6 +167,59 @@ try {
     " W; referencia RLC="+expectedUnbalancedAron.toFixed(3)+" W");
   console.log("Aron desequilibrado: dos vatímetros activos, carga 470/1000/1000 Ω y P total positiva");
 
+  // Aron desequilibrado predominantemente inductivo: se aumenta C de
+  // 10 a 100 µF en las tres ramas. A 60 Hz, XL-XC > 0.
+  // Se conservan los dos vatímetros y la topología de tres hilos.
+  const inductiveAron=unbalancedAron.replace(
+    /c="0\.000009999999999999999"/g,'c="0.0001"');
+  assert((inductiveAron.match(/c="0\.0001"/g)||[]).length===3,
+    "No se han cambiado los tres condensadores del Aron inductivo");
+  const inductiveImport=await page.evaluate(xml=>
+    window.LabCircuit.importWulflemmXml(xml),inductiveAron);
+  assert(inductiveImport.ok && inductiveImport.simulated,
+    "No se importa el Aron inductivo: "+JSON.stringify(inductiveImport));
+  await page.waitForFunction(()=>{
+    const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+    const meters=Array.from(sim?.getElements()||[]).filter(e=>
+      e.getType()==="WattmeterTrueElm");
+    return sim?.getTime()>0.12 && meters.length===2 &&
+      meters.every(m=>m.getInfo().some(x=>x.startsWith("P = ")&&!x.includes("...")));
+  },null,{timeout:60000});
+  const inductiveReadings=await page.evaluate(()=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    return Array.from(sim.getElements()).filter(e=>
+      e.getType()==="WattmeterTrueElm").map(e=>e.getInfo());
+  });
+  const inductiveP=inductiveReadings.map(info=>{
+    const line=info.find(x=>x.startsWith("P = "));
+    const match=line?.match(/^P =\s*(-?\d+(?:[.,]\d+)?)\s*(n|µ|u|m|k)?W$/i);
+    assert(match,"Potencia Aron inductiva ilegible: "+JSON.stringify(info));
+    return Number(match[1].replace(",","."))*
+      ({n:1e-9,"µ":1e-6,u:1e-6,m:1e-3,k:1e3,"":1}[match[2]||""]);
+  });
+  const inductiveTotal=inductiveP.reduce((a,b)=>a+b,0);
+  const inductiveX=omegaAron-1/(omegaAron*100e-6);
+  assert(inductiveX>0,"La carga debe ser predominantemente inductiva");
+  const inductiveY=branchR.map(R=>divC(complex(1),complex(R,inductiveX)));
+  const inductiveWeighted=phases.reduce((sum,v,k)=>
+    addC(sum,complex(
+      inductiveY[k].re*v.re-inductiveY[k].im*v.im,
+      inductiveY[k].re*v.im+inductiveY[k].im*v.re)),complex(0));
+  const inductiveNeutral=divC(inductiveWeighted,
+    inductiveY.reduce(addC,complex(0)));
+  const expectedInductiveTotal=phases.reduce((sum,v,k)=>{
+    const drop=subC(v,inductiveNeutral);
+    return sum+(drop.re**2+drop.im**2)*branchR[k]/
+      (branchR[k]**2+inductiveX**2);
+  },0);
+  assert(Math.abs(inductiveTotal-expectedInductiveTotal)<
+    Math.max(1,expectedInductiveTotal*0.08),
+    "Aron inductivo: suma de lecturas distinta del análisis nodal: "+
+    JSON.stringify({inductiveP,inductiveTotal,expectedInductiveTotal,inductiveReadings}));
+  console.log("Aron inductivo desequilibrado: W1="+inductiveP[0]+
+    " W, W2="+inductiveP[1]+" W; total="+inductiveTotal+
+    " W, referencia="+expectedInductiveTotal+" W");
+
   // Selección nueva de lectura pico, tensión pico, intensidad instantánea y
   // ventana de 100 ms. Debe sobrevivir al XML y mostrarse en el motor real.
   const extendedModeXml=original.replace(
