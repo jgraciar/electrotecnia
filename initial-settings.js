@@ -16,20 +16,22 @@ const get=(k)=>{try{return localStorage.getItem(k)}catch{return null}};
 const set=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
 const detected=detect();
 let language=(get("language")||detected).toLowerCase().split("-")[0];
+const unknownDetected=!catalogs[detected];
 if(!catalogs[language])language="es";
+let dialogLanguage=unknownDetected&&!get("language")?"en":language;
 let format=get("labRegionalFormat")||((detected==="en")?"uk":"eu");
 let digits=Math.max(0,Math.min(12,Number(get("labDecimalDigits")??4)||0));
 let decimal=get("labDecimalSeparator")||",";
 let grouping=get("labGroupingSeparator")??".";
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function render(){
- const t=catalogs[language]||catalogs.en;
+ const t=catalogs[dialogLanguage]||catalogs.en;
  const ds=format==="uk"?".":format==="eu"?",":decimal;
  const gs=format==="uk"?",":format==="eu"?".":grouping;
  const parts=(1234.5678901234).toFixed(digits).split(".");
  const preview=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,gs)+(parts[1]?ds+parts[1]:"");
  document.getElementById("lab-start-modal").innerHTML='<div class="lab-start-card" role="dialog" aria-modal="true" aria-labelledby="lab-start-title"><h2 id="lab-start-title">'+esc(t[0])+'</h2><p>'+esc(t[1])+'</p><label>'+esc(t[2])+'<select id="lab-start-language">'+Object.entries(names).map(([code,name])=>'<option value="'+code+'" '+(language===code?"selected":"")+'>'+esc(name)+'</option>').join("")+'</select></label><fieldset><legend>'+esc(t[3])+'</legend>'+["eu","uk","custom"].map((v,i)=>'<label class="lab-start-choice"><input type="radio" name="lab-start-format" value="'+v+'" '+(format===v?"checked":"")+'>'+esc(t[i+4])+'</label>').join("")+'</fieldset>'+(format==="custom"?'<div class="lab-start-pair"><label>'+esc(t[8])+'<select id="lab-start-decimal"><option value="," '+(decimal===","?"selected":"")+'>,</option><option value="." '+(decimal==="."?"selected":"")+'>.</option></select></label><label>'+esc(t[9])+'<select id="lab-start-group"><option value="." '+(grouping==="."?"selected":"")+'>.</option><option value="," '+(grouping===","?"selected":"")+'>,</option><option value="" '+(grouping===""?"selected":"")+'>'+esc(t[12])+'</option></select></label></div>':"")+'<label>'+esc(t[7])+'<input id="lab-start-digits" type="number" min="0" max="12" step="1" value="'+digits+'"></label><div class="lab-start-preview"><small>'+esc(t[10])+'</small><strong>'+esc(preview)+'</strong></div><button type="button" id="lab-start-accept">'+esc(t[11])+'</button></div>';
- document.getElementById("lab-start-language").onchange=e=>{language=e.target.value;format=language==="en"?"uk":"eu";render()};
+ document.getElementById("lab-start-language").onchange=e=>{language=e.target.value;dialogLanguage=language;format=language==="en"?"uk":"eu";render()};
  document.querySelectorAll('input[name="lab-start-format"]').forEach(el=>el.onchange=e=>{format=e.target.value;render()});
  document.getElementById("lab-start-digits").onchange=e=>{digits=Math.max(0,Math.min(12,Math.trunc(Number(e.target.value)||0)));render()};
  if(format==="custom"){
