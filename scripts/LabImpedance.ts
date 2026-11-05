@@ -44,3 +44,53 @@ export function atFrequency(values:RLCValues,f:number):ImpedanceValues {
     const modulus=Math.hypot(values.r,x);
     return {r:values.r,x,modulus,argument:Math.atan2(x,values.r)*180/Math.PI};
 }
+
+/** Parámetros físicos de una línea monofásica en π nominal.
+ * Los valores lineales están referidos a kilómetros; Xc' tiene unidad Ω·km.
+ * No se resta la reactancia capacitiva de la impedancia longitudinal.
+ */
+export type LinePiInput = {
+    lengthKm:number;
+    resistanceOhmPerKm:number;
+    inductiveKind:"xl"|"l";
+    inductiveValue:number; // Ω/km si xl, mH/km si l
+    capacitiveKind:"xc"|"c";
+    capacitiveValue:number; // Ω·km si xc, µF/km si c
+    referenceHz:number;
+};
+export type LinePiValues = {
+    r:number;l:number;c:number;halfCapacitance:number;
+    xlOhmPerKm:number;lMilliHenryPerKm:number;
+    xcOhmKm:number;cMicroFaradPerKm:number;
+};
+export function fromLinePi(input:LinePiInput):LinePiValues {
+    const {lengthKm,resistanceOhmPerKm,inductiveKind,inductiveValue,
+        capacitiveKind,capacitiveValue,referenceHz}=input;
+    validateFrequency(referenceHz);
+    if(![lengthKm,resistanceOhmPerKm,inductiveValue,capacitiveValue].every(Number.isFinite) ||
+        lengthKm<=0 || resistanceOhmPerKm<0 || inductiveValue<0 || capacitiveValue<0)
+        throw Error("La longitud debe ser positiva y los parámetros lineales finitos y no negativos");
+    if(inductiveKind!=="xl" && inductiveKind!=="l")
+        throw Error("Seleccione XL' o L'");
+    if(capacitiveKind!=="xc" && capacitiveKind!=="c")
+        throw Error("Seleccione XC' o C'");
+    if(capacitiveKind==="xc" && capacitiveValue===0)
+        throw Error("XC' debe ser positiva; para omitir la capacidad utilice C'=0");
+    const omega=2*Math.PI*referenceHz;
+    const lMilliHenryPerKm=inductiveKind==="l"?
+        inductiveValue:inductiveValue/omega*1000;
+    const xlOhmPerKm=omega*lMilliHenryPerKm*1e-3;
+    const cMicroFaradPerKm=capacitiveKind==="c"?
+        capacitiveValue:1/(omega*capacitiveValue)*1e6;
+    const xcOhmKm=cMicroFaradPerKm>0?
+        1/(omega*cMicroFaradPerKm*1e-6):Infinity;
+    const r=resistanceOhmPerKm*lengthKm;
+    const l=lMilliHenryPerKm*1e-3*lengthKm;
+    const c=cMicroFaradPerKm*1e-6*lengthKm;
+    if(![r,l,c].every(Number.isFinite))
+        throw Error("Los parámetros calculados de la línea exceden el rango numérico");
+    if(r===0 && l===0)
+        throw Error("La línea necesita resistencia o inductancia longitudinal");
+    return {r,l,c,halfCapacitance:c/2,xlOhmPerKm,lMilliHenryPerKm,
+        xcOhmKm,cMicroFaradPerKm};
+}
