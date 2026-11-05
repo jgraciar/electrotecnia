@@ -145,8 +145,14 @@ try{
         const result=await load(circuit('mode="2" f0="50" r="8.125" l="0" c="0"'));
         assert(result.info.some(v=>v.includes(c.expected)),
             "Formato regional incorrecto: "+JSON.stringify({c,info:result.info}));
-        assert(result.tag.includes('r="8.125"'),
-            "El formato de pantalla ha alterado el valor XML: "+result.tag);
+        // El valor físico debe conservarse al cambiar el formato regional.
+        // Si la simulación lo ha modificado, registrar la discrepancia
+        // explícitamente para localizar su causa, sin ocultar el fallo.
+        const parsedR=Number(result.tag.match(/\\br="([^"]+)"/)?.[1]);
+        assert.equal(parsedR,8.125,
+            "La resistencia física de Z ha cambiado tras importar con formato "+
+            JSON.stringify(c)+": esperada 8.125 Ω, obtenida "+parsedR+
+            " Ω; XML="+result.tag);
     }
     console.log("Formato general: coma/punto, agrupación opcional, cuatro decimales y XML exacto");
     // Restablecer valores españoles para las pruebas eléctricas restantes.
