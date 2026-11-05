@@ -149,15 +149,15 @@ replaceOnce(editDialog,'                    this.activeCol.appendChild(this.make
 `                    this.activeCol.appendChild(this.makeValueStepperRow(ei));
                     const hint=document.createElement("small");
                     hint.className="lab-numeric-format-hint";
-                    hint.style.cssText="display:block;color:#68727d;font-size:9px;line-height:1.2;margin:1px 0 3px;";
+                    hint.style.cssText="color:#68727d;font-size:9px;font-weight:normal;";
                     const decimal=NumberFormat.decimalSeparator;
                     const grouping=NumberFormat.groupingSeparator;
-                    const regional=decimal==="," && grouping==="."?"Europeo":
-                        decimal==="." && grouping===","?"Anglosajón":"Personalizado";
+                    const regional=decimal==="," && grouping==="."?"europeo":
+                        decimal==="." && grouping===","?"anglosajón":"personalizado";
                     const example=grouping?"1"+grouping+"234"+decimal+"5678":"1234"+decimal+"5678";
-                    hint.textContent="Formato "+regional+
-                        (regional==="Personalizado"?" (ejemplo: "+example+")":"");
-                    this.activeCol.appendChild(hint);`);
+                    hint.textContent="; formato "+regional+
+                        (regional==="personalizado"?" (ejemplo: "+example+")":"");
+                    label.appendChild(hint);`);
 replaceOnce(editDialog,'        if (ei !== null && ei.dimensionless) return noCommaFormat(v);',
 '        if (ei !== null && ei.dimensionless) return NumberFormat.localizedInput(noCommaFormat(v));');
 const numberFormatInput=join(dir,"NumberFormat.ts");
