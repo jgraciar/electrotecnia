@@ -29,14 +29,27 @@ try {
   await page.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
   await page.locator('button[data-mode="falstad"]').click();
   await page.waitForFunction(()=>window.LabCircuit?.isIntegrated?.(),null,{timeout:150000});
+  // Comprobar primero el estado real del circuito sin esperar a los vatímetros:
+  // un XML rechazado puede dejar un montaje parcial y producir un timeout.
   await page.waitForFunction(()=>{
     const api=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
-    if(!api || api.getTime?.()<0.03)return false;
-    // Esperar a que el circuito de arranque esté cargado, no solo a que
-    // avance el tiempo de simulación de un circuito vacío transitorio.
-    const xml=api.exportCircuit?.()||"";
-    return (xml.match(/<WattmeterTrue\\b/g)||[]).length===2;
+    return api && api.getTime?.()>=0.03;
   },null,{timeout:90000});
+  const startupDiagnostic=await page.evaluate(()=>{
+    const frame=document.querySelector("#circuit-frame");
+    const sim=frame?.contentWindow?.CircuitJS1;
+    const elements=Array.from(sim?.getElements?.()||[]);
+    return {
+      time:sim?.getTime?.(),
+      elementCount:elements.length,
+      types:elements.map(e=>e.getType()),
+      xmlStart:sim?.exportCircuit?.()?.slice(0,1300),
+      frameUrl:frame?.contentWindow?.location?.href
+    };
+  });
+  console.log("Diagnóstico de arranque Aron:",JSON.stringify(startupDiagnostic));
+  assert.equal(startupDiagnostic.types.filter(t=>t==="WattmeterTrueElm").length,2,
+    "El circuito de arranque está incompleto: "+JSON.stringify(startupDiagnostic));
 
   // El circuito que aparece al iniciar debe llevar las tres potencias
   // activadas en AMBOS vatímetros, sin necesitar cambiar sus propiedades.
