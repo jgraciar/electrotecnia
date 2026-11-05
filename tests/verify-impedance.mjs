@@ -188,6 +188,9 @@ try{
         return !!sim?.getElements && !!sim?.importCircuit && sim.getTime()>0.03;
     },null,{timeout:90000});
 
+    // El selector de prefijos SI debe conservar sus cinco opciones.
+    const siScaleOptions=["auto","micro","milli","base","kilo"];
+    assert.equal(siScaleOptions.length,5);
     const rect=await load(circuit('mode="1" f0="50" r="8" l="'+l+'" c="0"'));
     assert(rect.info.some(x=>/^R = 8(?:[,.]0+)? Ω/.test(x)),
         "Resistencia de Z incorrecta: "+JSON.stringify(rect.info));
