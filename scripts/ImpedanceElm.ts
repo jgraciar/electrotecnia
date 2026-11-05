@@ -26,7 +26,7 @@ import { atFrequency, fromPolar, fromRectangular, validateFrequency, validateRLC
 export class ImpedanceElm extends CompositeElm {
     // 0 polar, 1 rectangular, 2 R/L/C; todos referidos a CA.
     entryMode:number = 0;
-    // 0 módulo, 1 módulo/ángulo, 2 R/X, 3 R/L/C.
+    // 0 R+jX (por defecto), 1 módulo∠argumento, 2 R/X etiquetados, 3 R/L/C.
     displayMode:number = 0;
     referenceFrequency:number = 50;
     resistance:number = 10;
@@ -153,7 +153,8 @@ export class ImpedanceElm extends CompositeElm {
             // La fase angular permanece en grados, sin prefijos.
             const number=(v:number)=>CircuitElm.showFormat.format(v);
             const unit=(v:number,u:string)=>CircuitElm.getUnitText(v,u);
-            const shown=this.displayMode===0 ? unit(z.modulus,"Ω") :
+            const rectangular=unit(z.r,"Ω")+(z.x<0?" − j":" + j")+unit(Math.abs(z.x),"Ω");
+            const shown=this.displayMode===0 ? rectangular :
                 this.displayMode===1 ? unit(z.modulus,"Ω")+" ∠ "+number(z.argument)+"°" :
                 this.displayMode===2 ? "R="+unit(z.r,"Ω")+"  X="+unit(z.x,"Ω") :
                 "R="+unit(this.resistance,"Ω")+"  L="+unit(this.inductance,"H")+
@@ -303,7 +304,7 @@ export class ImpedanceElm extends CompositeElm {
         if(n===(this.entryMode===2?5:4)) {
             const ei=new EditInfo(Locale.LS("Value display on schematic"),0,-1,-1);
             ei.choice=new Choice();
-            ei.choice.add(Locale.LS("Magnitude |Z| only"));
+            ei.choice.add(Locale.LS("Resistance and reactance R ± jX (default)"));
             ei.choice.add(Locale.LS("Magnitude |Z| and phase φ"));
             ei.choice.add(Locale.LS("Resistance R and reactance X"));
             ei.choice.add(Locale.LS("Components R, L and C"));
