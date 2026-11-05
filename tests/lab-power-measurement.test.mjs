@@ -210,3 +210,22 @@ assert(Math.abs(fifthOpposed.powerFactor-expectedP/expectedS)<.015,
 assert(fifthOpposed.powerFactor<fifthOpposed.cosPhi,
  "La distorsion debe separar el factor de potencia real del cos phi");
 console.log("OK: P, Q1, S, cos phi, f.d.p., THD U/I y D* con quinto armonico de potencia negativa");
+
+
+// Carga no lineal de referencia: rectificador ideal de media onda con R.
+// i(t)=max(u(t),0)/R; no es una carga lineal R alimentada con seno completo.
+// Analíticamente: P=U²/(2R), I_rms=U/(sqrt(2)R), S=U²/(sqrt(2)R),
+// cosφ₁=1 y f.d.p.=1/sqrt(2). La corriente incluye componente continua.
+const rectifierR=100;
+const halfWave=measure(t=>voltage*sin(t),
+    t=>Math.max(0,voltage*sin(t))/rectifierR);
+assert.equal(halfWave.kind,"ac");
+approx("Rectificador media onda: P",halfWave.p,voltage*voltage/(2*rectifierR),.025);
+approx("Rectificador media onda: S",halfWave.s,voltage*voltage/(Math.SQRT2*rectifierR),.025);
+assert(Math.abs(halfWave.cosPhi-1)<.03,
+    "Rectificador ideal: la fundamental de corriente está en fase con la tensión");
+assert(Math.abs(halfWave.powerFactor-1/Math.SQRT2)<.03,
+    "Rectificador media onda: f.d.p. verdadero debe incluir la corriente no sinusoidal");
+assert(halfWave.powerFactor<halfWave.cosPhi-.2,
+    "No se debe confundir cosφ₁ con el factor de potencia real");
+console.log("OK: referencia analítica de carga no lineal, rectificador ideal de media onda.");
