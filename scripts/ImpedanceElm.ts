@@ -14,6 +14,7 @@ import { CurrentElm } from "./CurrentElm";
 import { CircuitXMLSerializer } from "./CircuitXMLSerializer";
 import { CircuitXMLDeserializer } from "./CircuitXMLDeserializer";
 import { EditInfo } from "./EditInfo";
+import { Locale } from "./Locale";
 import { Choice } from "./Choice";
 import { Font } from "./Font";
 import { Graphics } from "./Graphics";
@@ -54,7 +55,7 @@ export class ImpedanceElm extends CompositeElm {
 
     getDumpType():number { return 1553; }
     getXmlDumpType():string { return "Impedance"; }
-    getElmType():string { return "Impedancia Z (solo CA)"; }
+    getElmType():string { return Locale.LS("Impedance Z (AC only)"); }
     // La tecla z minúscula ya pertenece al diodo Zener; Z es Mayús+Z.
     getShortcut():number { return 'Z'.charCodeAt(0); }
 
@@ -181,7 +182,7 @@ export class ImpedanceElm extends CompositeElm {
     // sigue siendo físico; no se falsean los cálculos en presencia de armónicos.
     preStamp():void {
         if (this.doDcAnalysis()) {
-            CircuitElm.sim.stop("La impedancia Z solo está disponible en CA",this);
+            CircuitElm.sim.stop(Locale.LS("Impedance Z is only available in AC"),this);
             return;
         }
         // Se rechazan circuitos excitados exclusivamente con fuentes de CC,
@@ -196,7 +197,7 @@ export class ImpedanceElm extends CompositeElm {
         const hasDCSource=allVoltage.length>0 ||
             others.some(e=>e instanceof CurrentElm);
         if (hasDCSource && !hasAC) {
-            CircuitElm.sim.stop("Impedancia Z: se requiere una fuente de CA (no admite circuito solo CC)",this);
+            CircuitElm.sim.stop(Locale.LS("Impedance Z requires an AC source (DC-only circuits are not supported)"),this);
             return;
         }
         super.preStamp();
@@ -260,11 +261,11 @@ export class ImpedanceElm extends CompositeElm {
     getEditInfo(n:number):EditInfo | null {
         if(n===0) {
             this.ignoreOldDialog=false; // tras reconstruir el editor
-            const ei=new EditInfo("Impedancia Z · solo CA · asociación serie",0,-1,-1);
+            const ei=new EditInfo(Locale.LS("Impedance Z · AC only · series connection"),0,-1,-1);
             ei.choice=new Choice();
-            ei.choice.add("Módulo |Z| y argumento φ");
-            ei.choice.add("Resistencia R y reactancia X");
-            ei.choice.add("Componentes físicos R, L y C");
+            ei.choice.add(Locale.LS("Magnitude |Z| and phase φ"));
+            ei.choice.add(Locale.LS("Resistance R and reactance X"));
+            ei.choice.add(Locale.LS("Physical components R, L and C"));
             ei.choice.select(this.entryMode);
             ei.newDialog=true;
             return ei;
@@ -274,36 +275,36 @@ export class ImpedanceElm extends CompositeElm {
             if(auto!==null) {
                 // Campo informativo de solo lectura; no se cambia el origen
                 // de la frecuencia mediante el editor de la carga.
-                const ei=new EditInfo("Frecuencia CA detectada de la fuente",0,-1,-1);
+                const ei=new EditInfo(Locale.LS("AC frequency detected from source"),0,-1,-1);
                 ei.choice=new Choice();
-                ei.choice.add(CircuitElm.getUnitText(auto,"Hz") + " (automática)");
+                ei.choice.add(CircuitElm.getUnitText(auto,"Hz") + Locale.LS(" (automatic)"));
                 ei.choice.select(0);
                 return ei;
             }
-            return new EditInfo("Frecuencia de referencia CA (Hz; sin fuente única)",
+            return new EditInfo(Locale.LS("Reference AC frequency (Hz; no unique source)"),
                 this.referenceFrequency,0,0);
         }
         const z=atFrequency(this.values(),this.activeFrequency());
         if(this.entryMode===0) {
-            if(n===2)return new EditInfo("Módulo |Z| (Ω)",z.modulus,0,0);
-            if(n===3)return new EditInfo("Argumento φ (°)",z.argument,-90,90);
+            if(n===2)return new EditInfo(Locale.LS("Magnitude |Z| (Ω)"),z.modulus,0,0);
+            if(n===3)return new EditInfo(Locale.LS("Phase φ (°)"),z.argument,-90,90);
         }
         if(this.entryMode===1) {
-            if(n===2)return new EditInfo("Resistencia R (Ω)",this.resistance,0,0);
-            if(n===3)return new EditInfo("Reactancia X (Ω), +L / -C",z.x,-1e12,1e12);
+            if(n===2)return new EditInfo(Locale.LS("Resistance R (Ω)"),this.resistance,0,0);
+            if(n===3)return new EditInfo(Locale.LS("Reactance X (Ω), +L / -C"),z.x,-1e12,1e12);
         }
         if(this.entryMode===2) {
-            if(n===2)return new EditInfo("Resistencia R (Ω)",this.resistance,0,0);
-            if(n===3)return new EditInfo("Inductancia L (H), 0 = omitir",this.inductance,0,0);
-            if(n===4)return new EditInfo("Capacidad C (F), 0 = omitir",this.capacitance,0,0);
+            if(n===2)return new EditInfo(Locale.LS("Resistance R (Ω)"),this.resistance,0,0);
+            if(n===3)return new EditInfo(Locale.LS("Inductance L (H), 0 = omit"),this.inductance,0,0);
+            if(n===4)return new EditInfo(Locale.LS("Capacitance C (F), 0 = omit"),this.capacitance,0,0);
         }
         if(n===(this.entryMode===2?5:4)) {
-            const ei=new EditInfo("Visualización del valor en el esquema",0,-1,-1);
+            const ei=new EditInfo(Locale.LS("Value display on schematic"),0,-1,-1);
             ei.choice=new Choice();
-            ei.choice.add("Solo módulo |Z|");
-            ei.choice.add("Módulo |Z| y argumento φ");
-            ei.choice.add("Resistencia R y reactancia X");
-            ei.choice.add("Componentes R, L y C");
+            ei.choice.add(Locale.LS("Magnitude |Z| only"));
+            ei.choice.add(Locale.LS("Magnitude |Z| and phase φ"));
+            ei.choice.add(Locale.LS("Resistance R and reactance X"));
+            ei.choice.add(Locale.LS("Components R, L and C"));
             ei.choice.select(this.displayMode);
             return ei;
         }
