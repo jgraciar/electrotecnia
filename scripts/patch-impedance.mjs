@@ -156,7 +156,7 @@ replaceOnce(editDialog,'                    this.activeCol.appendChild(this.make
                         decimal==="." && grouping===","?"anglosajón":"personalizado";
                     const example=grouping?"1"+grouping+"234"+decimal+"5678":"1234"+decimal+"5678";
                     hint.textContent="; formato "+regional+
-                        (regional==="personalizado"?" (ejemplo: "+example+")":"");
+                        (regional==="personalizado"?" ("+example+")":"");
                     label.appendChild(hint);`);
 replaceOnce(editDialog,'        if (ei !== null && ei.dimensionless) return noCommaFormat(v);',
 '        if (ei !== null && ei.dimensionless) return NumberFormat.localizedInput(noCommaFormat(v));');
