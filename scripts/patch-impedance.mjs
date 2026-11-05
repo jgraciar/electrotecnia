@@ -176,3 +176,11 @@ for(const [a,b] of [[1e-9,1e12,"p"],[1e-6,1e9,"n"],[1e-3,1e6,"u"],[1,1e3,"m"],[1
     if(old) replaceOnce(editDialog,old,old.replace("noCommaFormat(v"+(a===1?" * 1e3":"")+")","NumberFormat.localizedInput(noCommaFormat(v"+(a===1?" * 1e3":"")+"))"));
 }
 console.log("Editor: ejemplo de formato regional junto a cada entrada numérica");
+
+// Añadir las traducciones propias sin sustituir el catálogo original.
+const spanishCatalog=join(dir,"public","locale","locale_es.txt");
+const ownTranslations=[["Impedance Z (AC only)","Impedancia Z (solo CA)"],["Impedance Z is only available in AC","La impedancia Z solo está disponible en CA"],["Impedance Z requires an AC source (DC-only circuits are not supported)","Impedancia Z: se requiere una fuente de CA (no admite circuito solo CC)"],["Impedance Z · AC only · series connection","Impedancia Z · solo CA · asociación serie"],["Magnitude |Z| and phase φ","Módulo |Z| y argumento φ"],["Resistance R and reactance X","Resistencia R y reactancia X"],["Physical components R, L and C","Componentes físicos R, L y C"],["AC frequency detected from source","Frecuencia CA detectada de la fuente"],[" (automatic)"," (automática)"],["Reference AC frequency (Hz; no unique source)","Frecuencia de referencia CA (Hz; sin fuente única)"],["Magnitude |Z| (Ω)","Módulo |Z| (Ω)"],["Phase φ (°)","Argumento φ (°)"],["Resistance R (Ω)","Resistencia R (Ω)"],["Reactance X (Ω), +L / -C","Reactancia X (Ω), +L / -C"],["Inductance L (H), 0 = omit","Inductancia L (H), 0 = omitir"],["Capacitance C (F), 0 = omit","Capacidad C (F), 0 = omitir"],["Value display on schematic","Visualización del valor en el esquema"],["Magnitude |Z| only","Solo módulo |Z|"],["Components R, L and C","Componentes R, L y C"]];
+const existingCatalog=readFileSync(spanishCatalog,"utf8");
+const addedTranslations=ownTranslations.filter(([en])=>!existingCatalog.includes(JSON.stringify(en)+"="))
+    .map(([en,es])=>JSON.stringify(en)+"="+JSON.stringify(es)).join("\n");
+if(addedTranslations)writeFileSync(spanishCatalog,existingCatalog+"\n"+addedTranslations+"\n");
