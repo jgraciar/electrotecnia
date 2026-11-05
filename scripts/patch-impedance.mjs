@@ -28,7 +28,7 @@ const menus=join(dir,"Menus.ts");
 replaceOnce(menus,
     '            "Add Inductor",                 "InductorElm",',
     '            "Add Inductor",                 "InductorElm",\n'+
-    '            "Add Impedance Z (AC, series RLC)", "ImpedanceElm",');
+    '            "Añadir impedancia Z (CA, RLC serie)", "ImpedanceElm",');
 // Un error por alimentación exclusivamente CC detiene el motor de CircuitJS.
 // Al importar otro circuito, reanudar únicamente si la parada fue provocada
 // por nuestra Z: nunca ocultar paradas del resto de elementos.
