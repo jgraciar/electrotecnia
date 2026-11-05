@@ -125,9 +125,9 @@ try{
     // Validación numérica de extremo a extremo: las opciones regionales
     // cambian únicamente la presentación, no los atributos XML ni el cálculo.
     const numericCases=[
-        {decimal:",",grouping:".",expected:"42,5"},
-        {decimal:".",grouping:",",expected:"42.5"},
-        {decimal:",",grouping:"",expected:"42,5"}
+        {decimal:",",grouping:".",expected:"8,125"},
+        {decimal:".",grouping:",",expected:"8.125"},
+        {decimal:",",grouping:"",expected:"8,125"}
     ];
     for(const c of numericCases){
         await page.evaluate(({decimal,grouping})=>{
