@@ -78,6 +78,36 @@ try {
   assert(peak>1e-6,"El puente debe absorber corriente de la fuente");
   console.log("Puente real: corriente máxima observada",peak,"A; intervalo",
     wave.at(-1).t-wave[0].t,"s");
+  // Regresión: varios valores de R y C y reinicializaciones sucesivas.
+  // Se comprueba el motor real, no solo el modelo matemático de referencia.
+  for(const [resistance,capacitance] of [[100,0.0001],[200,0.002],[1000,0.00047],[50,0.00001]]){
+    const circuit=xml.replace('r="200" c="0.002"',
+      `r="${resistance}" c="${capacitance}"`);
+    const imported=await page.evaluate(source=>
+      window.LabCircuit.importNativeCircuit("Estrés R-C",source),circuit);
+    assert(imported?.ok&&imported?.simulated,
+      `No se pudo importar R=${resistance} C=${capacitance}`);
+    await page.waitForFunction(()=>{
+      const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+      return sim?.getTime()>0.025;
+    },null,{timeout:60000});
+    const actual=await page.evaluate(()=>{
+      const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+      const bridge=Array.from(sim.getElements()).find(e=>e.getType()==="FilteredBridgeElm");
+      const saved=sim.exportCircuit();
+      const tag=new DOMParser().parseFromString(saved,"application/xml")
+        .querySelector("FilteredBridge");
+      return {count:Array.from(sim.getElements()).filter(e=>e.getType()==="FilteredBridgeElm").length,
+        current:bridge?.getCurrent(),r:Number(tag?.getAttribute("r")),
+        c:Number(tag?.getAttribute("c")),time:sim.getTime()};
+    });
+    assert.equal(actual.count,1,"No debe duplicarse el puente");
+    assert.equal(actual.r,resistance);
+    assert.equal(actual.c,capacitance);
+    assert(Number.isFinite(actual.current)&&Number.isFinite(actual.time),
+      "Corriente o tiempo no finitos después de cambiar R y C");
+  }
+  console.log("OK: cuatro reinicializaciones y cambios de R-C en CircuitJS");
   assert.equal(errors.length,0,"Errores JavaScript: "+errors.join("; "));
   console.log("OK: menú, importación, dos bornes, XML y corriente finita",check);
 } finally {
