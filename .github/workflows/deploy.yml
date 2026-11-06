@@ -126,6 +126,7 @@ jobs:
           python3 -m http.server 8765 --directory public >/tmp/lab-http.log 2>&1 &
           sleep 2
           node laboratorio/tests/verify-impedance.mjs
+          node laboratorio/tests/verify-filtered-bridge.mjs
           node laboratorio/tests/verify-wattmeter-inbound.mjs
 
       - name: Configurar Pages
