@@ -50,6 +50,7 @@ jobs:
           node --experimental-strip-types laboratorio/tests/lab-filtered-bridge-power.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-filtered-bridge-convergence.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-grid-balance.test.mjs
+          node --experimental-strip-types laboratorio/tests/lab-pv-inverter.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-impedance.test.mjs
 
       - name: Obtener código oficial de CircuitJS
