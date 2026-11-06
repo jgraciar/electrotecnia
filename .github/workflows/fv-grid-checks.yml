@@ -1,0 +1,27 @@
+name: FV grid model checks
+on:
+  push:
+    branches:
+      - feature/fv-grid-model-20261106
+    paths:
+      - 'fv-grid-model.js'
+      - 'tests/fv-grid-model.test.js'
+      - '.github/workflows/fv-grid-checks.yml'
+  pull_request:
+    paths:
+      - 'fv-grid-model.js'
+      - 'tests/fv-grid-model.test.js'
+      - '.github/workflows/fv-grid-checks.yml'
+  workflow_dispatch:
+jobs:
+  node-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: node --check fv-grid-model.js && node --check tests/fv-grid-model.test.js
+      - name: Run FV power balance tests
+        run: node tests/fv-grid-model.test.js
