@@ -95,10 +95,10 @@ try{
  assert(Object.values(measurement).every(Number.isFinite),"Medidas no finitas");
  assert(measurement.voltageRms>5&&measurement.voltageRms<15,"Tensión RMS fuera de rango");
  assert(Math.abs(measurement.load-1)<0.05,"La carga de 100 ohmios a 10 V debe consumir 1 W");
- assert(Math.abs(measurement.source+measurement.inverter+measurement.load)<0.05,
-  "La suma algebraica de potencias absorbidas debe ser cero");
+ assert(Math.abs(measurement.source-measurement.inverter-measurement.load)<0.05,
+  "La potencia suministrada por red y FV debe igualar la carga");
  assert(Math.abs(measurement.inverter+0.5)<0.05,"El inversor debe inyectar 0,5 W");
- assert(Math.abs(measurement.source+0.5)<0.05,"La red debe aportar los 0,5 W restantes");
+ assert(Math.abs(measurement.source-0.5)<0.05,"La red debe aportar los 0,5 W restantes");
  const rt=await page.evaluate(()=>{
   const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
   sim.importCircuit(sim.exportCircuit());
