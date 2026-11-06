@@ -99,6 +99,60 @@ try{
   "La potencia suministrada por red y FV debe igualar la carga");
  assert(Math.abs(measurement.inverter+0.5)<0.05,"El inversor debe inyectar 0,5 W");
  assert(Math.abs(measurement.source-0.5)<0.05,"La red debe aportar los 0,5 W restantes");
+ // Verificar físicamente los tres regímenes: consumo parcial, autoconsumo
+ // completo y vertido. Se mide la fuente de red en el solver de CircuitJS.
+ for(const [pvPower,expectedGrid] of [[0,1],[1,0],[1.5,-0.5]]){
+  const changed=xml.replace('pvP="0.5"','pvP="'+pvPower+'"');
+  const imported=await page.evaluate(x=>window.LabCircuit.importNativeCircuit("FV "+x.p+" W",x.xml),
+   {p:pvPower,xml:changed});
+  assert(imported?.ok,"No se pudo importar FV "+pvPower+" W");
+  await page.waitForFunction(p=>{
+   const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+   if(!sim)return false;
+   const tag=new DOMParser().parseFromString(sim.exportCircuit(),"application/xml").querySelector("PVInverter");
+   return tag?.getAttribute("pvP")===String(p)&&sim.getTime()>0.03;
+  },pvPower,{timeout:60000});
+  const measured=await page.evaluate(async()=>{
+   const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+   const original=sim.ontimestep,samples=[];
+   sim.ontimestep=()=>{
+    original?.();
+    const e=Array.from(sim.getElements());
+    const source=e.find(x=>x.getType()==="VoltageElm");
+    const resistor=e.find(x=>x.getType()==="ResistorElm");
+    const inverter=e.find(x=>x.getType()==="PVInverterElm");
+    if(source&&resistor&&inverter)
+     samples.push({t:sim.getTime(),grid:source.getVoltageDiff()*source.getCurrent(),
+      load:resistor.getVoltageDiff()*resistor.getCurrent(),
+      pv:inverter.getVoltageDiff()*inverter.getCurrent()});
+   };
+   try{
+    const t0=sim.getTime();
+    for(let k=0;k<500&&sim.getTime()-t0<0.12;k++)
+     await new Promise(resolve=>setTimeout(resolve,20));
+   }finally{sim.ontimestep=original;}
+   const last=samples.at(-1)?.t??0;
+   const data=samples.filter(x=>x.t>=last-0.08);
+   const energy={grid:0,load:0,pv:0};
+   let duration=0;
+   for(let i=1;i<data.length;i++){
+    const a=data[i-1],b=data[i],dt=b.t-a.t;
+    if(dt<=0)continue;
+    duration+=dt;
+    for(const k of Object.keys(energy))energy[k]+=dt*(a[k]+b[k])/2;
+   }
+   return {duration,samples:data.length,...Object.fromEntries(
+    Object.entries(energy).map(([k,v])=>[k,v/duration]))};
+  });
+  console.log("Régimen FV",pvPower,"W:",measured);
+  assert(measured.samples>100&&measured.duration>0.06,"Muestreo insuficiente FV "+pvPower);
+  assert(Math.abs(measured.grid-expectedGrid)<0.05,
+   "Potencia de red incorrecta para FV "+pvPower+" W");
+  assert(Math.abs(measured.load-1)<0.05,"Carga incorrecta");
+  assert(Math.abs(measured.pv+pvPower)<0.05,"Potencia del inversor incorrecta");
+  assert(Math.abs(measured.grid-measured.pv-measured.load)<0.05,
+   "Balance energético incorrecto");
+ }
  const rt=await page.evaluate(()=>{
   const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
   sim.importCircuit(sim.exportCircuit());
