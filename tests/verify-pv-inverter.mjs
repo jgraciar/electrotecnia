@@ -30,7 +30,7 @@ try{
   '<w x="400 304 288 304" f="0"/>'+
   '<w x="400 448 288 448" f="0"/></cir>';
  const result=await page.evaluate(x=>window.LabCircuit.importNativeCircuit("FV en paralelo",x),xml);
- assert(result?.ok&&result?.simulated,"Importación FV fallida: "+JSON.stringify(result));
+ assert(result?.ok,"Importación FV rechazada: "+JSON.stringify(result));
  await page.waitForFunction(()=>{
   const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
   return sim?.getTime()>0.05&&Array.from(sim.getElements()).some(e=>e.getType()==="PVInverterElm");
@@ -95,8 +95,10 @@ try{
  assert(Object.values(measurement).every(Number.isFinite),"Medidas no finitas");
  assert(measurement.voltageRms>5&&measurement.voltageRms<15,"Tensión RMS fuera de rango");
  assert(Math.abs(measurement.load-1)<0.05,"La carga de 100 ohmios a 10 V debe consumir 1 W");
- assert(Math.abs(measurement.source+measurement.inverter-measurement.load)<0.05,
-  "El balance de potencias del circuito debe cumplir Kirchhoff");
+ assert(Math.abs(measurement.source+measurement.inverter+measurement.load)<0.05,
+  "La suma algebraica de potencias absorbidas debe ser cero");
+ assert(Math.abs(measurement.inverter+0.5)<0.05,"El inversor debe inyectar 0,5 W");
+ assert(Math.abs(measurement.source+0.5)<0.05,"La red debe aportar los 0,5 W restantes");
  const rt=await page.evaluate(()=>{
   const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
   sim.importCircuit(sim.exportCircuit());
