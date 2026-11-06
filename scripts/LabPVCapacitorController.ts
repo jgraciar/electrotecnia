@@ -3,18 +3,23 @@
 export function selectCapacitorSteps({
  gridP, reactiveBeforeCapacitors, steps,
  targetCosPhi=0.95, minImportP=0.1,
- allowCapacitive=false
+ allowCapacitive=false, currentSelected=[]
 }){
  if(![gridP,reactiveBeforeCapacitors,targetCosPhi,minImportP].every(Number.isFinite)||
   !(targetCosPhi>0&&targetCosPhi<=1)||minImportP<0||
   !Array.isArray(steps)||steps.length>16||
+  !Array.isArray(currentSelected)||new Set(currentSelected).size!==currentSelected.length||
+  currentSelected.some(i=>!Number.isInteger(i)||i<0||i>=steps.length)||
   steps.some(q=>!Number.isFinite(q)||q<=0))
   throw Error("Parámetros del regulador no válidos");
  // Un cosφ calculado en exportación o P≈0 no es criterio suficiente
  // para cerrar escalones: se conserva el estado en esos regímenes.
- if(gridP<=minImportP)return {mode:gridP<0?"export-block":"low-import-block",
-  selected:[],capacitorQ:0,gridQ:reactiveBeforeCapacitors,
-  action:"hold",reason:"Medición de P en PCC insuficiente para regular por cosφ"};
+ if(gridP<=minImportP){
+  const capacitorQ=currentSelected.reduce((sum,i)=>sum+steps[i],0);
+  return {mode:gridP<0?"export-block":"low-import-block",
+   selected:[...currentSelected],capacitorQ,gridQ:reactiveBeforeCapacitors-capacitorQ,
+   action:"hold",reason:"Sin maniobra: se mantienen los contactores existentes"};
+ }
  const targetQ=gridP*Math.tan(Math.acos(targetCosPhi));
  let best={selected:[],capacitorQ:0,gridQ:reactiveBeforeCapacitors};
  let bestError=Math.abs(best.gridQ-targetQ);
