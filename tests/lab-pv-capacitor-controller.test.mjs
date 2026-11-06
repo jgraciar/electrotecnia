@@ -16,6 +16,15 @@ for(const gridP of [0,0.05,-20]){
  assert.equal(state.capacitorQ,0);
  assert.equal(state.gridQ,75);
 }
+// En bloqueo, los contactores que ya estaban cerrados permanecen cerrados.
+for(const gridP of [0,-20]){
+ const held=selectCapacitorSteps({...config,gridP,currentSelected:[0,2]});
+ assert.equal(held.action,"hold");
+ assert.deepEqual(held.selected,[0,2]);
+ assert.equal(held.capacitorQ,37.5);
+ assert.equal(held.gridQ,37.5);
+}
+assert.throws(()=>selectCapacitorSteps({...config,gridP:0,currentSelected:[3]}));
 const over=selectCapacitorSteps({
  gridP:40,reactiveBeforeCapacitors:10,steps:[12.5,25],targetCosPhi:0.95
 });
