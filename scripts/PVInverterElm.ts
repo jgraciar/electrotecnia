@@ -58,13 +58,13 @@ export class PVInverterElm extends CurrentElm {
     }
     doStep():void{
         const sim=SimulationManager.theSim;
-        // Corriente de 0->1: el borne 1 es la inyección hacia la carga.
+        // El signo se invierte para que P positiva reduzca la aportación de la red.
         this.current=gridFollowingCurrent({
             voltageRms:this.voltageRms,frequency:this.frequency,
             power:this.power,reactivePower:this.reactivePower,
             phase:this.phaseDegrees*Math.PI/180,time:sim.t
         });
-        sim.stampCurrentSource(this.nodes[0],this.nodes[1],this.current);
+        sim.stampCurrentSource(this.nodes[0],this.nodes[1],-this.current);
     }
     getEditInfo(n:number):EditInfo|null{
         if(n===0)return new EditInfo("Potencia activa FV P (W)",this.power,0,0);
