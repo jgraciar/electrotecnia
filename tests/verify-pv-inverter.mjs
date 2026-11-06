@@ -171,8 +171,10 @@ try{
   const original=sim.ontimestep, samples=[];
   sim.ontimestep=()=>{
    original?.();
-   const cap=Array.from(sim.getElements()).find(e=>e.getType()==="CapacitorElm");
-   if(cap)samples.push({t:sim.getTime(),v:cap.getVoltageDiff(),i:cap.getCurrent()});
+   const elms=Array.from(sim.getElements());
+   const cap=elms.find(e=>e.getType()==="CapacitorElm");
+   const grid=elms.find(e=>e.getType()==="VoltageElm");
+   if(cap&&grid)samples.push({t:sim.getTime(),v:cap.getVoltageDiff(),i:cap.getCurrent(),ig:grid.getCurrent(),vg:grid.getVoltageDiff()});
   };
   try{
    const start=sim.getTime();
@@ -180,7 +182,7 @@ try{
     await new Promise(resolve=>setTimeout(resolve,20));
   }finally{sim.ontimestep=original;}
   const end=samples.at(-1)?.t??0, data=samples.filter(x=>x.t>=end-0.08);
-  let duration=0,v2=0,i2=0,p=0;
+  let duration=0,v2=0,i2=0,p=0,gridI2=0,gridP=0,gridQ=0;
   for(let k=1;k<data.length;k++){
    const a=data[k-1],b=data[k],dt=b.t-a.t;
    if(dt<=0)continue;
@@ -188,15 +190,26 @@ try{
    v2+=dt*(a.v*a.v+b.v*b.v)/2;
    i2+=dt*(a.i*a.i+b.i*b.i)/2;
    p+=dt*(a.v*a.i+b.v*b.i)/2;
+   gridI2+=dt*(a.ig*a.ig+b.ig*b.ig)/2;
+   gridP+=dt*(a.vg*a.ig+b.vg*b.ig)/2;
+   // At 50 Hz, reactive power from the 90-degree-shifted voltage reference.
+   // Grid voltage and capacitor voltage are opposite in this circuit orientation.
+   const w=2*Math.PI*50;
+   gridQ+=dt*(Math.cos(w*a.t)*a.ig+Math.cos(w*b.t)*b.ig)/2;
   }
   return {samples:data.length,duration,vrms:Math.sqrt(v2/duration),
-   irms:Math.sqrt(i2/duration),p:p/duration};
+   irms:Math.sqrt(i2/duration),p:p/duration,
+   gridIrms:Math.sqrt(gridI2/duration),gridP:gridP/duration};
  });
  console.log("Condensador real de CircuitJS:",capMeasure);
  assert(capMeasure.samples>100&&capMeasure.duration>0.06,"Muestras insuficientes del condensador");
  assert(Math.abs(capMeasure.vrms-10)<0.1,"Tensión RMS del condensador incorrecta");
  assert(Math.abs(capMeasure.irms-0.05)<0.005,"Corriente capacitiva incorrecta");
  assert(Math.abs(capMeasure.p)<0.03,"El condensador ideal no debe consumir potencia activa");
+ assert(Math.abs(capMeasure.gridIrms-0.05)<0.006,
+  "Con FV cubriendo la potencia activa, la red debe suministrar solo corriente reactiva");
+ assert(Math.abs(capMeasure.gridP)<0.03,
+  "Con autoconsumo completo y condensador ideal, la potencia activa de red debe ser cero");
  const rt=await page.evaluate(()=>{
   const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
   sim.importCircuit(sim.exportCircuit());
