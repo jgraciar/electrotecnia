@@ -83,10 +83,12 @@ try {
   const inputPower=await page.evaluate(async()=>{
     const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
     const measurements=[];
-    for(let k=0;k<240;k++){
-      await new Promise(resolve=>setTimeout(resolve,8));
+    const initialTime=sim.getTime();
+    for(let k=0;k<1200;k++){
+      await new Promise(resolve=>setTimeout(resolve,12));
       const bridge=Array.from(sim.getElements()).find(e=>e.getType()==="FilteredBridgeElm");
       measurements.push({t:sim.getTime(),u:bridge.getVoltageDiff(),i:bridge.getCurrent()});
+      if(sim.getTime()-initialTime>=0.12)break;
     }
     let duration=0,u2=0,i2=0,ui=0,valid=0;
     for(let k=1;k<measurements.length;k++){
@@ -104,7 +106,8 @@ try {
       S:Math.sqrt(u2*i2)/duration,
       pf:ui/Math.sqrt(u2*i2)};
   });
-  assert(inputPower.duration>0.04&&inputPower.valid>20,
+  console.log("Diagnóstico adquisición de potencia:",inputPower);
+  assert(inputPower.duration>0.08&&inputPower.valid>20,
     "No hay suficientes muestras temporales válidas para calcular potencias");
   assert(Object.values(inputPower).every(Number.isFinite),
     "Las potencias del elemento real deben ser finitas");
