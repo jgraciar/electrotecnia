@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ensayo FV-red · Laboratorio de Electrotecnia</title>
+<style>body{font:16px system-ui,sans-serif;max-width:850px;margin:2rem auto;padding:0 1rem;background:#f5f7fa;color:#182b3a}main{background:white;padding:1.5rem;border-radius:12px}label{display:block;margin:1rem 0}input{width:100%;accent-color:#136eaa}output{font-weight:700}table{width:100%;border-collapse:collapse}td,th{padding:.6rem;text-align:left;border-bottom:1px solid #ddd}td:last-child{text-align:right;font-variant-numeric:tabular-nums}.note{color:#435569}.warning{background:#fff2da;padding:.8rem}</style></head>
+<body><main><h1>Autoconsumo fotovoltaico conectado a red</h1>
+<p class="note">Modelo matemático trifásico equilibrado, 420 V entre fases, 50 Hz. No es todavía una simulación de CircuitJS.</p>
+<label>Generación fotovoltaica: <output id="pvValue">0</output> kW<input id="pv" type="range" min="0" max="120" step="1" value="0"></label>
+<label>Batería de condensadores: <output id="qcValue">0</output> kVAr<input id="qc" type="range" min="0" max="60" step="1" value="0"></label>
+<table><tbody><tr><th>Magnitud</th><th>Resultado</th></tr>
+<tr><td>Potencia activa de cargas</td><td>81,000 kW</td></tr>
+<tr><td>Potencia reactiva de cargas</td><td id="loadQ"></td></tr>
+<tr><td>Potencia activa de red (+ importa / − exporta)</td><td id="gridP"></td></tr>
+<tr><td>Potencia reactiva de red (+ inductiva / − capacitiva)</td><td id="gridQ"></td></tr>
+<tr><td>Potencia aparente de red</td><td id="gridS"></td></tr>
+<tr><td>Corriente eficaz de red</td><td id="gridI"></td></tr>
+<tr><td>Factor de potencia en la acometida (módulo)</td><td id="gridPF"></td></tr>
+</tbody></table>
+<p id="status" class="warning" role="status"></p>
+<p class="note">Hipótesis: tensiones equilibradas y sinusoidales, cargas lineales, inversor ideal con cos φ = 1 y compensación ideal. No se incluyen pérdidas, armónicos ni dinámica del control.</p>
+<p><a href="./index.html">Volver al laboratorio</a></p></main>
+<script src="./fv-grid-model.js"></script><script>
+(function(){
+"use strict";
+const ids=["pv","qc","pvValue","qcValue","loadQ","gridP","gridQ","gridS","gridI","gridPF","status"];
+const el=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
+const format=(n,d=3)=>n.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d});
+function update(){
+const pv=Number(el.pv.value),qc=Number(el.qc.value);
+const r=FVGridModel.calculate({pvKW:pv,capacitorKvar:qc});
+el.pvValue.textContent=pv;el.qcValue.textContent=qc;
+el.loadQ.textContent=format(r.loadQKvar)+" kVAr";
+el.gridP.textContent=format(r.gridKW)+" kW";
+el.gridQ.textContent=format(r.gridKvar)+" kVAr";
+el.gridS.textContent=format(r.gridKVA)+" kVA";
+el.gridI.textContent=format(r.gridCurrentA)+" A";
+el.gridPF.textContent=r.gridPF===null?"Indefinido (S = 0)":format(r.gridPF,4);
+el.status.textContent=r.gridKW>0?"La red aporta potencia activa.":r.gridKW<0?"La instalación exporta potencia activa.":"No hay intercambio de potencia activa; puede seguir circulando corriente reactiva.";
+}
+el.pv.addEventListener("input",update);el.qc.addEventListener("input",update);update();
+})();
+</script></body></html>
