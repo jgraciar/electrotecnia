@@ -6,6 +6,8 @@ const xml=await readFile(new URL("./fixtures/fv-bateria-tres-escalones.xml",impo
 const browser=await chromium.launch({headless:true});
 try {
   const page=await browser.newPage();
+  const browserErrors=[];
+  page.on("pageerror",error=>browserErrors.push(error.message));
   await page.addInitScript(()=>localStorage.setItem("labStartConfigured","1"));
   await page.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
   await page.locator('button[data-mode="falstad"]').click();
@@ -50,19 +52,20 @@ try {
       }finally{sim.ontimestep=previous;}
       const end=samples.at(-1)?.t??0;
       const data=samples.filter(s=>s.t>=end-0.08);
-      let duration=0,gridI2=0,gridEnergy=0;
+      let duration=0,gridI2=0,gridEnergy=0,gridV2=0;
       const capI2=[0,0,0];
       for(let i=1;i<data.length;i++){
         const a=data[i-1],b=data[i],dt=b.t-a.t;
         if(!(dt>0))continue;
         duration+=dt;
         gridI2+=dt*(a.i*a.i+b.i*b.i)/2;
+        gridV2+=dt*(a.v*a.v+b.v*b.v)/2;
         gridEnergy+=dt*(a.i*a.v+b.i*b.v)/2;
         for(let j=0;j<3;j++)capI2[j]+=dt*(a.caps[j]**2+b.caps[j]**2)/2;
       }
       return {switches:switches.map(s=>s.position),capacitors:capacitors.length,
         inverter:inverter.length,samples:data.length,duration,
-        gridIrms:Math.sqrt(gridI2/duration),gridP:gridEnergy/duration,
+        gridIrms:Math.sqrt(gridI2/duration),gridVrms:Math.sqrt(gridV2/duration),gridP:gridEnergy/duration,
         capIrms:capI2.map(v=>Math.sqrt(v/duration)),exported:sim.exportCircuit()};
     });
     assert.equal(measured.capacitors,3);
@@ -70,6 +73,8 @@ try {
     assert.deepEqual(measured.switches,[0,1,2].map(j=>mask&(1<<j)?0:1));
     assert(measured.samples>100&&measured.duration>0.06,"Muestreo insuficiente: "+mask);
     assert(Number.isFinite(measured.gridIrms)&&Number.isFinite(measured.gridP));
+    assert(Math.abs(measured.gridVrms-10)<0.15,
+      "Tensión de red fuera de tolerancia en combinación "+mask+": "+measured.gridVrms);
     const expected=[0.05,0.05,0.10].map((i,j)=>mask&(1<<j)?i:0);
     for(let j=0;j<3;j++)
       assert(Math.abs(measured.capIrms[j]-expected[j])<0.008,
@@ -93,4 +98,5 @@ try {
     assert.equal(roundTrip.inverter,1);
     console.log("OK: combinación",mask, "Ired",measured.gridIrms,"P red",measured.gridP,"I condensadores",measured.capIrms);
   }
+  assert.deepEqual(browserErrors,[],"Errores de ejecución del navegador");
 }finally{await browser.close();}
