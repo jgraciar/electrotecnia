@@ -79,6 +79,10 @@ jobs:
         run: |
           node laboratorio/scripts/patch-impedance.mjs circuitjs-src/ts laboratorio/scripts/ImpedanceElm.ts laboratorio/scripts/LabImpedance.ts
 
+      - name: Registrar inversor fotovoltaico de corriente sincronizada
+        run: |
+          node laboratorio/scripts/patch-pv-inverter.mjs circuitjs-src/ts laboratorio/scripts/PVInverterElm.ts laboratorio/scripts/LabPVInverter.ts
+
       - name: Instalar dependencias y compilar CircuitJS
         working-directory: circuitjs-src/ts
         run: |
