@@ -19,7 +19,7 @@ for(const bad of [0,-1,NaN,Infinity]){
 }
 for(const n of [0,1,2,7,8,9,16]){
  const a=Array.from({length:n},()=>0);
- assert.throws(()=>currentHarmonics(a,Math.floor(n/2)),/Muestras/);
+ assert.throws(()=>currentHarmonics(a,n<8?1:Math.ceil(n/2)),/Muestras/);
 }
 for(const order of [0,-1,1.5,NaN,Infinity]){
  assert.throws(()=>currentHarmonics(Array(32).fill(0),order),/Muestras/);
