@@ -44,6 +44,26 @@ try {
   assert.equal(check.r,"200");
   assert.equal(check.c,"0.002");
   assert(Number.isFinite(check.current),"La corriente de entrada debe ser finita");
+  // Comprobar la respuesta temporal del elemento real, no solo su presencia.
+  // Capturar varias ventanas de tiempo de simulación con el solver en marcha.
+  const wave=await page.evaluate(async()=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    const samples=[];
+    for(let k=0;k<160;k++){
+      await new Promise(resolve=>setTimeout(resolve,12));
+      const elm=Array.from(sim.getElements()).find(e=>e.getType()==="FilteredBridgeElm");
+      samples.push({t:sim.getTime(),i:elm.getCurrent()});
+    }
+    return samples;
+  });
+  assert(wave.every(x=>Number.isFinite(x.t)&&Number.isFinite(x.i)),
+    "La evolución temporal debe ser finita");
+  assert(wave.at(-1).t>wave[0].t+0.02,
+    "La simulación debe avanzar al menos un periodo de 50 Hz");
+  const peak=Math.max(...wave.map(x=>Math.abs(x.i)));
+  assert(peak>1e-6,"El puente debe absorber corriente de la fuente");
+  console.log("Puente real: corriente máxima observada",peak,"A; intervalo",
+    wave.at(-1).t-wave[0].t,"s");
   assert.equal(errors.length,0,"Errores JavaScript: "+errors.join("; "));
   console.log("OK: menú, importación, dos bornes, XML y corriente finita",check);
 } finally {
