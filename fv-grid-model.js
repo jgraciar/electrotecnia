@@ -16,7 +16,7 @@
     const gridKvar=loadQKvar-capacitorKvar;
     const gridKVA=Math.hypot(gridKW,gridKvar);
     const gridCurrentA=gridKVA*1000/(Math.sqrt(3)*lineVoltage);
-    const gridPF=gridKVA===0?null:Math.abs(gridKW)/gridKVA;
+    const gridPF=gridKVA<1e-9?null:Math.abs(gridKW)/gridKVA;
     return {lineVoltage,phaseVoltage:lineVoltage/Math.sqrt(3),frequency,
       loadKW,loadQKvar,pvKW,capacitorKvar,gridKW,gridKvar,gridKVA,gridCurrentA,
       gridPF,gridPowerDirection:gridKW>0?"import":gridKW<0?"export":"zero",
