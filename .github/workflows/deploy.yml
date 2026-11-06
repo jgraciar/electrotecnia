@@ -45,6 +45,7 @@ jobs:
           node --experimental-strip-types laboratorio/tests/lab-power-measurement.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-nonlinear-load.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-filtered-bridge.test.mjs
+          node --experimental-strip-types laboratorio/tests/lab-harmonics.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-impedance.test.mjs
 
       - name: Obtener código oficial de CircuitJS
