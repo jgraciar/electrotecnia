@@ -78,6 +78,46 @@ try {
   assert(peak>1e-6,"El puente debe absorber corriente de la fuente");
   console.log("Puente real: corriente máxima observada",peak,"A; intervalo",
     wave.at(-1).t-wave[0].t,"s");
+  // Medición de magnitudes de entrada del solver real.
+  // Integración ponderada por el tiempo simulado, nunca por el reloj del navegador.
+  const inputPower=await page.evaluate(async()=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    const measurements=[];
+    for(let k=0;k<240;k++){
+      await new Promise(resolve=>setTimeout(resolve,8));
+      const bridge=Array.from(sim.getElements()).find(e=>e.getType()==="FilteredBridgeElm");
+      measurements.push({t:sim.getTime(),u:bridge.getVoltageDiff(),i:bridge.getCurrent()});
+    }
+    let duration=0,u2=0,i2=0,ui=0,valid=0;
+    for(let k=1;k<measurements.length;k++){
+      const a=measurements[k-1],b=measurements[k],dt=b.t-a.t;
+      if(!(dt>0)||!Number.isFinite(dt))continue;
+      if(![a.u,a.i,b.u,b.i].every(Number.isFinite))continue;
+      duration+=dt;
+      u2+=dt*(a.u*a.u+b.u*b.u)/2;
+      i2+=dt*(a.i*a.i+b.i*b.i)/2;
+      ui+=dt*(a.u*a.i+b.u*b.i)/2;
+      valid++;
+    }
+    return {duration,valid,urms:Math.sqrt(u2/duration),
+      irms:Math.sqrt(i2/duration),P:ui/duration,
+      S:Math.sqrt(u2*i2)/duration,
+      pf:ui/Math.sqrt(u2*i2)};
+  });
+  assert(inputPower.duration>0.04&&inputPower.valid>20,
+    "No hay suficientes muestras temporales válidas para calcular potencias");
+  assert(Object.values(inputPower).every(Number.isFinite),
+    "Las potencias del elemento real deben ser finitas");
+  assert(inputPower.urms>1&&inputPower.irms>1e-6,
+    "La fuente y el rectificador deben presentar valores RMS no nulos");
+  assert(Math.abs(inputPower.P)<=inputPower.S*(1+1e-8),
+    "Debe cumplirse |P| <= S");
+  assert(Math.abs(inputPower.pf)<=1+1e-8,
+    "El factor de potencia real debe estar entre -1 y 1");
+  console.log("Medición temporal del rectificador real (muestreo no uniforme):",
+    inputPower);
+  // La THD exige una adquisición uniforme en tiempo simulado;
+  // no se calcula mediante el muestreo asíncrono anterior.
   // Regresión: varios valores de R y C y reinicializaciones sucesivas.
   // Se comprueba el motor real, no solo el modelo matemático de referencia.
   for(const [resistance,capacitance] of [[100,0.0001],[200,0.002],[1000,0.00047],[50,0.00001]]){
