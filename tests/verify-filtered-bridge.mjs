@@ -43,6 +43,20 @@ try {
   assert.equal(check.posts,2);
   assert.equal(check.r,"200");
   assert.equal(check.c,"0.002");
+  // La exportación XML debe permitir recuperar el mismo elemento sin perder
+  // los valores físicos, el tipo ni los dos terminales de conexión.
+  const roundtrip=await page.evaluate(()=>{
+    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+    const saved=sim.exportCircuit();
+    sim.importCircuit(saved);
+    const elm=Array.from(sim.getElements()).find(e=>e.getType()==="FilteredBridgeElm");
+    const xml2=sim.exportCircuit();
+    const tag=new DOMParser().parseFromString(xml2,"application/xml").querySelector("FilteredBridge");
+    return {count:Array.from(sim.getElements()).filter(e=>e.getType()==="FilteredBridgeElm").length,
+      posts:elm?.getPostCount(),r:tag?.getAttribute("r"),c:tag?.getAttribute("c")};
+  });
+  assert.deepEqual(roundtrip,{count:1,posts:2,r:"200",c:"0.002"},
+    "El puente debe conservar su topología y parámetros al reimportar XML");
   assert(Number.isFinite(check.current),"La corriente de entrada debe ser finita");
   // Comprobar la respuesta temporal del elemento real, no solo su presencia.
   // Capturar varias ventanas de tiempo de simulación con el solver en marcha.
