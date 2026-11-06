@@ -153,6 +153,50 @@ try{
   assert(Math.abs(measured.grid-measured.pv-measured.load)<0.05,
    "Balance energético incorrecto");
  }
+ // Banco de condensadores físico en paralelo: Qc=ω C V² = 0,5 VAr.
+ // El condensador no debe suministrar potencia activa media.
+ const capacitance=0.5/(2*Math.PI*50*100);
+ const capacitorXml=xml.replace('pvP="0.5"','pvP="1"').replace('</cir>',
+  '<c x="512 304 512 448" f="0" c="'+capacitance+'" voltdiff="0"/>'+
+  '<w x="512 304 400 304" f="0"/>'+
+  '<w x="512 448 400 448" f="0"/></cir>');
+ const capacitorImport=await page.evaluate(x=>window.LabCircuit.importNativeCircuit("FV con condensador",x),capacitorXml);
+ assert(capacitorImport?.ok,"No se pudo importar el circuito con condensador");
+ await page.waitForFunction(()=>{
+  const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+  return sim?.getTime()>0.1&&Array.from(sim.getElements()).some(e=>e.getType()==="CapacitorElm");
+ },null,{timeout:60000});
+ const capMeasure=await page.evaluate(async()=>{
+  const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+  const original=sim.ontimestep, samples=[];
+  sim.ontimestep=()=>{
+   original?.();
+   const cap=Array.from(sim.getElements()).find(e=>e.getType()==="CapacitorElm");
+   if(cap)samples.push({t:sim.getTime(),v:cap.getVoltageDiff(),i:cap.getCurrent()});
+  };
+  try{
+   const start=sim.getTime();
+   for(let k=0;k<500&&sim.getTime()-start<0.12;k++)
+    await new Promise(resolve=>setTimeout(resolve,20));
+  }finally{sim.ontimestep=original;}
+  const end=samples.at(-1)?.t??0, data=samples.filter(x=>x.t>=end-0.08);
+  let duration=0,v2=0,i2=0,p=0;
+  for(let k=1;k<data.length;k++){
+   const a=data[k-1],b=data[k],dt=b.t-a.t;
+   if(dt<=0)continue;
+   duration+=dt;
+   v2+=dt*(a.v*a.v+b.v*b.v)/2;
+   i2+=dt*(a.i*a.i+b.i*b.i)/2;
+   p+=dt*(a.v*a.i+b.v*b.i)/2;
+  }
+  return {samples:data.length,duration,vrms:Math.sqrt(v2/duration),
+   irms:Math.sqrt(i2/duration),p:p/duration};
+ });
+ console.log("Condensador real de CircuitJS:",capMeasure);
+ assert(capMeasure.samples>100&&capMeasure.duration>0.06,"Muestras insuficientes del condensador");
+ assert(Math.abs(capMeasure.vrms-10)<0.1,"Tensión RMS del condensador incorrecta");
+ assert(Math.abs(capMeasure.irms-0.05)<0.005,"Corriente capacitiva incorrecta");
+ assert(Math.abs(capMeasure.p)<0.03,"El condensador ideal no debe consumir potencia activa");
  const rt=await page.evaluate(()=>{
   const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
   sim.importCircuit(sim.exportCircuit());
