@@ -48,6 +48,53 @@ try{
  assert.equal(state.p,"0.5");
  assert.equal(state.q,"0");
  assert(Number.isFinite(state.current)&&state.time>0.05);
+ // Captura en cada paso del solver, sin depender del reloj del navegador.
+ const measurement=await page.evaluate(async()=>{
+  const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+  const original=sim.ontimestep;
+  const samples=[];
+  sim.ontimestep=()=>{
+   original?.();
+   const elements=Array.from(sim.getElements());
+   const source=elements.find(e=>e.getType()==="VoltageElm");
+   const resistor=elements.find(e=>e.getType()==="ResistorElm");
+   const inverter=elements.find(e=>e.getType()==="PVInverterElm");
+   if(!source||!resistor||!inverter)return;
+   const t=sim.getTime();
+   if(!Number.isFinite(t))return;
+   samples.push({t,vs:source.getVoltageDiff(),is:source.getCurrent(),
+    vr:resistor.getVoltageDiff(),ir:resistor.getCurrent(),
+    vi:inverter.getVoltageDiff(),ii:inverter.getCurrent()});
+   if(samples.length>50000)samples.shift();
+  };
+  try{
+   const start=sim.getTime();
+   for(let k=0;k<500;k++){
+    await new Promise(resolve=>setTimeout(resolve,20));
+    if(sim.getTime()-start>0.12)break;
+   }
+  }finally{sim.ontimestep=original;}
+  const tEnd=samples.at(-1)?.t??0;
+  const tStart=tEnd-0.08;
+  const data=samples.filter(s=>s.t>=tStart);
+  let duration=0,load=0,source=0,inverter=0,voltageSq=0;
+  for(let i=1;i<data.length;i++){
+   const a=data[i-1],b=data[i],dt=b.t-a.t;
+   if(!(dt>0))continue;
+   duration+=dt;
+   load+=dt*(a.vr*a.ir+b.vr*b.ir)/2;
+   source+=dt*(a.vs*a.is+b.vs*b.is)/2;
+   inverter+=dt*(a.vi*a.ii+b.vi*b.ii)/2;
+   voltageSq+=dt*(a.vr*a.vr+b.vr*b.vr)/2;
+  }
+  return {samples:data.length,duration,load:load/duration,source:source/duration,
+   inverter:inverter/duration,voltageRms:Math.sqrt(voltageSq/duration)};
+ });
+ console.log("Potencias reales de CircuitJS (orientación de terminales):",measurement);
+ assert(measurement.samples>100&&measurement.duration>0.06,"Muestras insuficientes del solver");
+ assert(Object.values(measurement).every(Number.isFinite),"Medidas no finitas");
+ assert(measurement.voltageRms>5&&measurement.voltageRms<15,"Tensión RMS fuera de rango");
+ assert(Math.abs(measurement.load-1)<0.15,"La carga de 100 ohmios a 10 V debe consumir 1 W");
  const rt=await page.evaluate(()=>{
   const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
   sim.importCircuit(sim.exportCircuit());
