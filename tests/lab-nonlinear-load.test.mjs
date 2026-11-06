@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {halfWaveCurrent,halfWaveReference} from "../scripts/LabNonlinearLoad.ts";
+import {halfWaveCurrent,halfWaveReference,fullWaveInputCurrent,fullWaveReference} from "../scripts/LabNonlinearLoad.ts";
 const close=(a,b)=>assert(Math.abs(a-b)<1e-10*Math.max(1,Math.abs(b)));
 const R=100,U=230;
 const ref=halfWaveReference(U,R);
@@ -26,3 +26,24 @@ for(let k=0;k<n;k++){
 close(sumP,ref.p);
 close(U*Math.sqrt(sumI2),ref.s);
 console.log("OK: modelo de referencia de rectificador ideal de media onda.");
+
+const full=fullWaveReference(U,R);
+close(full.p,U*U/R);
+close(full.s,U*U/R);
+close(full.cosPhi,1);
+close(full.powerFactor,1);
+close(full.currentRms,U/R);
+close(fullWaveInputCurrent(325,R),3.25);
+close(fullWaveInputCurrent(-325,R),-3.25);
+assert.throws(()=>fullWaveInputCurrent(12,0),/R debe/);
+assert.throws(()=>fullWaveReference(0,R),/tensión eficaz/);
+let fullP=0,fullI2=0;
+for(let k=0;k<n;k++){
+    const v=Math.SQRT2*U*Math.sin(2*Math.PI*(k+.5)/n);
+    const i=fullWaveInputCurrent(v,R);
+    fullP+=v*i/n;
+    fullI2+=i*i/n;
+}
+close(fullP,full.p);
+close(U*Math.sqrt(fullI2),full.s);
+console.log("OK: puente ideal sin filtro, entrada sinusoidal y f.d.p. unitario.");
