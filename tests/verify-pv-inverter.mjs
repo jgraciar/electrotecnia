@@ -24,7 +24,7 @@ try{
   '<v x="80 304 80 448" f="0" wf="1" fr="50" maxv="14.142135623730951"/>'+
   '<g x="80 448 80 480" f="0"/>'+
   '<w x="80 304 288 304" f="0"/>'+
-  '<r x="288 304 288 448" f="0" resistance="100"/>'+
+  '<r x="288 304 288 448" f="0" r="100"/>'+
   '<w x="288 448 80 448" f="0"/>'+
   '<PVInverter x="400 448 400 304" f="0" pvP="0.5" pvQ="0" pvV="10" pvF="50" pvPhase="0"/>'+
   '<w x="400 304 288 304" f="0"/>'+
@@ -94,7 +94,9 @@ try{
  assert(measurement.samples>100&&measurement.duration>0.06,"Muestras insuficientes del solver");
  assert(Object.values(measurement).every(Number.isFinite),"Medidas no finitas");
  assert(measurement.voltageRms>5&&measurement.voltageRms<15,"Tensión RMS fuera de rango");
- assert(Math.abs(measurement.load-1)<0.15,"La carga de 100 ohmios a 10 V debe consumir 1 W");
+ assert(Math.abs(measurement.load-1)<0.05,"La carga de 100 ohmios a 10 V debe consumir 1 W");
+ assert(Math.abs(measurement.source+measurement.inverter-measurement.load)<0.05,
+  "El balance de potencias del circuito debe cumplir Kirchhoff");
  const rt=await page.evaluate(()=>{
   const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
   sim.importCircuit(sim.exportCircuit());
