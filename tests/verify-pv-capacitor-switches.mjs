@@ -63,7 +63,7 @@ try {
         gridEnergy+=dt*(a.i*a.v+b.i*b.v)/2;
         for(let j=0;j<3;j++)capI2[j]+=dt*(a.caps[j]**2+b.caps[j]**2)/2;
       }
-      return {switches:switches.map(s=>s.position),capacitors:capacitors.length,
+      return {switches:Array.from(new DOMParser().parseFromString(sim.exportCircuit(),"application/xml").querySelectorAll("s")).map(s=>Number(s.getAttribute("p"))),capacitors:capacitors.length,
         inverter:inverter.length,samples:data.length,duration,
         gridIrms:Math.sqrt(gridI2/duration),gridVrms:Math.sqrt(gridV2/duration),gridP:gridEnergy/duration,
         capIrms:capI2.map(v=>Math.sqrt(v/duration)),exported:sim.exportCircuit()};
@@ -89,7 +89,7 @@ try {
       const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
       sim.importCircuit(exported);
       const e=Array.from(sim.getElements());
-      return {switches:e.filter(x=>x.getType()==="SwitchElm").map(x=>x.position),
+      return {switches:Array.from(new DOMParser().parseFromString(sim.exportCircuit(),"application/xml").querySelectorAll("s")).map(s=>Number(s.getAttribute("p"))),
         capacitors:e.filter(x=>x.getType()==="CapacitorElm").length,
         inverter:e.filter(x=>x.getType()==="PVInverterElm").length};
     },measured.exported);
