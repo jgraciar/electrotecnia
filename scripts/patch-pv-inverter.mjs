@@ -27,4 +27,11 @@ replaceOnce(menus,
 replaceOnce(menus,
  '    showOhmCheckItem         = new CheckItem();',
  '    showOhmCheckItem         = new CheckItem(true);');
+// UIManager carga las opciones del usuario DESPUÉS de crear el menú.
+// El valor inicial debe corregirse también aquí; no sobrescribir
+// elecciones guardadas (showOhm=false) ni parámetros de URL.
+const ui=join(dir,"UIManager.ts");
+replaceOnce(ui,
+ 'showOhm       = qp.getBooleanValue("showOhm", this.getOptionFromStorage("showOhm", false));',
+ 'showOhm       = qp.getBooleanValue("showOhm", this.getOptionFromStorage("showOhm", true));');
 console.log("Inversor FV registrado en CircuitJS");
