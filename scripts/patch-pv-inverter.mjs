@@ -21,6 +21,10 @@ replaceOnce(registry,
  '    CirSim.theApp.register("ResistorElm", new ResistorElm(0, 0));\n    CirSim.theApp.register("PVInverterElm", new PVInverterElm(0, 0));');
 const menus=join(dir,"Menus.ts");
 replaceOnce(menus,
- '            "Add Inductor",                 "InductorElm",',
- '            "Add Inductor",                 "InductorElm",\n            "Inversor fotovoltaico FV (CA)", "PVInverterElm",');
+ '            "Add Current Source",                   "CurrentElm",',
+ '            "Add Current Source",                   "CurrentElm",\n            "Inversor fotovoltaico FV (CA)", "PVInverterElm",');
+// Opción inicial: mostrar la unidad Ω al lado de las resistencias.
+replaceOnce(menus,
+ '    showOhmCheckItem         = new CheckItem();',
+ '    showOhmCheckItem         = new CheckItem(true);');
 console.log("Inversor FV registrado en CircuitJS");
