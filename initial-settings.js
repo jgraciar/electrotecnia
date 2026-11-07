@@ -10,6 +10,19 @@ const catalogs={
  nl:["Eerste instellingen","Bevestig taal en getalnotatie.","Taal","Regionale notatie","Europees","Engels","Aangepast","Weergegeven decimalen","Decimaalteken","Duizendtalscheiding","Voorbeeld","Bevestigen en laboratorium openen","Geen","Instellingen"],
  pl:["Konfiguracja początkowa","Potwierdź język i format liczb.","Język","Format regionalny","Europejski","Anglosaski","Niestandardowy","Wyświetlane miejsca dziesiętne","Separator dziesiętny","Separator tysięcy","Podgląd","Zatwierdź i otwórz laboratorium","Brak","Ustawienia"]
 };
+// Idiomas originales de CircuitJS que no estaban incluidos en el asistente inicial.
+// El catálogo de componentes se encuentra en LabTranslations.ts.
+Object.assign(catalogs,{
+ csx:["Úvodní nastavení","Potvrďte jazyk a formát čísel.","Jazyk","Místní formát","Evropský","Anglosaský","Vlastní","Počet desetinných míst","Desetinný oddělovač","Oddělovač tisíců","Náhled","Potvrdit a otevřít laboratoř","Žádný","Nastavení"],
+ da:["Første opsætning","Bekræft sprog og talformat.","Sprog","Regionalt format","Europæisk","Angelsaksisk","Brugerdefineret","Antal decimaler","Decimaltegn","Tusindtalsseparator","Forhåndsvisning","Bekræft og åbn laboratoriet","Ingen","Indstillinger"],
+ fi:["Alkuasetukset","Vahvista kieli ja lukumuoto.","Kieli","Alueellinen muoto","Eurooppalainen","Anglosaksinen","Mukautettu","Desimaalien määrä","Desimaalierotin","Tuhaterotin","Esikatselu","Vahvista ja avaa laboratorio","Ei mitään","Asetukset"],
+ nb:["Førstegangsoppsett","Bekreft språk og tallformat.","Språk","Regionalt format","Europeisk","Angelsaksisk","Egendefinert","Antall desimaler","Desimalskilletegn","Tusenskilletegn","Forhåndsvisning","Bekreft og åpne laboratoriet","Ingen","Innstillinger"],
+ ru:["Начальная настройка","Подтвердите язык и формат чисел.","Язык","Региональный формат","Европейский","Англосаксонский","Пользовательский","Количество знаков после запятой","Десятичный разделитель","Разделитель тысяч","Предпросмотр","Подтвердить и открыть лабораторию","Нет","Настройки"],
+ zh:["初始设置","请选择语言和数字格式。","语言","地区格式","欧洲格式","英美格式","自定义","小数位数","小数分隔符","千位分隔符","预览","确认并打开实验室","无","设置"],
+ "zh-tw":["初始設定","請確認語言和數字格式。","語言","地區格式","歐洲格式","英美格式","自訂","小數位數","小數分隔符號","千位分隔符號","預覽","確認並開啟實驗室","無","設定"],
+ ja:["初期設定","言語と数値形式を確認してください。","言語","地域形式","欧州式","英米式","カスタム","小数点以下の桁数","小数点記号","桁区切り記号","プレビュー","確定して実験室を開く","なし","設定"],
+ kr:["초기 설정","언어와 숫자 형식을 확인하세요.","언어","지역 형식","유럽식","영미식","사용자 지정","소수 자릿수","소수 구분 기호","천 단위 구분 기호","미리 보기","확인하고 실험실 열기","없음","설정"]
+});
 const settingsHelp={en:"You can change these options later using Settings, at the bottom right of the laboratory.",es:"Puedes modificar estas opciones más adelante pulsando el botón «Configuración», situado en la esquina inferior derecha de la pantalla.",fr:"Vous pourrez modifier ces options dans « Paramètres », en bas à droite du laboratoire.",de:"Sie können diese Optionen später über „Einstellungen“ unten rechts im Labor ändern.",it:"Puoi modificare queste opzioni in seguito da «Impostazioni», in basso a destra nel laboratorio.",pt:"Pode alterar estas opções mais tarde em «Definições», no canto inferior direito do laboratório.",nl:"Je kunt deze opties later wijzigen via «Instellingen», rechtsonder in het laboratorium.",pl:"Te opcje można później zmienić w «Ustawieniach» w prawym dolnym rogu laboratorium."};
 const precisionNotes={"en":"CircuitJS calculates using 64-bit double-precision floating-point numbers (approximately 15–17 significant decimal digits). This option changes only how results are displayed. The final displayed decimal digit is rounded, not truncated.","es":"CircuitJS calcula con números de coma flotante de doble precisión (64 bits), aproximadamente 15–17 cifras decimales significativas. Esta opción solo modifica la visualización. El último decimal mostrado se redondea, no se trunca.","fr":"CircuitJS calcule en virgule flottante double précision (64 bits), soit environ 15 à 17 chiffres significatifs. Ce réglage modifie uniquement l'affichage. La dernière décimale affichée est arrondie, et non tronquée.","de":"CircuitJS rechnet mit 64-Bit-Gleitkommazahlen doppelter Genauigkeit (etwa 15–17 signifikante Dezimalziffern). Diese Einstellung betrifft nur die Anzeige. Die letzte angezeigte Dezimalstelle wird gerundet, nicht abgeschnitten.","it":"CircuitJS calcola con numeri in virgola mobile a doppia precisione (64 bit), circa 15–17 cifre significative. Questa impostazione modifica solo la visualizzazione. L'ultima cifra decimale visualizzata viene arrotondata, non troncata.","pt":"O CircuitJS calcula com números de vírgula flutuante de dupla precisão (64 bits), aproximadamente 15–17 algarismos significativos. Esta opção altera apenas a apresentação. A última casa decimal apresentada é arredondada, não truncada.","nl":"CircuitJS rekent met 64-bits drijvendekommagetallen met dubbele precisie (ongeveer 15–17 significante cijfers). Deze instelling verandert alleen de weergave. De laatste weergegeven decimaal wordt afgerond, niet afgekapt.","pl":"CircuitJS oblicza wartości za pomocą 64-bitowych liczb zmiennoprzecinkowych podwójnej precyzji (około 15–17 cyfr znaczących). To ustawienie zmienia tylko wyświetlanie. Ostatnia wyświetlana cyfra po przecinku jest zaokrąglana, a nie obcinana."};
 const unitLabels={
@@ -22,13 +35,21 @@ const unitLabels={
  nl:["Weergegeven eenheidsvoorvoegsel","Automatisch","Micro (µ)","Milli (m)","Basiseenheid","Kilo (k)"],
  pl:["Wyświetlany przedrostek jednostki","Automatyczny","Mikro (µ)","Mili (m)","Jednostka podstawowa","Kilo (k)"]
 };
-const names={en:"English",es:"Español",fr:"Français",de:"Deutsch",it:"Italiano",pt:"Português",nl:"Nederlands",pl:"Polski"};
+const names={csx:"Čeština",da:"Dansk",de:"Deutsch",en:"English",
+ es:"Español",fi:"Suomi",fr:"Français",it:"Italiano",
+ nb:"Norsk bokmål",pl:"Polski",pt:"Português",ru:"Русский",
+ zh:"中文（中国大陆）","zh-tw":"中文（台灣）",ja:"日本語",kr:"한국어"};
 // Respeta el orden de preferencias del navegador, incluidos es-ES y es-419.
+const normalizeLanguage=value=>{
+ const code=String(value||"").toLowerCase().replace(/_/g,"-");
+ if(code.startsWith("zh-tw")||code.startsWith("zh-hk"))return "zh-tw";
+ const base=code.split("-")[0];
+ return base==="cs"?"csx":base==="ko"?"kr":base;
+};
 const detect=()=>{
  const prefs=[...(navigator.languages||[]),navigator.language,
   Intl.DateTimeFormat().resolvedOptions().locale].filter(Boolean);
- const codes=prefs.map(x=>String(x).toLowerCase().replace("_","-").split("-")[0]);
- return codes.find(code=>Object.hasOwn(catalogs,code))||"es";
+ return prefs.map(normalizeLanguage).find(code=>Object.hasOwn(catalogs,code))||"es";
 };
 const get=(k)=>{try{return localStorage.getItem(k)}catch{return null}};
 const set=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
@@ -38,7 +59,7 @@ const detected=detect();
 let languageMode=get("labLanguageMode")||
  (get("language")?"manual":"auto");
 let language=languageMode==="auto"?detected:
- (get("language")||detected).toLowerCase().split("-")[0];
+ normalizeLanguage(get("language")||detected);
 if(!catalogs[language])language=detected;
 let dialogLanguage=language;
 if(languageMode==="auto")set("language",detected);
@@ -46,7 +67,11 @@ const autoNames={
  en:"Automatic (browser)",es:"Automático (navegador)",
  fr:"Automatique (navigateur)",de:"Automatisch (Browser)",
  it:"Automatico (browser)",pt:"Automático (navegador)",
- nl:"Automatisch (browser)",pl:"Automatycznie (przeglądarka)"
+ nl:"Automatisch (browser)",pl:"Automatycznie (przeglądarka)",
+ csx:"Automaticky (prohlížeč)",da:"Automatisk (browser)",
+ fi:"Automaattinen (selain)",nb:"Automatisk (nettleser)",
+ ru:"Автоматически (браузер)",zh:"自动（浏览器）",
+ "zh-tw":"自動（瀏覽器）",ja:"自動（ブラウザー）",kr:"자동 (브라우저)"
 };
 let format=get("labRegionalFormat")||((detected==="en")?"uk":"eu");
 let unitScale=get("labDisplayUnitScale")||"auto";
