@@ -122,7 +122,7 @@ export class PVInverterElm extends CurrentElm {
         CircuitXMLSerializer.dumpAttr(elem,"pvF",this.frequency);
         CircuitXMLSerializer.dumpAttr(elem,"pvPhase",this.phaseDegrees);
         elem.setAttribute("pvMode",this.mode);
-        // 0 = eficaz (por defecto), 1 = media algebraica, 2 = instantánea.
+        // 0 = RMS predeterminado; 2 = instantánea (compatibilidad con XML).
         if(this.currentReadMode!==0)
             CircuitXMLSerializer.dumpAttr(elem,"pvIView",this.currentReadMode);
         elem.setAttribute("pvSet",this.powerEntry);
@@ -145,7 +145,7 @@ export class PVInverterElm extends CurrentElm {
         const a=xml.currentXmlElement;
         this.mode=a.getAttribute("pvMode")==="island"?"island":"grid";
         const readMode=xml.parseIntAttr("pvIView",0);
-        this.currentReadMode=readMode===1||readMode===2?readMode:0;
+        this.currentReadMode=readMode===2?2:0; // El antiguo 1 vuelve a RMS.
         this.currentSamples.clear();
         this.powerEntry=a.getAttribute("pvSet")==="S"?"S":"P";
         this.operatingS=xml.parseDoubleAttr("pvSvalue",
@@ -207,8 +207,8 @@ export class PVInverterElm extends CurrentElm {
     }
     private currentReadSelector():EditInfo{
         return this.option("Lectura de intensidad",
-            ["Eficaz RMS (por defecto)","Media algebraica","Instantánea i(t)"],
-            this.currentReadMode);
+            ["Eficaz RMS (por defecto)","Instantánea i(t)"],
+            this.currentReadMode===2?1:0);
     }
     private option(label:string,items:string[],selected:number):EditInfo{
         const e=new EditInfo(label,selected,-1,-1);
@@ -272,7 +272,7 @@ export class PVInverterElm extends CurrentElm {
                 this.currentSamples.clear();
             }
             if(n===5&&ei.choice)
-                this.currentReadMode=ei.choice.getSelectedIndex() as PVCurrentReadMode;
+                this.currentReadMode=ei.choice.getSelectedIndex()===1?2:0;
             return;
         }
         if(n===1&&Number.isFinite(ei.value)&&ei.value>0)
@@ -285,7 +285,7 @@ export class PVInverterElm extends CurrentElm {
             if(!this.advancedReactive)this.legacyReactive=false;
         }
         if(n===4&&ei.choice)
-            this.currentReadMode=ei.choice.getSelectedIndex() as PVCurrentReadMode;
+            this.currentReadMode=ei.choice.getSelectedIndex()===1?2:0;
         if(n===5&&ei.checkbox){
             this.advancedReactive=ei.checkbox.getState();
             if(!this.advancedReactive){
