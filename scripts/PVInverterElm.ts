@@ -232,12 +232,12 @@ export class PVInverterElm extends CurrentElm {
         return inverterCurrentDisplay(
             this.currentSamples,this.currentReadMode,frequency);
     }
-    // Dibujo explícito sobre los DOS tramos visibles del inversor, evitando
-    // que la circunferencia o el símbolo de corriente oculten las bolitas.
-    // Se dibujan en cada fotograma de la simulación, aunque el menú general
-    // "Mostrar corriente" esté desactivado (solicitud específica del inversor).
+    // Dibujo explícito sobre los dos tramos visibles del inversor, evitando
+    // que el símbolo oculte las bolitas. Respeta el ajuste general de
+    // CircuitJS para mostrar u ocultar la circulación de corriente.
     private drawInverterDots(g:Graphics):void{
-        if(this.isCreating()||!CircuitElm.app.simIsRunning())return;
+        if(this.isCreating()||!CircuitElm.app.simIsRunning()||
+           !CircuitElm.app.menus.dotsCheckItem.getState())return;
         // CurrentElm.current utiliza el sentido real de la fuente
         // estampada; las bolitas y los cables muestran la misma dirección.
         const physicalCurrent=this.current;
