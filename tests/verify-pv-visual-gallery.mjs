@@ -113,6 +113,13 @@ try{
     filename+" W"+i+" Q incorrecta "+q+" frente a "+expectedQ);
    assert(s+1e-6>=Math.hypot(p,q)*0.99,
     filename+" W"+i+" potencia aparente incoherente");
+   // Todas estas cargas e inversores son sinusoidales de 50 Hz.
+   // S debe ser coherente con P y Q1, sin distorsión artificial.
+   const expectedS=Math.hypot(p,q);
+   const toleranceS=Math.max(100,expectedS*0.035);
+   assert(Math.abs(s-expectedS)<toleranceS,
+    filename+" W"+i+" S incoherente: "+s+" vs "+expectedS+
+    " VA; revisar corriente transitoria/numérica del capacitor");
   }
   console.log("OK: catálogo",filename,"vatímetros",expected.length,
    "P/Q/S físicas contrastadas en CircuitJS");

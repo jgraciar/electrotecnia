@@ -31,6 +31,13 @@ for(const filename of fixtures){
  const capacitorNodes=[...circuit.matchAll(
   /<c x="(-?\d+) (-?\d+) (-?\d+) (-?\d+)"/g)]
   .map(m=>m.slice(1).map(Number));
+ const capTags=[...circuit.matchAll(/<c\b[^>]*\/>/g)].map(m=>m[0]);
+ assert.equal(capTags.length,capacitorNodes.length);
+ for(const tag of capTags){
+  const sr=Number(tag.match(/\bsr="([^"]+)"/)?.[1]);
+  assert(Number.isFinite(sr)&&sr>0&&sr<=0.1,
+   filename+": condensador sin resistencia serie de amortiguación");
+ }
  for(const q of capacitorNodes){
   for(const point of [q.slice(0,2),q.slice(2,4)]){
    assert(wireEnds.has(point.join(",")),
