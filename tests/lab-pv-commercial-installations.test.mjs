@@ -48,7 +48,7 @@ const scenarios=[
  {name:"monofásica, vertido con Q del inversor",site:"mono",
   loadP:2,loadQ:1.5,pvP:4.5,pvQ:1,capacitorQ:2.5,gridP:-2.5,gridQ:-2,reactive:"capacitive"},
  {name:"trifásica, taller con escalón de 25 kVAr",site:"tri",
-  loadP:45,loadQ:30,pvP:10,pvQ:0,capacitorQ:25,gridP:35,gridQ:5,reactive:"inductive"},
+  loadP:45,loadQ:32,pvP:10,pvQ:0,capacitorQ:25,gridP:35,gridQ:7,reactive:"inductive"},
  {name:"trifásica, autoconsumo completo con escalón retenido",site:"tri",
   loadP:8,loadQ:6,pvP:8,pvQ:0,capacitorQ:12.5,gridP:0,gridQ:-6.5,reactive:"capacitive"},
  {name:"trifásica, vertido con FV aportando Q",site:"tri",
@@ -115,7 +115,7 @@ for(const c of scenarios){
 
 // Regulación de escalones en presencia de FV y cosphi objetivo 0,95.
 for(const [site,loadP,loadQ,pvP,expected] of [
- ["mono",7,4,3,[0]],["tri",45,30,10,[1]]
+ ["mono",7,4,3,[0]],["tri",45,32,10,[1]]
 ]){
  const cfg=installations[site];
  const unregulated=pvGridBalance({
