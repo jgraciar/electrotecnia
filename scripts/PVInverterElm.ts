@@ -172,6 +172,18 @@ export class PVInverterElm extends CurrentElm {
     // No heredar la comprobación de trayectoria de CurrentElm: en aislada
     // se permiten cargas desconectadas (tensión en vacío sin intensidad).
     validate():boolean{return true;}
+    // En aislada, la corriente no se puede calcular con la tensión del
+    // paso anterior: debe utilizar la tensión resuelta en el paso actual.
+    // CircuitJS invoca calculateCurrent() al actualizar los nodos.
+    calculateCurrent():void{
+        if(this.mode!=="island")return;
+        const sim=SimulationManager.theSim;
+        if(!sim||!this.nodes||this.nodes.length<2)return;
+        const ref=islandReferenceVoltage(
+            {...this,phaseDegrees:0},sim.t);
+        this.current=(ref-this.getVoltageDiff())/
+            islandOutputResistance(this);
+    }
     stamp():void{
         const sim=SimulationManager.theSim;
         if(this.mode==="island"){
@@ -189,7 +201,6 @@ export class PVInverterElm extends CurrentElm {
             const resistance=islandOutputResistance(this);
             // Fuente de Norton: tensión entre nodo 1 y nodo 0 = -ref.
             sim.stampCurrentSource(this.nodes[0],this.nodes[1],ref/resistance);
-            this.current=(ref-this.getVoltageDiff())/resistance;
             return;
         }
         const ref=this.gridReference();
