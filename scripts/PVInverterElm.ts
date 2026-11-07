@@ -232,38 +232,8 @@ export class PVInverterElm extends CurrentElm {
         return inverterCurrentDisplay(
             this.currentSamples,this.currentReadMode,frequency);
     }
-    // Dibujo explícito sobre los dos tramos visibles del inversor, evitando
-    // que el símbolo oculte las bolitas. Respeta el ajuste general de
-    // CircuitJS para mostrar u ocultar la circulación de corriente.
-    private drawInverterDots(g:Graphics):void{
-        if(this.isCreating()||!CircuitElm.app.simIsRunning()||
-           !CircuitElm.app.menus.dotsCheckItem.getState())return;
-        // CurrentElm.current utiliza el sentido real de la fuente
-        // estampada; las bolitas y los cables muestran la misma dirección.
-        const physicalCurrent=this.current;
-        if(!Number.isFinite(physicalCurrent)||Math.abs(physicalCurrent)<1e-12)
-            return;
-        this.curcount=this.updateDotCountImpl(physicalCurrent,this.curcount);
-        const ds=16;
-        const phase=this.curcount===this.CURRENT_TOO_FAST?
-            (SimulationManager.theSim.t*500%ds):
-            ((this.curcount%ds)+ds)%ds;
-        g.save();
-        g.setColor(CircuitElm.currentColor);
-        for(const [a,b] of [
-            [this.point1,this.lead1!],[this.lead2!,this.point2]
-        ]){
-            const dx=b.x-a.x,dy=b.y-a.y;
-            const length=Math.hypot(dx,dy);
-            if(length<1)continue;
-            for(let d=phase;d<length;d+=ds){
-                const x=Math.round(a.x+d*dx/length);
-                const y=Math.round(a.y+d*dy/length);
-                g.fillRect(x-2,y-2,4,4);
-            }
-        }
-        g.restore();
-    }
+    // Mismo método de animación que AmmeterElm: velocidad y sentido
+    // de la corriente del propio elemento y ajuste general de CircuitJS.
     draw(g:Graphics):void{
         const radius=12;
         this.draw2Leads(g);
@@ -273,12 +243,14 @@ export class PVInverterElm extends CurrentElm {
         CircuitElm.drawThickLine(g,this.ashaft1!,this.ashaft2!);
         g.fillPolygon(this.arrow!);
         this.setBbox(this.point1,this.point2,radius);
-        this.drawInverterDots(g);
+        this.doDots(g);
         if(this.showValues()){
             const measure=this.displayedCurrent();
+            const unit=this.currentReadMode===0?"A(rms)":"A";
             const value=measure.value===null?"…":
-                CircuitElm.getShortUnitText(measure.value,"A");
-            this.drawValues(g,measure.label+" = "+value,radius+7);
+                CircuitElm.getUnitTextWithScale(
+                    measure.value,unit,CircuitElm.SCALE_AUTO);
+            this.drawValues(g,value,radius+7);
         }
         this.drawPosts(g);
     }
@@ -391,8 +363,9 @@ export class PVInverterElm extends CurrentElm {
         // getBasicInfo() utiliza la intensidad instantánea por defecto.
         // Sustituirla por la indicación seleccionada en ambos modos.
         const currentDisplay=this.displayedCurrent();
-        arr[1]=currentDisplay.label+" = "+(currentDisplay.value===null?
-            "...":CircuitElm.getUnitText(currentDisplay.value,"A"));
+        const unit=this.currentReadMode===0?"A(rms)":"A";
+        arr[1]=currentDisplay.value===null?"…":
+            CircuitElm.getUnitText(currentDisplay.value,unit);
         if(this.mode==="island"){
             arr[3]="S nominal = "+CircuitElm.getUnitText(this.ratedApparent,"VA");
             arr[4]="U salida = "+CircuitElm.getUnitText(this.voltageRms,"V")+" RMS";

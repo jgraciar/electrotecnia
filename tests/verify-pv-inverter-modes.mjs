@@ -107,21 +107,23 @@ try{
    near(readings.inverterIrms,.5/12,.006,
     "I RMS inversor conectado a red 12 V/60 Hz, P = 0.5 W");
   }
-  // Comprobar el dibujo real: I RMS se muestra SOLO si la opción
-  // general "Mostrar valores" está activada; las bolitas se animan
-  // con la simulación en marcha.
+  // Comprobar lectura como amperímetro y bolitas sobre el inversor,
+  // no aceptar las de otros elementos de este circuito.
   const onScreen=await page.evaluate(async()=>{
    const win=document.querySelector("#circuit-frame").contentWindow;
    const proto=win.CanvasRenderingContext2D.prototype;
    const oldText=proto.fillText,oldRect=proto.fillRect;
    const text=[],dots=[];
    proto.fillText=function(v,...args){
-    if(typeof v==="string" && (v.includes("I [RMS]")||v.includes("i(t)")))
-     text.push(v);
+    if(typeof v==="string" && (v.includes("A(rms)")||
+       v.includes("I [RMS]")||v.includes("i(t)")))text.push(v);
     return oldText.call(this,v,...args);
    };
    proto.fillRect=function(x,y,w,h){
-    if(w===4&&h===4)dots.push({x,y});
+    // Conectar el análisis a los puntos de corriente sobre el
+    // inversor vertical en x=400 (y=304..448).
+    if(w===4&&h===4&&Math.abs(x-400)<=5&&y>=309&&y<=440)
+     dots.push({x,y});
     return oldRect.call(this,x,y,w,h);
    };
    try{await new Promise(resolve=>setTimeout(resolve,750));}
@@ -129,9 +131,10 @@ try{
    return {labels:[...new Set(text)],dotRectangles:dots.length};
   });
   console.log("Inversor FV: dibujo visible",name,onScreen);
-  assert(onScreen.labels.some(x=>x.startsWith("I [RMS] = ")&&
-   !x.endsWith("…")),name+": falta lectura numérica RMS sobre el inversor");
-  assert(onScreen.dotRectangles>0,name+": faltan bolitas animadas de corriente");
+  assert(onScreen.labels.some(x=>x.includes("A(rms)")&&
+   !x.includes("I [RMS]")&&!x.includes("I =")&&!x.endsWith("…")),
+   name+": falta medida RMS como valor de amperímetro");
+  assert(onScreen.dotRectangles>0,name+": no hay bolitas sobre el inversor");
   // El bit 16 en el atributo f de CircuitJS desactiva "Mostrar valores".
   // La misma opción también controla el texto de los demás componentes.
   const noValuesXml=xml.replace('<cir f="1"','<cir f="17"');
@@ -150,7 +153,8 @@ try{
    const proto=win.CanvasRenderingContext2D.prototype;
    const oldFill=proto.fillText,labels=[];
    proto.fillText=function(value,...args){
-    if(typeof value==="string"&&value.includes("I [RMS]"))
+    if(typeof value==="string"&&
+       (value.includes("A(rms)")||value.includes("I [RMS]")))
      labels.push(value);
     return oldFill.call(this,value,...args);
    };
@@ -189,7 +193,8 @@ try{
     return originalRect.call(this,x,y,w,h);
    };
    proto.fillText=function(value,...args){
-    if(typeof value==="string"&&value.includes("I [RMS]"))
+    if(typeof value==="string"&&
+       (value.includes("A(rms)")||value.includes("I [RMS]")))
      labels.push(value);
     return originalText.call(this,value,...args);
    };
@@ -202,8 +207,8 @@ try{
   });
   assert.equal(noDotsScreen.dotCount,0,
    name+": el inversor dibuja bolitas pese a desactivar Mostrar corriente");
-  assert(noDotsScreen.labels.some(x=>x.startsWith("I [RMS] = ")&&
-   !x.endsWith("…")),
+  assert(noDotsScreen.labels.some(x=>x.includes("A(rms)")&&
+   !x.includes("I =")&&!x.endsWith("…")),
    name+": se oculta la intensidad al desactivar únicamente las bolitas");
   console.log("OK: menú Mostrar corriente independiente de Mostrar valores",name);
 
