@@ -135,6 +135,16 @@ try{
    !x.includes("I [RMS]")&&!x.includes("I =")&&!x.endsWith("…")),
    name+": falta medida RMS como valor de amperímetro");
   assert(onScreen.dotRectangles>0,name+": no hay bolitas sobre el inversor");
+  // La cifra dibujada debe corresponder a la corriente REAL del elemento;
+  // no basta con que se haya escrito una etiqueta o una potencia nominal.
+  const currentString=onScreen.labels.find(x=>x.includes("A(rms)"));
+  const rendered=currentString?.match(/([+-]?\d+(?:[.,]\d+)?)\s*(m?A\(rms\))/);
+  assert(rendered,name+": lectura RMS del inversor sin número o unidad");
+  const magnitude=Number(rendered[1].replace(",","."));
+  const displayedAmps=magnitude*(rendered[2].startsWith("m")?1e-3:1);
+  near(displayedAmps,readings.inverterIrms,
+   Math.max(.0015,readings.inverterIrms*.03),
+   name+": intensidad indicada en el esquema distinta de la medida por el solver");
   // El bit 16 en el atributo f de CircuitJS desactiva "Mostrar valores".
   // La misma opción también controla el texto de los demás componentes.
   const noValuesXml=xml.replace('<cir f="1"','<cir f="17"');
