@@ -53,7 +53,19 @@ const cases=[
   blocks:"能動機能ブロック",element:"太陽光発電インバーター（交流）"},
  {browser:"ko-KR",mode:"auto",saved:null,expected:"kr",
   input:"입력 및 전원",passive:"수동 소자",
-  blocks:"능동 기능 블록",element:"태양광 인버터 (교류)"}
+  blocks:"능동 기능 블록",element:"태양광 인버터 (교류)"},
+ {browser:"ca-ES",mode:"auto",saved:null,expected:"ca",
+  input:"Entrades i fonts",passive:"Components passius",
+  blocks:"Blocs funcionals actius",element:"Inversor fotovoltaic (CA)"},
+ {browser:"es-ES",mode:"manual",saved:"ca-es-valencia",expected:"ca-es-valencia",
+  input:"Entrades i fonts",passive:"Components passius",
+  blocks:"Blocs funcionals actius",element:"Inversor fotovoltaic (CA)"},
+ {browser:"gl-ES",mode:"auto",saved:null,expected:"gl",
+  input:"Entradas e fontes",passive:"Compoñentes pasivos",
+  blocks:"Bloques funcionais activos",element:"Inversor fotovoltaico (CA)"},
+ {browser:"eu-ES",mode:"auto",saved:null,expected:"eu",
+  input:"Sarrerak eta iturriak",passive:"Osagai pasiboak",
+  blocks:"Bloke funtzional aktiboak",element:"Inbertsore fotovoltaikoa (AC)"}
 ];
 try{
  for(const c of cases){
