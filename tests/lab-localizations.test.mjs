@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import {labKeys,labLanguageCodes,labTranslation}
  from "../scripts/LabTranslations.ts";
 
-assert.deepEqual([...labLanguageCodes],["en","es","fr","de","it","pt","nl","pl"]);
+assert.deepEqual([...labLanguageCodes],["csx","da","de","en","es","fi","fr","it","nb","pl","pt","ru","zh","zh-tw","ja","kr"]);
 const keys=labKeys();
-assert(keys.length>=78,"Las etiquetas añadidas no deben quedar sin traducir");
+assert(keys.length>=92,"Las etiquetas añadidas no deben quedar sin traducir");
 assert.equal(new Set(keys).size,keys.length,"No repetir claves de traducción");
 const important=[
  "Inversor fotovoltaico FV (CA)","Añadir impedancia Z (CA, RLC serie)",
@@ -27,7 +27,7 @@ for(const key of important){
   const translation=labTranslation(language,key);
   assert(typeof translation==="string" && translation.length>0,
    "Falta "+language+" para "+key);
-  if(language!=="es" && language!=="pt" && language!=="it")
+  if(!["es","pt","it"].includes(language))
    assert.notEqual(translation,key,"No se traduce "+key+" en "+language);
  }
 }
@@ -43,7 +43,15 @@ for(const language of labLanguageCodes){
 assert.equal(labTranslation("es-ES","Tipo de inversor"),"Tipo de inversor");
 assert.equal(labTranslation("en-US","Tipo de inversor"),"Inverter type");
 assert.equal(labTranslation("fr-FR","Tipo de inversor"),"Type d’onduleur");
-assert.equal(labTranslation("nl-NL","Tipo de inversor"),"Omvormertype");
+assert.equal(labTranslation("cs-CZ","Tipo de inversor"),"Typ střídače");
+assert.equal(labTranslation("da-DK","Tipo de inversor"),"Invertertype");
+assert.equal(labTranslation("fi-FI","Tipo de inversor"),"Invertterin tyyppi");
+assert.equal(labTranslation("nb-NO","Tipo de inversor"),"Type vekselretter");
+assert.equal(labTranslation("ru-RU","Tipo de inversor"),"Тип инвертора");
+assert.equal(labTranslation("zh-CN","Tipo de inversor"),"逆变器类型");
+assert.equal(labTranslation("zh-TW","Tipo de inversor"),"逆變器類型");
+assert.equal(labTranslation("ja-JP","Tipo de inversor"),"インバーターの種類");
+assert.equal(labTranslation("ko-KR","Tipo de inversor"),"인버터 종류");
 assert.equal(labTranslation("zz","Tipo de inversor"),null);
 console.log("OK: "+keys.length+" etiquetas añadidas en "+labLanguageCodes.length+
  " idiomas, menús e información incluidos");
