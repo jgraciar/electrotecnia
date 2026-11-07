@@ -210,6 +210,60 @@ try{
   "Con FV cubriendo la potencia activa, la red debe suministrar solo corriente reactiva");
  assert(Math.abs(capMeasure.gridP)<0.03,
   "Con autoconsumo completo y condensador ideal, la potencia activa de red debe ser cero");
+ // Potencia reactiva real en el solver: FV inyecta Q y la red absorbe -Q.
+ // Se obtiene Q de la corriente de red y de la tensión en cuadratura
+ // calculada como -(dv/dt)/omega, sin depender de la fase inicial.
+ for(const pvQ of [0.4,-0.4]){
+  const reactiveXml=xml.replace('pvP="0.5"','pvP="1"')
+   .replace('pvQ="0"','pvQ="'+pvQ+'"');
+  const imported=await page.evaluate(
+   x=>window.LabCircuit.importNativeCircuit("FV reactiva "+x.q+" VAr",x.xml),
+   {q:pvQ,xml:reactiveXml});
+  assert(imported?.ok,"No se pudo importar FV con Q="+pvQ);
+  await page.waitForFunction(q=>{
+   const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+   if(!sim||sim.getTime()<=0.04)return false;
+   const el=new DOMParser().parseFromString(sim.exportCircuit(),"application/xml")
+    .querySelector("PVInverter");
+   return el?.getAttribute("pvQ")===String(q);
+  },pvQ,{timeout:60000});
+  const reactive=await page.evaluate(async()=>{
+   const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
+   const original=sim.ontimestep, samples=[];
+   sim.ontimestep=()=>{
+    original?.();
+    const source=Array.from(sim.getElements()).find(e=>e.getType()==="VoltageElm");
+    if(source)samples.push({t:sim.getTime(),v:source.getVoltageDiff(),i:source.getCurrent()});
+   };
+   try{
+    const start=sim.getTime();
+    for(let k=0;k<500&&sim.getTime()-start<0.12;k++)
+     await new Promise(resolve=>setTimeout(resolve,20));
+   }finally{sim.ontimestep=original;}
+   const tEnd=samples.at(-1)?.t??0, data=samples.filter(s=>s.t>=tEnd-0.08);
+   let duration=0,p=0,q=0,v2=0,i2=0;
+   for(let i=1;i<data.length-1;i++){
+    const a=data[i-1],b=data[i],c=data[i+1];
+    const span=c.t-a.t, dt=span/2;
+    if(!(dt>0))continue;
+    const quadratureVoltage=-(c.v-a.v)/(span*2*Math.PI*50);
+    p+=dt*b.v*b.i;
+    q+=dt*quadratureVoltage*b.i;
+    v2+=dt*b.v*b.v;
+    i2+=dt*b.i*b.i;
+    duration+=dt;
+   }
+   return {samples:data.length,duration,p:p/duration,q:q/duration,
+    voltageRms:Math.sqrt(v2/duration),currentRms:Math.sqrt(i2/duration)};
+  });
+  console.log("FV con reactiva en CircuitJS, Q inversor=",pvQ,reactive);
+  assert(reactive.samples>100&&reactive.duration>0.06,"Muestreo de Q insuficiente");
+  assert(Object.values(reactive).every(Number.isFinite),"Magnitudes Q no finitas");
+  assert(Math.abs(reactive.p)<0.05,"La red no debe importar P con FV=100 %");
+  assert(Math.abs(reactive.q+pvQ)<0.05,"Potencia reactiva de red incorrecta");
+  assert(Math.abs(reactive.currentRms-Math.abs(pvQ)/10)<0.008,
+   "La corriente de red no corresponde a la potencia reactiva intercambiada");
+ }
  const rt=await page.evaluate(()=>{
   const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
   sim.importCircuit(sim.exportCircuit());
