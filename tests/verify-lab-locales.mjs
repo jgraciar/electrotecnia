@@ -27,9 +27,33 @@ const cases=[
   input:"Wejścia i źródła",passive:"Elementy pasywne",
   blocks:"Aktywne bloki funkcjonalne",
   element:"Falownik fotowoltaiczny (AC)"},
- {browser:"en-US",mode:"manual",saved:"nl",expected:"nl",
-  input:"Ingangen en bronnen",passive:"Passieve componenten",blocks:"Actieve bouwblokken",
-  element:"PV-omvormer (AC)"}
+ {browser:"cs-CZ",mode:"auto",saved:null,expected:"csx",
+  input:"Vstupy a zdroje",passive:"Pasivní součástky",
+  blocks:"Aktivní funkční bloky",element:"Fotovoltaický střídač (AC)"},
+ {browser:"en-US",mode:"manual",saved:"da",expected:"da",
+  input:"Indgange og kilder",passive:"Passive komponenter",
+  blocks:"Aktive funktionsblokke",element:"Solcelleinverter (AC)"},
+ {browser:"en-US",mode:"manual",saved:"fi",expected:"fi",
+  input:"Tulot ja lähteet",passive:"Passiiviset komponentit",
+  blocks:"Aktiiviset toimilohkot",element:"Aurinkosähköinvertteri (AC)"},
+ {browser:"en-US",mode:"manual",saved:"nb",expected:"nb",
+  input:"Innganger og kilder",passive:"Passive komponenter",
+  blocks:"Aktive funksjonsblokker",element:"Solcellevekselretter (AC)"},
+ {browser:"en-US",mode:"manual",saved:"ru",expected:"ru",
+  input:"Входы и источники",passive:"Пассивные компоненты",
+  blocks:"Активные функциональные блоки",element:"Фотоэлектрический инвертор (переменный ток)"},
+ {browser:"en-US",mode:"manual",saved:"zh",expected:"zh",
+  input:"输入与电源",passive:"无源元件",
+  blocks:"有源功能模块",element:"光伏逆变器（交流）"},
+ {browser:"zh-TW",mode:"auto",saved:null,expected:"zh-tw",
+  input:"輸入與電源",passive:"被動元件",
+  blocks:"主動功能模組",element:"太陽光電逆變器（交流）"},
+ {browser:"en-US",mode:"manual",saved:"ja",expected:"ja",
+  input:"入力と電源",passive:"受動部品",
+  blocks:"能動機能ブロック",element:"太陽光発電インバーター（交流）"},
+ {browser:"ko-KR",mode:"auto",saved:null,expected:"kr",
+  input:"입력 및 전원",passive:"수동 소자",
+  blocks:"능동 기능 블록",element:"태양광 인버터 (교류)"}
 ];
 try{
  for(const c of cases){
@@ -88,5 +112,5 @@ try{
    assert.deepEqual(errors,[],"Errores JS para "+c.expected);
   }finally{await context.close();}
  }
- console.log("OK: español automático, inglés y los 8 idiomas manuales en menús de CircuitJS");
+ console.log("OK: idiomas originales de CircuitJS; detección automática y selección manual");
 }finally{await browser.close();}
