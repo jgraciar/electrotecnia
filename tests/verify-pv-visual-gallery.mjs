@@ -24,6 +24,18 @@ const variants=[
  ["autoconsumo-trifasica-vatimetros.xml",tri],
  ["autoconsumo-galeria-vatimetros.xml",[...mono,...tri]]
 ];
+// La compilacion minifica los nombres internos de campos de WattmeterTrueElm.
+// Se comprueba su API publica (getInfo), que coincide con las lecturas visibles.
+// Interpretar correctamente W, kW, VAr, kVAr, VA y kVA.
+function readPower(info,prefix,unit){
+ const line=info.find(x=>typeof x==="string"&&x.startsWith(prefix));
+ assert(line,"Lectura "+prefix+" ausente: "+JSON.stringify(info));
+ const raw=line.slice(prefix.length).trim();
+ const match=raw.match(/^([+-]?(?:\\d+(?:[.,]\\d*)?|[.,]\\d+)(?:[Ee][+-]?\\d+)?)\\s*([numµkMGT]?)((?:W|VAr|VA))$/);
+ assert(match&&match[3]===unit,"Lectura incorrecta "+prefix+raw);
+ const multiplier={"":1,n:1e-9,u:1e-6,"µ":1e-6,m:1e-3,k:1e3,M:1e6,G:1e9,T:1e12};
+ return Number(match[1].replace(",","."))*multiplier[match[2]];
+}
 const browser=await chromium.launch({headless:true});
 try{
  const page=await browser.newPage({viewport:{width:1440,height:950}});
@@ -58,12 +70,10 @@ try{
    const elems=Array.from(sim.getElements());
    const meters=elems.filter(e=>e.getType()==="WattmeterTrueElm");
    const pv=elems.filter(e=>e.getType()==="PVInverterElm");
-   const electrical=meters.map(m=>m.labMeasurement?.measure("ac"));
    const info=meters.map(m=>m.getInfo());
    const exported=sim.exportCircuit();
    const doc=new DOMParser().parseFromString(exported,"application/xml");
    return {time:sim.getTime(),count:meters.length,pvCount:pv.length,
-    electrical:electrical.map(m=>m?{p:m.p,q:m.q,s:m.s,kind:m.kind}:null),
     info,
     xmlMeterCount:doc.querySelectorAll("WattmeterTrue").length,
     mask:Array.from(doc.querySelectorAll("WattmeterTrue")).map(e=>e.getAttribute("labPowerMask"))
@@ -74,9 +84,11 @@ try{
   assert.equal(measured.xmlMeterCount,expected.length,filename);
   assert(measured.mask.every(m=>m==="7"),"No se conservan P/Q/S al importar/exportar");
   for(let i=0;i<expected.length;i++){
-   const elec=measured.electrical[i],info=measured.info[i];
-   assert(elec&&elec.kind==="ac",filename+" vatímetro "+i+" sin lectura CA");
-   assert([elec.p,elec.q,elec.s].every(Number.isFinite),
+   const info=measured.info[i];
+   const p=readPower(info,"P = ","W");
+   const q=readPower(info,"Q (fundamental) = ","VAr");
+   const s=readPower(info,"S = ","VA");
+   assert([p,q,s].every(Number.isFinite),
     filename+" vatímetro "+i+" magnitud no finita");
    assert(info.some(x=>x.startsWith("P = ")),filename+" vatímetro "+i+" no muestra P");
    assert(info.some(x=>x.startsWith("Q (fundamental) = ")),
@@ -86,11 +98,11 @@ try{
    const [expectedP,expectedQ]=expected[i];
    const pTol=Math.max(120,Math.abs(expectedP)*0.09);
    const qTol=Math.max(150,Math.abs(expectedQ)*0.12);
-   assert(Math.abs(elec.p-expectedP)<pTol,
-    filename+" W"+i+" P incorrecta "+elec.p+" frente a "+expectedP);
-   assert(Math.abs(elec.q-expectedQ)<qTol,
-    filename+" W"+i+" Q incorrecta "+elec.q+" frente a "+expectedQ);
-   assert(elec.s+1e-6>=Math.hypot(elec.p,elec.q)*0.99,
+   assert(Math.abs(p-expectedP)<pTol,
+    filename+" W"+i+" P incorrecta "+p+" frente a "+expectedP);
+   assert(Math.abs(q-expectedQ)<qTol,
+    filename+" W"+i+" Q incorrecta "+q+" frente a "+expectedQ);
+   assert(s+1e-6>=Math.hypot(p,q)*0.99,
     filename+" W"+i+" potencia aparente incoherente");
   }
   console.log("OK: catálogo",filename,"vatímetros",expected.length,
