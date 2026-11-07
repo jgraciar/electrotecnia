@@ -59,6 +59,7 @@ jobs:
           node --experimental-strip-types laboratorio/tests/lab-pv-commercial-installations.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-sector-autoconsumption.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-three-phase-unbalanced.test.mjs
+          node laboratorio/tests/check-pv-fixture-junctions.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-capacitor-contactors.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-impedance.test.mjs
 
@@ -114,6 +115,7 @@ jobs:
           mkdir -p public/tests/fixtures
           cp laboratorio/tests/fixtures/wulflemm-aron.xml public/tests/fixtures/
           cp laboratorio/tests/fixtures/autoconsumo-*-vatimetros.xml public/tests/fixtures/
+          cp -a laboratorio/tests/fixtures/autoconsumo-casos public/tests/fixtures/
           cp -a circuitjs-src/ts/dist/. public/circuitjs/
           cp circuitjs-src/COPYING.txt public/circuitjs/COPYING.txt
           test -f public/index.html
