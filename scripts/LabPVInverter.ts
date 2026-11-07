@@ -1,4 +1,4 @@
-import { LabPowerMeasurement } from "./LabPowerMeasurement.ts";
+import type { LabPowerMeasurement } from "./LabPowerMeasurement";
 // Inversor conectado a red: referencia temporal para validar la inyección de corriente.
 // Potencias en W y VAr; tensión RMS fase-neutro en V.
 // Convención: corriente positiva del inversor hacia el punto de conexión.
