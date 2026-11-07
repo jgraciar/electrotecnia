@@ -61,6 +61,21 @@ for(const pvP of [100,120]){
  assert.deepEqual(selection.selected,[0,2]);
  close(selection.capacitorQ,37.5);
  close(selection.gridQ,37.5);
+ // Al bloquear las maniobras, los escalones conectados siguen absorbiendo
+ // corriente capacitiva; el regulador no los desconecta por sí solo.
+ const held=pvGridBalance({loadP,loadQ,pvP,voltage,capacitorQ:selection.capacitorQ});
+ close(held.gridP,loadP-pvP);
+ close(held.gridQ,selection.gridQ);
+ close(held.gridCurrent,Math.hypot(loadP-pvP,37.5)*1000/(Math.sqrt(3)*voltage));
+ assert(held.gridCurrent>0);
+ assert.equal(held.reactiveDirection,"inductive");
+ if(pvP>loadP){
+  assert.equal(held.gridDirection,"export");
+  close(held.exportedP,pvP-loadP);
+ }else{
+  assert.equal(held.gridDirection,"zero");
+  assert(held.activeZeroReactiveNonzero);
+ }
 }
 // Autoconsumo total no implica corriente de acometida nula si queda Q.
 // La FV puede aportar Q; los condensadores aportan Q capacitiva.
