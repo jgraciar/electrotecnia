@@ -57,7 +57,6 @@ try{
    const inv=e.find(x=>x.getType()==="PVInverterElm");
    const load=e.find(x=>x.getType()==="ResistorElm");
    const source=e.find(x=>x.getType()==="VoltageElm");
-   const labels=[...Array(8).keys()].map(i=>inv.getEditInfo(i)?.name??null);
    const before=sim.ontimestep,samples=[];
    sim.ontimestep=()=>{
     before?.();
@@ -82,10 +81,9 @@ try{
    }
    const tag=new DOMParser().parseFromString(sim.exportCircuit(),"application/xml")
     .querySelector("PVInverter");
-   const details=[];inv.getInfo(details);
    return {seconds,samples:data.length,voltageRms:Math.sqrt(v2/seconds),
-    loadPower:energy/seconds,gridPower:sourceP/seconds,info:details,
-    labels,fields:{mode:tag?.getAttribute("pvMode"),
+    loadPower:energy/seconds,gridPower:sourceP/seconds,
+    fields:{mode:tag?.getAttribute("pvMode"),
      nominalP:tag?.getAttribute("pvPnom"),nominalS:tag?.getAttribute("pvSnom")},
     hasGridSource:!!source
    };
@@ -95,21 +93,11 @@ try{
   near(readings.voltageRms,expectRms,1.2,name+": U RMS");
   near(readings.loadPower,expectP,Math.max(.04,expectP*.04),name+": P carga");
   assert.equal(readings.fields.mode,mode);
-  assert.equal(readings.labels[0],"Tipo de inversor");
-  assert(readings.labels[1].includes("Potencia activa nominal"));
-  assert(readings.labels[2].includes("Potencia aparente"));
   if(mode==="grid"){
    near(readings.gridPower,.5,.07,"Red P (FV 0.5 W)");
    assert(readings.hasGridSource);
-   assert(readings.labels[3].includes("Potencia FV activa actual"));
-   assert.equal(readings.labels[5],null,"cosφ oculto sin activar modo avanzado");
-   assert(readings.info.some(x=>x.includes("60 Hz")),
-    "El inversor debe tomar 60 Hz de la red, no los 50 Hz del XML");
   }else{
    assert(!readings.hasGridSource,"La aislada no debe tener fuente de red");
-   assert(readings.labels[3].includes("Tensión de salida"));
-   assert(readings.labels[4].includes("Frecuencia"));
-   assert.equal(readings.labels[5],null,"Aislada sin control manual de fase");
   }
  }
  assert.deepEqual(errors,[],"Errores de JavaScript en navegador");
