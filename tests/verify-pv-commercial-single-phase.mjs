@@ -103,7 +103,9 @@ try{
   assert(m.samples>100&&m.duration>0.06,"Muestras de solver insuficientes");
   close(m.voltageRms,voltage,2,"Tensión 230 V");
   close(m.loadP,loadP,100,"Potencia de carga");
-  close(m.pvP,-scenario.pvP,100,"Inyección FV");
+  // La magnitud medida VI es potencia suministrada: signo positivo
+  // en el sentido de corriente post0 -> post1 de la fuente FV.
+  close(m.pvP,scenario.pvP,100,"Inyección FV");
   close(m.p,scenario.gridP,120,"Potencia activa de red");
   close(m.q,-capQ,160,"Potencia reactiva de red");
   close(m.capacitorIrms,capQ/voltage,0.3,"Corriente de condensador");

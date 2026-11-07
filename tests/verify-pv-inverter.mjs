@@ -95,9 +95,11 @@ try{
  assert(Object.values(measurement).every(Number.isFinite),"Medidas no finitas");
  assert(measurement.voltageRms>5&&measurement.voltageRms<15,"Tensión RMS fuera de rango");
  assert(Math.abs(measurement.load-1)<0.05,"La carga de 100 ohmios a 10 V debe consumir 1 W");
- assert(Math.abs(measurement.source-measurement.inverter-measurement.load)<0.05,
-  "La potencia suministrada por red y FV debe igualar la carga");
- assert(Math.abs(measurement.inverter+0.5)<0.05,"El inversor debe inyectar 0,5 W");
+ // Con CircuitElm, I positiva circula del borne 0 al 1. El inversor
+ // inyecta potencia positiva al nodo de red; por tanto P_carga = P_red + P_FV.
+ assert(Math.abs(measurement.source+measurement.inverter-measurement.load)<0.05,
+  "La suma de potencias suministradas por red y FV debe igualar la carga");
+ assert(Math.abs(measurement.inverter-0.5)<0.05,"El inversor debe inyectar 0,5 W");
  assert(Math.abs(measurement.source-0.5)<0.05,"La red debe aportar los 0,5 W restantes");
  // Verificar físicamente los tres regímenes: consumo parcial, autoconsumo
  // completo y vertido. Se mide la fuente de red en el solver de CircuitJS.
@@ -149,8 +151,8 @@ try{
   assert(Math.abs(measured.grid-expectedGrid)<0.05,
    "Potencia de red incorrecta para FV "+pvPower+" W");
   assert(Math.abs(measured.load-1)<0.05,"Carga incorrecta");
-  assert(Math.abs(measured.pv+pvPower)<0.05,"Potencia del inversor incorrecta");
-  assert(Math.abs(measured.grid-measured.pv-measured.load)<0.05,
+  assert(Math.abs(measured.pv-pvPower)<0.05,"Potencia del inversor incorrecta");
+  assert(Math.abs(measured.grid+measured.pv-measured.load)<0.05,
    "Balance energético incorrecto");
  }
  // Banco de condensadores físico en paralelo: Qc=ω C V² = 0,5 VAr.
