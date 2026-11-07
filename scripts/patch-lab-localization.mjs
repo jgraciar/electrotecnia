@@ -37,6 +37,20 @@ once(locale,'                // Catálogo inexistente: utilizar el español del 
  '                // base inglesa, pero traducir todos los elementos añadidos.\n'+
  '                if(Locale.activeLanguage==="nl") Locale.localizationMap=new Map();\n'+
  '                else await Locale.loadSpanishFallback();');
+// Windows usa ca-ES-valencia. No debe reducirse a «ca» al
+// normalizar variantes regionales antes de cargar el catálogo.
+once(locale,
+ '        if (lang.toLowerCase() === "zh-tw" || lang.toLowerCase() === "zh-cht")',
+ '        if (lang.toLowerCase().startsWith("ca-es-valencia"))\n'+
+ '            lang = "ca-es-valencia";\n'+
+ '        else if (lang.toLowerCase() === "zh-tw" || lang.toLowerCase() === "zh-cht")');
+// CircuitJS solo incluye 15 catálogos de idioma originales. Para los
+// cuatro nuevos, utilizar los textos originales en español como respaldo,
+// pero mantener el idioma cooficial en todos los elementos del laboratorio.
+once(locale,
+ '        const url = moduleBaseURL + "locale/locale_" + lang + ".txt";',
+ '        const originalLang = ["ca","ca-es-valencia","gl","eu"].includes(lang)?"es":lang;\n'+
+ '        const url = moduleBaseURL + "locale/locale_" + originalLang + ".txt";');
 const dialog=join(dir,"EditDialog.ts");
 once(dialog,'                    opt.textContent = ei.choice.items[j];',
  '                    opt.textContent = Locale.LS(ei.choice.items[j]);');
