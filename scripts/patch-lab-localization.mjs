@@ -37,4 +37,8 @@ once(locale,'                // Catálogo inexistente: utilizar el español del 
 const dialog=join(dir,"EditDialog.ts");
 once(dialog,'                    opt.textContent = ei.choice.items[j];',
  '                    opt.textContent = Locale.LS(ei.choice.items[j]);');
+once(dialog,'                cbLabel.appendChild(document.createTextNode(ei.checkbox.name));',
+ '                cbLabel.appendChild(document.createTextNode(Locale.LS(ei.checkbox.name)));');
+once(dialog,'                btn.textContent = ei.button.label ?? ei.button.textContent ?? String(ei.button);',
+ '                btn.textContent = Locale.LS(ei.button.label ?? ei.button.textContent ?? String(ei.button));');
 console.log("Traducciones activadas: menús heredados, opciones de selección y 8 idiomas");
