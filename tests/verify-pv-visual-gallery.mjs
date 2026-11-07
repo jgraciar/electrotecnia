@@ -34,7 +34,14 @@ function readPower(info,prefix,unit){
  const match=raw.match(/^([+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)(?:[Ee][+-]?\d+)?)\s*([pnumµμkMGT]?)((?:W|VAr|VA))$/);
  assert(match&&match[3]===unit,"Lectura incorrecta "+prefix+raw);
  const multiplier={"":1,p:1e-12,n:1e-9,u:1e-6,"µ":1e-6,"μ":1e-6,m:1e-3,k:1e3,M:1e6,G:1e9,T:1e12};
- return Number(match[1].replace(",","."))*multiplier[match[2]];
+ const numberText=match[1];
+ // CircuitJS se muestra con configuración española: coma decimal y punto
+ // de millares ("1.000 W" significa 1000 W, no 1 W).
+ const normalized=numberText.includes(",")
+  ? numberText.replace(/\./g,"").replace(",",".")
+  : /^[+-]?\d{1,3}(?:\.\d{3})+$/.test(numberText)
+   ? numberText.replace(/\./g,"") : numberText;
+ return Number(normalized)*multiplier[match[2]];
 }
 const browser=await chromium.launch({headless:true});
 try{
