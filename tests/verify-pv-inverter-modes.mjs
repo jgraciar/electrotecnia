@@ -61,6 +61,7 @@ try{
    sim.ontimestep=()=>{
     before?.();
     samples.push({t:sim.getTime(),v:load.getVoltageDiff(),
+     iInverter:inv.getCurrent(),iLoad:load.getCurrent(),
      p:load.getVoltageDiff()*load.getCurrent(),
      sourceP:source?source.getVoltageDiff()*source.getCurrent():null});
    };
@@ -70,18 +71,21 @@ try{
      await new Promise(resolve=>setTimeout(resolve,20));
    }finally{sim.ontimestep=before;}
    const end=samples.at(-1)?.t??0,data=samples.filter(s=>s.t>=end-0.06);
-   let seconds=0,energy=0,v2=0,sourceP=0;
+   let seconds=0,energy=0,v2=0,sourceP=0,invI2=0,loadI2=0;
    for(let i=1;i<data.length;i++){
     const a=data[i-1],b=data[i],dt=b.t-a.t;
     if(!(dt>0))continue;
     seconds+=dt;energy+=dt*(a.p+b.p)/2;
     v2+=dt*(a.v*a.v+b.v*b.v)/2;
+    invI2+=dt*(a.iInverter**2+b.iInverter**2)/2;
+    loadI2+=dt*(a.iLoad**2+b.iLoad**2)/2;
     if(a.sourceP!=null&&b.sourceP!=null)
      sourceP+=dt*(a.sourceP+b.sourceP)/2;
    }
    const tag=new DOMParser().parseFromString(sim.exportCircuit(),"application/xml")
     .querySelector("PVInverter");
    return {seconds,samples:data.length,voltageRms:Math.sqrt(v2/seconds),
+    inverterIrms:Math.sqrt(invI2/seconds),loadIrms:Math.sqrt(loadI2/seconds),
     loadPower:energy/seconds,gridPower:sourceP/seconds,
     fields:{mode:tag?.getAttribute("pvMode"),
      nominalP:tag?.getAttribute("pvPnom"),nominalS:tag?.getAttribute("pvSnom"),
@@ -93,6 +97,16 @@ try{
   assert(readings.seconds>0.04&&readings.samples>100,name+": samples");
   near(readings.voltageRms,expectRms,1.2,name+": U RMS");
   near(readings.loadPower,expectP,Math.max(.04,expectP*.04),name+": P carga");
+  if(mode==="island"){
+   near(readings.inverterIrms,readings.loadIrms,
+    Math.max(.025,.03*readings.loadIrms),
+    "I RMS inversor aislado debe coincidir con I RMS carga");
+   near(readings.inverterIrms,Math.sqrt(readings.loadPower/52.9),
+    .12,"I RMS inversor aislado desde la potencia de la carga");
+  }else{
+   near(readings.inverterIrms,.5/12,.006,
+    "I RMS inversor conectado a red 12 V/60 Hz, P = 0.5 W");
+  }
   assert.equal(readings.fields.mode,mode);
   assert.equal(readings.fields.currentMode,"0",
    "RMS debe ser predeterminado al no especificar pvIView");
