@@ -1,0 +1,49 @@
+import assert from "node:assert/strict";
+import {labKeys,labLanguageCodes,labTranslation}
+ from "../scripts/LabTranslations.ts";
+
+assert.deepEqual([...labLanguageCodes],["en","es","fr","de","it","pt","nl","pl"]);
+const keys=labKeys();
+assert(keys.length>=78,"Las etiquetas añadidas no deben quedar sin traducir");
+assert.equal(new Set(keys).size,keys.length,"No repetir claves de traducción");
+const important=[
+ "Inversor fotovoltaico FV (CA)","Añadir impedancia Z (CA, RLC serie)",
+ "Carga no lineal: puente rectificador con filtro C","Tipo de inversor",
+ "Potencia activa nominal Pn (W)","Potencia aparente máxima Smax (VA)",
+ "Regulación avanzada de cos φ (por defecto 1)","Lectura de intensidad",
+ "Eficaz RMS (por defecto)","Instantánea i(t)",
+ "Impedancia Z · solo CA · conexión en serie",
+ "Tipo de corriente","Automatica (detectar)","Alterna (CA)",
+ "Potencia activa P (W)","Potencia reactiva Q (VAr) - fundamental",
+ "Potencia aparente S (VA)","Mostrar cos φ (fundamental)",
+ "Mostrar THD corriente (%)","Decimales generales (0 a 10)",
+ "Separador decimal","Separador de miles",
+ "Conexión a red (U/f automáticas)","Fotovoltaica aislada",
+ "Puente rectificador monofásico con filtro capacitivo"
+];
+for(const key of important){
+ assert(keys.includes(key),"Falta texto añadido al catálogo: "+key);
+ for(const language of labLanguageCodes){
+  const translation=labTranslation(language,key);
+  assert(typeof translation==="string" && translation.length>0,
+   "Falta "+language+" para "+key);
+  if(language!=="es" && language!=="pt" && language!=="it")
+   assert.notEqual(translation,key,"No se traduce "+key+" en "+language);
+ }
+}
+for(const language of labLanguageCodes){
+ for(const key of keys){
+  const value=labTranslation(language,key);
+  assert(value&&value.trim().length>0,language+": traducción vacía para "+key);
+ }
+ for(const menu of ["Inputs and Sources","Passive Components","Outputs and Labels","Show Ω Unit"]){
+  assert(labTranslation(language,menu),"Submenú sin traducir: "+language+"/"+menu);
+ }
+}
+assert.equal(labTranslation("es-ES","Tipo de inversor"),"Tipo de inversor");
+assert.equal(labTranslation("en-US","Tipo de inversor"),"Inverter type");
+assert.equal(labTranslation("fr-FR","Tipo de inversor"),"Type d’onduleur");
+assert.equal(labTranslation("nl-NL","Tipo de inversor"),"Omvormertype");
+assert.equal(labTranslation("zz","Tipo de inversor"),null);
+console.log("OK: "+keys.length+" etiquetas añadidas en "+labLanguageCodes.length+
+ " idiomas, menús e información incluidos");
