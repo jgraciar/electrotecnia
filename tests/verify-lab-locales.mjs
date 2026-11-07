@@ -4,19 +4,31 @@ import {chromium} from "playwright";
 const browser=await chromium.launch({headless:true});
 const cases=[
  {browser:"es-ES",mode:"auto",saved:null,expected:"es",
-  input:"Entradas y fuentes",passive:"Componentes pasivos",
+  input:"Entradas y fuentes",passive:"Componentes pasivos",blocks:"Bloques funcionales activos",
   element:"Inversor fotovoltaico FV (CA)"},
  {browser:"es-ES",mode:"manual",saved:"en",expected:"en",
-  input:"Inputs and Sources",passive:"Passive Components",
+  input:"Inputs and Sources",passive:"Passive Components",blocks:"Active Building Blocks",
   element:"PV inverter (AC)"},
  {browser:"es-ES",mode:"manual",saved:"fr",expected:"fr",
-  input:"Entrées et sources",passive:"Composants passifs",
+  input:"Entrées et sources",passive:"Composants passifs",blocks:"Blocs fonctionnels actifs",
   element:"Onduleur photovoltaïque (CA)"},
  {browser:"en-US",mode:"manual",saved:"de",expected:"de",
-  input:"Eingänge und Quellen",passive:"Passive Bauelemente",
+  input:"Eingänge und Quellen",passive:"Passive Bauelemente",blocks:"Aktive Funktionsblöcke",
   element:"PV-Wechselrichter (AC)"},
+ {browser:"es-ES",mode:"manual",saved:"it",expected:"it",
+  input:"Ingressi e sorgenti",passive:"Componenti passivi",
+  blocks:"Blocchi funzionali attivi",
+  element:"Inverter fotovoltaico (CA)"},
+ {browser:"es-ES",mode:"manual",saved:"pt",expected:"pt",
+  input:"Entradas e fontes",passive:"Componentes passivos",
+  blocks:"Blocos funcionais ativos",
+  element:"Inversor fotovoltaico (CA)"},
+ {browser:"es-ES",mode:"manual",saved:"pl",expected:"pl",
+  input:"Wejścia i źródła",passive:"Elementy pasywne",
+  blocks:"Aktywne bloki funkcjonalne",
+  element:"Falownik fotowoltaiczny (AC)"},
  {browser:"en-US",mode:"manual",saved:"nl",expected:"nl",
-  input:"Ingangen en bronnen",passive:"Passieve componenten",
+  input:"Ingangen en bronnen",passive:"Passieve componenten",blocks:"Actieve bouwblokken",
   element:"PV-omvormer (AC)"}
 ];
 try{
@@ -65,10 +77,12 @@ try{
     "Submenú Entradas y fuentes sin traducir: "+c.expected);
    assert(current.headings.some(x=>x.includes(c.passive)),
     "Submenú Componentes pasivos sin traducir: "+c.expected);
+   assert(current.headings.some(x=>x.includes(c.blocks)),
+    "Submenú Bloques activos sin traducir: "+c.expected);
    assert(current.labels.some(x=>x.includes(c.element)),
     "Inversor sin traducir: "+c.expected);
    assert.deepEqual(errors,[],"Errores JS para "+c.expected);
   }finally{await context.close();}
  }
- console.log("OK: español automático y selección manual en inglés, francés, alemán y neerlandés");
+ console.log("OK: español automático, inglés y los 8 idiomas manuales en menús de CircuitJS");
 }finally{await browser.close();}
