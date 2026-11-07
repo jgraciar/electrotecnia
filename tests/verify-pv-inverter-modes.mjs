@@ -107,6 +107,30 @@ try{
    near(readings.inverterIrms,.5/12,.006,
     "I RMS inversor conectado a red 12 V/60 Hz, P = 0.5 W");
   }
+  // Comprobar el dibujo real del canvas, no solamente la magnitud
+  // calculada: el inversor debe mostrar I RMS y bolitas animadas.
+  const onScreen=await page.evaluate(async()=>{
+   const win=document.querySelector("#circuit-frame").contentWindow;
+   const proto=win.CanvasRenderingContext2D.prototype;
+   const oldText=proto.fillText,oldRect=proto.fillRect;
+   const text=[],dots=[];
+   proto.fillText=function(v,...args){
+    if(typeof v==="string" && (v.includes("I [RMS]")||v.includes("i(t)")))
+     text.push(v);
+    return oldText.call(this,v,...args);
+   };
+   proto.fillRect=function(x,y,w,h){
+    if(w===4&&h===4)dots.push({x,y});
+    return oldRect.call(this,x,y,w,h);
+   };
+   try{await new Promise(resolve=>setTimeout(resolve,750));}
+   finally{proto.fillText=oldText;proto.fillRect=oldRect;}
+   return {labels:[...new Set(text)],dotRectangles:dots.length};
+  });
+  console.log("Inversor FV: dibujo visible",name,onScreen);
+  assert(onScreen.labels.some(x=>x.startsWith("I [RMS] = ")&&
+   !x.endsWith("…")),name+": falta lectura numérica RMS sobre el inversor");
+  assert(onScreen.dotRectangles>0,name+": faltan bolitas animadas de corriente");
   assert.equal(readings.fields.mode,mode);
   assert.equal(readings.fields.currentMode,"0",
    "RMS debe ser predeterminado al no especificar pvIView");
