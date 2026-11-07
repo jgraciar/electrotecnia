@@ -223,10 +223,9 @@ export class PVInverterElm extends CurrentElm {
         const sim=SimulationManager.theSim;
         if(sim)this.currentSamples.add(sim.t,0,this.getCurrent());
     }
-    // La fuente de corriente de Falstad dibuja por defecto i(t) y solo
-    // cuando está activada la opción global "Mostrar valores". En el inversor
-    // se indica siempre la magnitud seleccionada (RMS inicialmente), sin
-    // confundirla con la corriente instantánea del modelo.
+    // Al igual que el resto de componentes de CircuitJS, el inversor
+    // dibuja su lectura solo cuando está activado "Mostrar valores".
+    // La magnitud es RMS por defecto, no la muestra instantánea.
     private displayedCurrent(){
         const frequency=this.mode==="island"?this.frequency:
             (this.gridReference()?.frequency??this.frequency);
@@ -275,10 +274,12 @@ export class PVInverterElm extends CurrentElm {
         g.fillPolygon(this.arrow!);
         this.setBbox(this.point1,this.point2,radius);
         this.drawInverterDots(g);
-        const measure=this.displayedCurrent();
-        const value=measure.value===null?"…":
-            CircuitElm.getShortUnitText(measure.value,"A");
-        this.drawValues(g,measure.label+" = "+value,radius+7);
+        if(this.showValues()){
+            const measure=this.displayedCurrent();
+            const value=measure.value===null?"…":
+                CircuitElm.getShortUnitText(measure.value,"A");
+            this.drawValues(g,measure.label+" = "+value,radius+7);
+        }
         this.drawPosts(g);
     }
     private currentReadSelector():EditInfo{

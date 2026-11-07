@@ -107,8 +107,9 @@ try{
    near(readings.inverterIrms,.5/12,.006,
     "I RMS inversor conectado a red 12 V/60 Hz, P = 0.5 W");
   }
-  // Comprobar el dibujo real del canvas, no solamente la magnitud
-  // calculada: el inversor debe mostrar I RMS y bolitas animadas.
+  // Comprobar el dibujo real: I RMS se muestra SOLO si la opción
+  // general "Mostrar valores" está activada; las bolitas se animan
+  // con la simulación en marcha.
   const onScreen=await page.evaluate(async()=>{
    const win=document.querySelector("#circuit-frame").contentWindow;
    const proto=win.CanvasRenderingContext2D.prototype;
@@ -131,6 +132,35 @@ try{
   assert(onScreen.labels.some(x=>x.startsWith("I [RMS] = ")&&
    !x.endsWith("…")),name+": falta lectura numérica RMS sobre el inversor");
   assert(onScreen.dotRectangles>0,name+": faltan bolitas animadas de corriente");
+  // El bit 16 en el atributo f de CircuitJS desactiva "Mostrar valores".
+  // La misma opción también controla el texto de los demás componentes.
+  const noValuesXml=xml.replace('<cir f="1"','<cir f="17"');
+  assert.notEqual(noValuesXml,xml,"XML sin cabecera para la prueba de menú");
+  const hiddenImport=await page.evaluate(c=>
+   window.LabCircuit.importNativeCircuit(c.name,c.xml),
+   {name:name+" sin mostrar valores",xml:noValuesXml});
+  assert(hiddenImport?.ok,name+": no se pudo desactivar Mostrar valores");
+  await page.waitForFunction(()=>{
+   const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+   return sim?.getTime()>0.04&&Array.from(sim.getElements())
+    .filter(e=>e.getType()==="PVInverterElm").length===1;
+  },null,{timeout:90000});
+  const hiddenText=await page.evaluate(async()=>{
+   const win=document.querySelector("#circuit-frame").contentWindow;
+   const proto=win.CanvasRenderingContext2D.prototype;
+   const oldFill=proto.fillText,labels=[];
+   proto.fillText=function(value,...args){
+    if(typeof value==="string"&&value.includes("I [RMS]"))
+     labels.push(value);
+    return oldFill.call(this,value,...args);
+   };
+   try{await new Promise(resolve=>setTimeout(resolve,750));}
+   finally{proto.fillText=oldFill;}
+   return labels;
+  });
+  assert.deepEqual(hiddenText,[],
+   name+": el inversor muestra I RMS pese a estar desactivada la opción global");
+  console.log("OK: opción global Mostrar valores respetada por inversor",name);
   assert.equal(readings.fields.mode,mode);
   assert.equal(readings.fields.currentMode,"0",
    "RMS debe ser predeterminado al no especificar pvIView");
