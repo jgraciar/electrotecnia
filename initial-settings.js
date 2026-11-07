@@ -95,14 +95,21 @@ const names={ca:"Català","ca-es-valencia":"Valencià",gl:"Galego",eu:"Euskara",
 const normalizeLanguage=value=>{
  const code=String(value||"").toLowerCase().replace(/_/g,"-");
  if(code.startsWith("ca-es-valencia")||code==="ca-valencia")return "ca-es-valencia";
- if(code.startsWith("zh-tw")||code.startsWith("zh-hk"))return "zh-tw";
+ if(code.startsWith("zh-tw")||code.startsWith("zh-hk")||
+    code.startsWith("zh-mo")||code.startsWith("zh-hant"))return "zh-tw";
  const base=code.split("-")[0];
- return base==="cs"?"csx":base==="ko"?"kr":base;
+ if(base==="cs")return "csx";
+ if(base==="ko")return "kr";
+ if(base==="no"||base==="nn")return "nb";
+ return base;
 };
 const detect=()=>{
  const prefs=[...(navigator.languages||[]),navigator.language,
   Intl.DateTimeFormat().resolvedOptions().locale].filter(Boolean);
- return prefs.map(normalizeLanguage).find(code=>Object.hasOwn(catalogs,code))||"es";
+ // Usar el primer idioma admitido del orden de preferencias del navegador.
+ // Si no hay ninguno, ofrecer inglés como idioma técnico de respaldo:
+ // el navegador no expone la interfaz instalada de Windows.
+ return prefs.map(normalizeLanguage).find(code=>Object.hasOwn(catalogs,code))||"en";
 };
 const get=(k)=>{try{return localStorage.getItem(k)}catch{return null}};
 const set=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
