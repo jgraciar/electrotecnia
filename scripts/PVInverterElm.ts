@@ -207,11 +207,14 @@ export class PVInverterElm extends CurrentElm {
         const ref=this.gridReference();
         if(!ref){this.current=0;return;}
         const op=this.operation();
-        this.current=gridFollowingCurrent({
+        // La corriente almacenada debe llevar el MISMO signo que la fuente
+        // Norton estampada, para que CircuitJS calcule correctamente las
+        // corrientes en los conductores y sus bolitas de circulación.
+        this.current=-gridFollowingCurrent({
             voltageRms:ref.voltageRms,frequency:ref.frequency,
             power:op.p,reactivePower:op.q,phase:ref.phase,time:sim.t
         });
-        sim.stampCurrentSource(this.nodes[0],this.nodes[1],-this.current);
+        sim.stampCurrentSource(this.nodes[0],this.nodes[1],this.current);
     }
     // Se registra la corriente efectivamente calculada por CircuitJS en cada
     // paso, no un valor nominal deducido de P/S. También funciona en aislada.
@@ -236,9 +239,9 @@ export class PVInverterElm extends CurrentElm {
     // "Mostrar corriente" esté desactivado (solicitud específica del inversor).
     private drawInverterDots(g:Graphics):void{
         if(this.isCreating()||!CircuitElm.app.simIsRunning())return;
-        // El modelo FV de red estampa la fuente en sentido inverso al de
-        // CurrentElm.current. Para la animación se usa el sentido físico.
-        const physicalCurrent=this.mode==="grid"?-this.current:this.current;
+        // CurrentElm.current utiliza el sentido real de la fuente
+        // estampada; las bolitas y los cables muestran la misma dirección.
+        const physicalCurrent=this.current;
         if(!Number.isFinite(physicalCurrent)||Math.abs(physicalCurrent)<1e-12)
             return;
         this.curcount=this.updateDotCountImpl(physicalCurrent,this.curcount);
