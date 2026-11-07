@@ -172,7 +172,7 @@ export class PVInverterElm extends CurrentElm {
     doStep():void{
         const sim=SimulationManager.theSim;
         if(this.mode==="island"){
-            const ref=islandReferenceVoltage(this,sim.t);
+            const ref=islandReferenceVoltage({...this,phaseDegrees:0},sim.t);
             const resistance=islandOutputResistance(this);
             // Fuente de Norton: tensión entre nodo 1 y nodo 0 = -ref.
             sim.stampCurrentSource(this.nodes[0],this.nodes[1],ref/resistance);
