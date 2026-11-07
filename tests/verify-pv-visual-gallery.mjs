@@ -95,6 +95,8 @@ try{
     filename+" vatímetro "+i+" no muestra Q");
    assert(info.some(x=>x.startsWith("S = ")),
     filename+" vatímetro "+i+" no muestra S");
+   console.log("MEDIDA VATIMETRO",filename,i,
+    JSON.stringify({p,q,s,raw:info}));
    const [expectedP,expectedQ]=expected[i];
    const pTol=Math.max(120,Math.abs(expectedP)*0.09);
    const qTol=Math.max(150,Math.abs(expectedQ)*0.12);
