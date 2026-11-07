@@ -1,3 +1,4 @@
+import { LabPowerMeasurement } from "./LabPowerMeasurement";
 // Inversor conectado a red: referencia temporal para validar la inyección de corriente.
 // Potencias en W y VAr; tensión RMS fase-neutro en V.
 // Convención: corriente positiva del inversor hacia el punto de conexión.
@@ -82,4 +83,25 @@ export function islandReferenceVoltage(settings:PVIslandSettings,time:number):nu
     return Math.SQRT2*settings.voltageRms*
         Math.sin(2*Math.PI*settings.frequency*time+
                  (settings.phaseDegrees??0)*Math.PI/180);
+}
+
+
+// Indicación del inversor: intensidad eficaz por defecto. La media es la
+// media algebraica (con signo) durante un periodo, no la media rectificada.
+// i(t) es la muestra instantánea. Cálculo sobre muestras reales del solver.
+export type PVCurrentReadMode = 0 | 1 | 2; // RMS, media, instantánea
+export function inverterCurrentDisplay(
+    samples: LabPowerMeasurement, mode: PVCurrentReadMode, frequency: number
+):{label:string;value:number|null}{
+    const labels=["I [RMS]","I [media]","i(t)"];
+    if(!Number.isInteger(mode)||mode<0||mode>2)
+        throw Error("Modo de lectura de intensidad no válido");
+    const freq=Number.isFinite(frequency)&&frequency>0?frequency:50;
+    const period=1/freq;
+    const window=samples.getWindowReadings(period);
+    if(!window || (mode!==2&&window.duration<period*0.95))
+        return {label:labels[mode],value:null};
+    const value=mode===0?window.rms.i:mode===1?
+        window.mean.i:window.instantaneous.i;
+    return {label:labels[mode],value};
 }

@@ -84,7 +84,8 @@ try{
    return {seconds,samples:data.length,voltageRms:Math.sqrt(v2/seconds),
     loadPower:energy/seconds,gridPower:sourceP/seconds,
     fields:{mode:tag?.getAttribute("pvMode"),
-     nominalP:tag?.getAttribute("pvPnom"),nominalS:tag?.getAttribute("pvSnom")},
+     nominalP:tag?.getAttribute("pvPnom"),nominalS:tag?.getAttribute("pvSnom"),
+     currentMode:tag?.getAttribute("pvIView")??"0"},
     hasGridSource:!!source
    };
   });
@@ -93,6 +94,8 @@ try{
   near(readings.voltageRms,expectRms,1.2,name+": U RMS");
   near(readings.loadPower,expectP,Math.max(.04,expectP*.04),name+": P carga");
   assert.equal(readings.fields.mode,mode);
+  assert.equal(readings.fields.currentMode,"0",
+   "RMS debe ser predeterminado al no especificar pvIView");
   if(mode==="grid"){
    near(readings.gridPower,.5,.07,"Red P (FV 0.5 W)");
    assert(readings.hasGridSource);

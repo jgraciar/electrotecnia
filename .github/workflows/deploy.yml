@@ -53,6 +53,7 @@ jobs:
           node --experimental-strip-types laboratorio/tests/lab-pv-grid-balance.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-inverter.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-catalog-inverter.test.mjs
+          node --experimental-strip-types laboratorio/tests/lab-pv-current-display.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-kirchhoff.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-capacitor-bank.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-capacitor-controller.test.mjs

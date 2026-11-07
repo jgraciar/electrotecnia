@@ -8,13 +8,15 @@ import { VoltageElm } from "./VoltageElm";
 import { CircuitElm } from "./CircuitElm";
 import { SimulationManager } from "./SimulationManager";
 import { EditInfo } from "./EditInfo";
+import { LabPowerMeasurement } from "./LabPowerMeasurement";
 import { Choice } from "./Choice";
 import { StringTokenizer } from "./StringTokenizer";
 import { CircuitXMLSerializer } from "./CircuitXMLSerializer";
 import { CircuitXMLDeserializer } from "./CircuitXMLDeserializer";
 import {
     gridFollowingCurrent, commercialPVPower,
-    islandOutputResistance, islandReferenceVoltage
+    islandOutputResistance, islandReferenceVoltage,
+    inverterCurrentDisplay, PVCurrentReadMode
 } from "./LabPVInverter";
 
 type GridReference={voltageRms:number;frequency:number;phase:number};
@@ -34,6 +36,8 @@ export class PVInverterElm extends CurrentElm {
     ratedActive:number=5000;
     advancedReactive:boolean=false;
     legacyReactive:boolean=false;
+    currentReadMode:PVCurrentReadMode=0;
+    private readonly currentSamples=new LabPowerMeasurement();
 
     constructor(x:number,y:number);
     constructor(x:number,y:number,x2:number,y2:number,f:number,st:StringTokenizer);
@@ -118,6 +122,9 @@ export class PVInverterElm extends CurrentElm {
         CircuitXMLSerializer.dumpAttr(elem,"pvF",this.frequency);
         CircuitXMLSerializer.dumpAttr(elem,"pvPhase",this.phaseDegrees);
         elem.setAttribute("pvMode",this.mode);
+        // 0 = eficaz (por defecto), 1 = media algebraica, 2 = instantánea.
+        if(this.currentReadMode!==0)
+            CircuitXMLSerializer.dumpAttr(elem,"pvIView",this.currentReadMode);
         elem.setAttribute("pvSet",this.powerEntry);
         CircuitXMLSerializer.dumpAttr(elem,"pvSnom",this.ratedApparent);
         CircuitXMLSerializer.dumpAttr(elem,"pvPnom",this.ratedActive);
@@ -137,6 +144,9 @@ export class PVInverterElm extends CurrentElm {
         this.phaseDegrees=xml.parseDoubleAttr("pvPhase",this.phaseDegrees);
         const a=xml.currentXmlElement;
         this.mode=a.getAttribute("pvMode")==="island"?"island":"grid";
+        const readMode=xml.parseIntAttr("pvIView",0);
+        this.currentReadMode=readMode===1||readMode===2?readMode:0;
+        this.currentSamples.clear();
         this.powerEntry=a.getAttribute("pvSet")==="S"?"S":"P";
         this.operatingS=xml.parseDoubleAttr("pvSvalue",
             Math.hypot(this.power,this.reactivePower));
@@ -188,6 +198,18 @@ export class PVInverterElm extends CurrentElm {
         });
         sim.stampCurrentSource(this.nodes[0],this.nodes[1],-this.current);
     }
+    // Se registra la corriente efectivamente calculada por CircuitJS en cada
+    // paso, no un valor nominal deducido de P/S. También funciona en aislada.
+    stepFinished():void{
+        super.stepFinished();
+        const sim=SimulationManager.theSim;
+        if(sim)this.currentSamples.add(sim.t,0,this.getCurrent());
+    }
+    private currentReadSelector():EditInfo{
+        return this.option("Lectura de intensidad",
+            ["Eficaz RMS (por defecto)","Media algebraica","Instantánea i(t)"],
+            this.currentReadMode);
+    }
     private option(label:string,items:string[],selected:number):EditInfo{
         const e=new EditInfo(label,selected,-1,-1);
         e.choice=new Choice();
@@ -206,6 +228,7 @@ export class PVInverterElm extends CurrentElm {
             if(n===3)return new EditInfo("Tensión de salida U RMS (V, fase-N)",
                 this.voltageRms,0,0);
             if(n===4)return new EditInfo("Frecuencia de salida (Hz)",this.frequency,0,0);
+            if(n===5)return this.currentReadSelector();
             return null;
         }
         // Apartado principal: campos que aparecen en fichas técnicas comerciales.
@@ -215,13 +238,14 @@ export class PVInverterElm extends CurrentElm {
             this.ratedApparent,0,0);
         if(n===3)return new EditInfo("Potencia FV activa actual P (W)",
             this.power,0,0);
-        if(n===4)return EditInfo.createCheckbox(
+        if(n===4)return this.currentReadSelector();
+        if(n===5)return EditInfo.createCheckbox(
             "Regulación avanzada de cos φ (por defecto 1)",
             this.advancedReactive);
         if(!this.advancedReactive)return null;
-        if(n===5)return new EditInfo("cos φ de consigna",this.powerFactor,
+        if(n===6)return new EditInfo("cos φ de consigna",this.powerFactor,
             0.8,1).setDimensionless();
-        if(n===6)return this.option("Sentido de potencia reactiva",
+        if(n===7)return this.option("Sentido de potencia reactiva",
             ["Inductivo","Capacitivo"],this.reactiveSense==="inductivo"?0:1);
         return null;
     }
@@ -231,6 +255,7 @@ export class PVInverterElm extends CurrentElm {
             if(next!==this.mode){
                 this.mode=next;
                 this.legacyReactive=false;
+                this.currentSamples.clear();
                 ei.newDialog=true;
             }
             return;
@@ -242,8 +267,12 @@ export class PVInverterElm extends CurrentElm {
                 this.ratedApparent=ei.value;
             if(n===3&&Number.isFinite(ei.value)&&ei.value>0)
                 this.voltageRms=ei.value;
-            if(n===4&&Number.isFinite(ei.value)&&ei.value>0)
+            if(n===4&&Number.isFinite(ei.value)&&ei.value>0){
                 this.frequency=ei.value;
+                this.currentSamples.clear();
+            }
+            if(n===5&&ei.choice)
+                this.currentReadMode=ei.choice.getSelectedIndex() as PVCurrentReadMode;
             return;
         }
         if(n===1&&Number.isFinite(ei.value)&&ei.value>0)
@@ -255,7 +284,9 @@ export class PVInverterElm extends CurrentElm {
             this.powerEntry="P";
             if(!this.advancedReactive)this.legacyReactive=false;
         }
-        if(n===4&&ei.checkbox){
+        if(n===4&&ei.choice)
+            this.currentReadMode=ei.choice.getSelectedIndex() as PVCurrentReadMode;
+        if(n===5&&ei.checkbox){
             this.advancedReactive=ei.checkbox.getState();
             if(!this.advancedReactive){
                 this.powerFactor=1;
@@ -269,10 +300,10 @@ export class PVInverterElm extends CurrentElm {
             }
             ei.newDialog=true;
         }
-        if(n===5&&this.advancedReactive&&Number.isFinite(ei.value)&&
+        if(n===6&&this.advancedReactive&&Number.isFinite(ei.value)&&
            ei.value>=0.8&&ei.value<=1)
             this.powerFactor=ei.value;
-        if(n===6&&this.advancedReactive&&ei.choice)
+        if(n===7&&this.advancedReactive&&ei.choice)
             this.reactiveSense=ei.choice.getSelectedIndex()===1?
                 "capacitivo":"inductivo";
     }
@@ -280,6 +311,14 @@ export class PVInverterElm extends CurrentElm {
         arr[0]=this.mode==="grid"?"Inversor FV conectado a red":
             "Inversor FV aislado (fuente de tensión)";
         this.getBasicInfo(arr);
+        // getBasicInfo() utiliza la intensidad instantánea por defecto.
+        // Sustituirla por la indicación seleccionada en ambos modos.
+        const measurementFrequency=this.mode==="island"?this.frequency:
+            (this.gridReference()?.frequency??this.frequency);
+        const currentDisplay=inverterCurrentDisplay(
+            this.currentSamples,this.currentReadMode,measurementFrequency);
+        arr[1]=currentDisplay.label+" = "+(currentDisplay.value===null?
+            "...":CircuitElm.getUnitText(currentDisplay.value,"A"));
         if(this.mode==="island"){
             arr[3]="S nominal = "+CircuitElm.getUnitText(this.ratedApparent,"VA");
             arr[4]="U salida = "+CircuitElm.getUnitText(this.voltageRms,"V")+" RMS";
