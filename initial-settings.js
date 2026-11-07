@@ -23,6 +23,12 @@ Object.assign(catalogs,{
  ja:["初期設定","言語と数値形式を確認してください。","言語","地域形式","欧州式","英米式","カスタム","小数点以下の桁数","小数点記号","桁区切り記号","プレビュー","確定して実験室を開く","なし","設定"],
  kr:["초기 설정","언어와 숫자 형식을 확인하세요.","언어","지역 형식","유럽식","영미식","사용자 지정","소수 자릿수","소수 구분 기호","천 단위 구분 기호","미리 보기","확인하고 실험실 열기","없음","설정"]
 });
+Object.assign(catalogs,{
+ ca:["Configuració inicial","Confirma l'idioma i el format numèric.","Idioma","Format regional","Europeu","Anglosaxó","Personalitzat","Decimals de visualització","Separador decimal","Separador de milers","Vista prèvia","Confirma i obre el laboratori","Cap","Configuració"],
+ "ca-es-valencia":["Configuració inicial","Confirma l'idioma i el format numèric.","Idioma","Format regional","Europeu","Anglosaxó","Personalitzat","Decimals de visualització","Separador decimal","Separador de milers","Vista prèvia","Accepta i obri el laboratori","Cap","Configuració"],
+ gl:["Configuración inicial","Confirma o idioma e o formato numérico.","Idioma","Formato rexional","Europeo","Anglosaxón","Personalizado","Decimais de visualización","Separador decimal","Separador de milleiros","Vista previa","Confirmar e abrir o laboratorio","Ningún","Configuración"],
+ eu:["Hasierako konfigurazioa","Berretsi hizkuntza eta zenbaki-formatua.","Hizkuntza","Eskualdeko formatua","Europakoa","Anglosaxoia","Pertsonalizatua","Bistaratuko diren hamartarrak","Hamartar-bereizlea","Milakoen bereizlea","Aurrebista","Berretsi eta ireki laborategia","Bat ere ez","Ezarpenak"]
+});
 const settingsHelp={en:"You can change these options later using Settings, at the bottom right of the laboratory.",es:"Puedes modificar estas opciones más adelante pulsando el botón «Configuración», situado en la esquina inferior derecha de la pantalla.",fr:"Vous pourrez modifier ces options dans « Paramètres », en bas à droite du laboratoire.",de:"Sie können diese Optionen später über „Einstellungen“ unten rechts im Labor ändern.",it:"Puoi modificare queste opzioni in seguito da «Impostazioni», in basso a destra nel laboratorio.",pt:"Pode alterar estas opções mais tarde em «Definições», no canto inferior direito do laboratório.",nl:"Je kunt deze opties later wijzigen via «Instellingen», rechtsonder in het laboratorium.",pl:"Te opcje można później zmienić w «Ustawieniach» w prawym dolnym rogu laboratorium."};
 const precisionNotes={"en":"CircuitJS calculates using 64-bit double-precision floating-point numbers (approximately 15–17 significant decimal digits). This option changes only how results are displayed. The final displayed decimal digit is rounded, not truncated.","es":"CircuitJS calcula con números de coma flotante de doble precisión (64 bits), aproximadamente 15–17 cifras decimales significativas. Esta opción solo modifica la visualización. El último decimal mostrado se redondea, no se trunca.","fr":"CircuitJS calcule en virgule flottante double précision (64 bits), soit environ 15 à 17 chiffres significatifs. Ce réglage modifie uniquement l'affichage. La dernière décimale affichée est arrondie, et non tronquée.","de":"CircuitJS rechnet mit 64-Bit-Gleitkommazahlen doppelter Genauigkeit (etwa 15–17 signifikante Dezimalziffern). Diese Einstellung betrifft nur die Anzeige. Die letzte angezeigte Dezimalstelle wird gerundet, nicht abgeschnitten.","it":"CircuitJS calcola con numeri in virgola mobile a doppia precisione (64 bit), circa 15–17 cifre significative. Questa impostazione modifica solo la visualizzazione. L'ultima cifra decimale visualizzata viene arrotondata, non troncata.","pt":"O CircuitJS calcula com números de vírgula flutuante de dupla precisão (64 bits), aproximadamente 15–17 algarismos significativos. Esta opção altera apenas a apresentação. A última casa decimal apresentada é arredondada, não truncada.","nl":"CircuitJS rekent met 64-bits drijvendekommagetallen met dubbele precisie (ongeveer 15–17 significante cijfers). Deze instelling verandert alleen de weergave. De laatste weergegeven decimaal wordt afgerond, niet afgekapt.","pl":"CircuitJS oblicza wartości za pomocą 64-bitowych liczb zmiennoprzecinkowych podwójnej precyzji (około 15–17 cyfr znaczących). To ustawienie zmienia tylko wyświetlanie. Ostatnia wyświetlana cyfra po przecinku jest zaokrąglana, a nie obcinana."};
 const unitLabels={
@@ -37,6 +43,10 @@ const unitLabels={
 };
 // Textos explicativos y opciones regionales de los nueve idiomas adicionales.
 Object.assign(settingsHelp,{
+ ca:"Més endavant pots canviar aquestes opcions a Configuració, a la part inferior dreta del laboratori.",
+ "ca-es-valencia":"Més avant pots canviar estes opcions en Configuració, en la part inferior dreta del laboratori.",
+ gl:"Podes modificar estas opcións máis adiante en Configuración, na parte inferior dereita do laboratorio.",
+ eu:"Ezarpen horiek geroago alda ditzakezu laborategiaren beheko eskuineko Ezarpenak atalean.",
  csx:"Tato nastavení můžete později změnit v nabídce Nastavení v pravém dolním rohu laboratoře.",
  da:"Du kan ændre disse indstillinger senere under Indstillinger nederst til højre i laboratoriet.",
  fi:"Voit muuttaa näitä asetuksia myöhemmin laboratorion oikean alakulman Asetukset-valikosta.",
@@ -48,6 +58,10 @@ Object.assign(settingsHelp,{
  kr:"이 설정은 나중에 실험실 오른쪽 아래의 설정 메뉴에서 변경할 수 있습니다."
 });
 Object.assign(precisionNotes,{
+ ca:"CircuitJS calcula amb nombres de coma flotant de doble precisió (64 bits), aproximadament 15–17 xifres significatives. Aquesta opció només canvia la visualització. L'últim decimal es mostra arrodonit.",
+ "ca-es-valencia":"CircuitJS calcula amb nombres de coma flotant de doble precisió (64 bits), aproximadament 15–17 xifres significatives. Esta opció només canvia la visualització. L'últim decimal es mostra arredonit.",
+ gl:"CircuitJS calcula con números de coma flotante de dobre precisión (64 bits), aproximadamente 15–17 cifras significativas. Esta opción só modifica a visualización. O último decimal arredóndase.",
+ eu:"CircuitJS-k 64 biteko doitasun bikoitzeko koma mugikorreko zenbakiak erabiltzen ditu (15–17 zifra esanguratsu inguru). Aukera honek bistaratzea soilik aldatzen du. Azken hamartarra biribildu egiten da.",
  csx:"CircuitJS používá 64bitové výpočty s dvojitou přesností (přibližně 15–17 platných číslic). Toto nastavení mění jen zobrazení; poslední číslice se zaokrouhluje.",
  da:"CircuitJS beregner med 64-bit flydende kommatal med dobbelt præcision (ca. 15–17 betydende cifre). Indstillingen ændrer kun visningen; sidste ciffer afrundes.",
  fi:"CircuitJS laskee 64-bittisillä kaksinkertaisen tarkkuuden liukuluvuilla (noin 15–17 merkitsevää numeroa). Asetus vaikuttaa vain näyttöön; viimeinen numero pyöristetään.",
@@ -59,6 +73,10 @@ Object.assign(precisionNotes,{
  kr:"CircuitJS는 64비트 배정밀도 부동소수점(약 15~17자리 유효숫자)으로 계산합니다. 이 설정은 표시만 바꾸며 마지막 자리는 반올림됩니다."
 });
 Object.assign(unitLabels,{
+ ca:["Prefix d'unitat mostrat","Automàtic","Micro (µ)","Mil·li (m)","Unitat bàsica","Quilo (k)"],
+ "ca-es-valencia":["Prefix d'unitat mostrat","Automàtic","Micro (µ)","Mil·li (m)","Unitat bàsica","Quilo (k)"],
+ gl:["Prefixo de unidade mostrado","Automático","Micro (µ)","Mili (m)","Unidade base","Quilo (k)"],
+ eu:["Bistaratutako unitate-aurrizkia","Automatikoa","Mikro (µ)","Mili (m)","Oinarrizko unitatea","Kilo (k)"],
  csx:["Zobrazená předpona jednotky","Automaticky","Mikro (µ)","Mili (m)","Základní jednotka","Kilo (k)"],
  da:["Vist enhedspræfiks","Automatisk","Mikro (µ)","Milli (m)","Grundenhed","Kilo (k)"],
  fi:["Näytettävä yksikön etuliite","Automaattinen","Mikro (µ)","Milli (m)","Perusyksikkö","Kilo (k)"],
@@ -69,13 +87,14 @@ Object.assign(unitLabels,{
  ja:["表示する単位接頭辞","自動","マイクロ (µ)","ミリ (m)","基本単位","キロ (k)"],
  kr:["표시할 단위 접두어","자동","마이크로 (µ)","밀리 (m)","기본 단위","킬로 (k)"]
 });
-const names={csx:"Čeština",da:"Dansk",de:"Deutsch",en:"English",
+const names={ca:"Català","ca-es-valencia":"Valencià",gl:"Galego",eu:"Euskara",csx:"Čeština",da:"Dansk",de:"Deutsch",en:"English",
  es:"Español",fi:"Suomi",fr:"Français",it:"Italiano",
  nb:"Norsk bokmål",pl:"Polski",pt:"Português",ru:"Русский",
  zh:"中文（中国大陆）","zh-tw":"中文（台灣）",ja:"日本語",kr:"한국어"};
 // Respeta el orden de preferencias del navegador, incluidos es-ES y es-419.
 const normalizeLanguage=value=>{
  const code=String(value||"").toLowerCase().replace(/_/g,"-");
+ if(code.startsWith("ca-es-valencia")||code==="ca-valencia")return "ca-es-valencia";
  if(code.startsWith("zh-tw")||code.startsWith("zh-hk"))return "zh-tw";
  const base=code.split("-")[0];
  return base==="cs"?"csx":base==="ko"?"kr":base;
@@ -98,6 +117,8 @@ if(!catalogs[language])language=detected;
 let dialogLanguage=language;
 if(languageMode==="auto")set("language",detected);
 const autoNames={
+ ca:"Automàtic (navegador)","ca-es-valencia":"Automàtic (navegador)",
+ gl:"Automático (navegador)",eu:"Automatikoa (arakatzailea)",
  en:"Automatic (browser)",es:"Automático (navegador)",
  fr:"Automatique (navigateur)",de:"Automatisch (Browser)",
  it:"Automatico (browser)",pt:"Automático (navegador)",
