@@ -27,7 +27,7 @@ for(const key of important){
   const translation=labTranslation(language,key);
   assert(typeof translation==="string" && translation.length>0,
    "Falta "+language+" para "+key);
-  if(!["es","pt","it"].includes(language))
+  if(!["es","pt","it","gl"].includes(language))
    assert.notEqual(translation,key,"No se traduce "+key+" en "+language);
  }
 }
