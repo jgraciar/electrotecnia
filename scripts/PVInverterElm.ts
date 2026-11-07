@@ -30,7 +30,9 @@ export class PVInverterElm extends CurrentElm {
     operatingS:number=3000;
     powerFactor:number=1;
     reactiveSense:"inductivo"|"capacitivo"="inductivo";
-    ratedApparent:number=6000;
+    ratedApparent:number=5500;
+    ratedActive:number=5000;
+    advancedReactive:boolean=false;
     legacyReactive:boolean=false;
 
     constructor(x:number,y:number);
@@ -46,7 +48,8 @@ export class PVInverterElm extends CurrentElm {
                 this.frequency=Number(st.nextToken());
                 this.phaseDegrees=Number(st.nextToken());
                 this.operatingS=Math.hypot(this.power,this.reactivePower);
-                this.ratedApparent=Math.max(6000,this.operatingS);
+                this.ratedApparent=Math.max(5500,this.operatingS);
+                this.ratedActive=Math.max(5000,Math.max(0,this.power));
                 this.powerFactor=this.operatingS>0?
                     Math.abs(this.power)/this.operatingS:1;
                 this.legacyReactive=this.reactivePower!==0;
@@ -68,7 +71,8 @@ export class PVInverterElm extends CurrentElm {
             entry:this.powerEntry,
             value:this.powerEntry==="P"?this.power:this.operatingS,
             cosPhi:this.powerFactor,sense:this.reactiveSense,
-            ratedApparent:this.ratedApparent
+            ratedApparent:this.ratedApparent,
+            ratedActive:this.ratedActive
         });
     }
     // Detecta el generador CA que comparte la referencia de neutro.
@@ -116,8 +120,10 @@ export class PVInverterElm extends CurrentElm {
         elem.setAttribute("pvMode",this.mode);
         elem.setAttribute("pvSet",this.powerEntry);
         CircuitXMLSerializer.dumpAttr(elem,"pvSnom",this.ratedApparent);
+        CircuitXMLSerializer.dumpAttr(elem,"pvPnom",this.ratedActive);
         CircuitXMLSerializer.dumpAttr(elem,"pvSvalue",this.operatingS);
         elem.setAttribute("pvSense",this.reactiveSense);
+        if(this.advancedReactive)elem.setAttribute("pvQmode","advanced");
         // Los XML antiguos con Q libre se siguen leyendo correctamente.
         if(!this.legacyReactive)
             CircuitXMLSerializer.dumpAttr(elem,"pvCos",this.powerFactor);
@@ -135,12 +141,15 @@ export class PVInverterElm extends CurrentElm {
         this.operatingS=xml.parseDoubleAttr("pvSvalue",
             Math.hypot(this.power,this.reactivePower));
         this.ratedApparent=xml.parseDoubleAttr("pvSnom",
-            Math.max(6000,Math.hypot(this.power,this.reactivePower)));
+            Math.max(5500,Math.hypot(this.power,this.reactivePower)));
+        this.ratedActive=xml.parseDoubleAttr("pvPnom",
+            Math.max(5000,Math.max(this.power,0)));
         this.reactiveSense=a.getAttribute("pvSense")==="capacitivo"||
             (this.reactivePower<0&&a.getAttribute("pvSense")==null)
             ?"capacitivo":"inductivo";
         const pf=a.getAttribute("pvCos");
         this.legacyReactive=pf==null&&this.reactivePower!==0;
+        this.advancedReactive=a.getAttribute("pvQmode")==="advanced";
         this.powerFactor=pf==null?
             (this.operatingS>0?Math.abs(this.power)/this.operatingS:1):
             xml.parseDoubleAttr("pvCos",1);
@@ -166,8 +175,8 @@ export class PVInverterElm extends CurrentElm {
             const ref=islandReferenceVoltage(this,sim.t);
             const resistance=islandOutputResistance(this);
             // Fuente de Norton: tensión entre nodo 1 y nodo 0 = -ref.
-            sim.stampCurrentSource(this.nodes[0],this.nodes[1],-ref/resistance);
-            this.current=(this.getVoltageDiff()+ref)/resistance;
+            sim.stampCurrentSource(this.nodes[0],this.nodes[1],ref/resistance);
+            this.current=(ref-this.getVoltageDiff())/resistance;
             return;
         }
         const ref=this.gridReference();
@@ -190,65 +199,82 @@ export class PVInverterElm extends CurrentElm {
         if(n===0)return this.option("Tipo de inversor",
             ["Conexión a red (U/f automáticas)","Fotovoltaica aislada"],this.mode==="grid"?0:1);
         if(this.mode==="island"){
-            if(n===1)return new EditInfo("Potencia aparente nominal S (VA)",
+            if(n===1)return new EditInfo("Potencia activa nominal Pn (W)",
+                this.ratedActive,0,0);
+            if(n===2)return new EditInfo("Potencia aparente máxima Smax (VA)",
                 this.ratedApparent,0,0);
-            if(n===2)return new EditInfo("Tensión de salida U RMS (V, fase-N)",
+            if(n===3)return new EditInfo("Tensión de salida U RMS (V, fase-N)",
                 this.voltageRms,0,0);
-            if(n===3)return new EditInfo("Frecuencia de salida (Hz)",this.frequency,0,0);
-            if(n===4)return new EditInfo("Fase de salida (grados)",this.phaseDegrees,-180,180)
-                .setDimensionless();
+            if(n===4)return new EditInfo("Frecuencia de salida (Hz)",this.frequency,0,0);
             return null;
         }
-        if(n===1)return this.option("Consigna de generación",
-            ["Potencia activa P (W)","Potencia aparente S (VA)"],this.powerEntry==="P"?0:1);
-        if(n===2)return new EditInfo(this.powerEntry==="P"?
-            "Potencia activa objetivo P (W)":"Potencia aparente objetivo S (VA)",
-            this.powerEntry==="P"?this.power:this.operatingS,0,0);
-        if(n===3)return new EditInfo("cos φ de salida (1 por defecto)",
-            this.powerFactor,0.8,1).setDimensionless();
-        if(n===4)return this.option("Sentido de potencia reactiva",
-            ["Inductivo","Capacitivo"],this.reactiveSense==="inductivo"?0:1);
-        if(n===5)return new EditInfo("Potencia aparente nominal máxima S (VA)",
+        // Apartado principal: campos que aparecen en fichas técnicas comerciales.
+        if(n===1)return new EditInfo("Potencia activa nominal Pn (W)",
+            this.ratedActive,0,0);
+        if(n===2)return new EditInfo("Potencia aparente máxima Smax (VA)",
             this.ratedApparent,0,0);
+        if(n===3)return new EditInfo("Potencia FV activa actual P (W)",
+            this.power,0,0);
+        if(n===4)return EditInfo.createCheckbox(
+            "Regulación avanzada de cos φ (por defecto 1)",
+            this.advancedReactive);
+        if(!this.advancedReactive)return null;
+        if(n===5)return new EditInfo("cos φ de consigna",this.powerFactor,
+            0.8,1).setDimensionless();
+        if(n===6)return this.option("Sentido de potencia reactiva",
+            ["Inductivo","Capacitivo"],this.reactiveSense==="inductivo"?0:1);
         return null;
     }
     setEditValue(n:number,ei:EditInfo):void{
         if(n===0&&ei.choice){
             const next=ei.choice.getSelectedIndex()===1?"island":"grid";
-            if(next!==this.mode){this.mode=next;ei.newDialog=true;}
-            return;
-        }
-        if(this.mode==="island"){
-            if(n===1&&Number.isFinite(ei.value)&&ei.value>0)this.ratedApparent=ei.value;
-            if(n===2&&Number.isFinite(ei.value)&&ei.value>0)this.voltageRms=ei.value;
-            if(n===3&&Number.isFinite(ei.value)&&ei.value>0)this.frequency=ei.value;
-            if(n===4&&Number.isFinite(ei.value))this.phaseDegrees=ei.value;
-            return;
-        }
-        if(n===1&&ei.choice){
-            const entry=ei.choice.getSelectedIndex()===1?"S":"P";
-            if(entry!==this.powerEntry){
-                const op=this.operation();
-                this.power=op.p;this.operatingS=op.s;this.powerEntry=entry;
+            if(next!==this.mode){
+                this.mode=next;
+                this.legacyReactive=false;
                 ei.newDialog=true;
             }
             return;
         }
-        if(n===2&&Number.isFinite(ei.value)&&ei.value>=0){
-            if(this.powerEntry==="P")this.power=ei.value;
-            else this.operatingS=ei.value;
-            this.legacyReactive=false;
+        if(this.mode==="island"){
+            if(n===1&&Number.isFinite(ei.value)&&ei.value>0)
+                this.ratedActive=ei.value;
+            if(n===2&&Number.isFinite(ei.value)&&ei.value>0)
+                this.ratedApparent=ei.value;
+            if(n===3&&Number.isFinite(ei.value)&&ei.value>0)
+                this.voltageRms=ei.value;
+            if(n===4&&Number.isFinite(ei.value)&&ei.value>0)
+                this.frequency=ei.value;
+            return;
         }
-        if(n===3&&Number.isFinite(ei.value)&&ei.value>=0.8&&ei.value<=1){
-            this.powerFactor=ei.value;
-            this.legacyReactive=false;
-        }
-        if(n===4&&ei.choice){
-            this.reactiveSense=ei.choice.getSelectedIndex()===1?"capacitivo":"inductivo";
-            this.legacyReactive=false;
-        }
-        if(n===5&&Number.isFinite(ei.value)&&ei.value>0)
+        if(n===1&&Number.isFinite(ei.value)&&ei.value>0)
+            this.ratedActive=ei.value;
+        if(n===2&&Number.isFinite(ei.value)&&ei.value>0)
             this.ratedApparent=ei.value;
+        if(n===3&&Number.isFinite(ei.value)&&ei.value>=0){
+            this.power=ei.value;
+            this.powerEntry="P";
+            if(!this.advancedReactive)this.legacyReactive=false;
+        }
+        if(n===4&&ei.checkbox){
+            this.advancedReactive=ei.checkbox.getState();
+            if(!this.advancedReactive){
+                this.powerFactor=1;
+                this.reactivePower=0;
+                this.legacyReactive=false;
+            }else if(this.legacyReactive){
+                this.powerFactor=this.operatingS>0?
+                    Math.min(1,Math.max(.8,
+                        Math.abs(this.power)/this.operatingS)):1;
+                this.legacyReactive=false;
+            }
+            ei.newDialog=true;
+        }
+        if(n===5&&this.advancedReactive&&Number.isFinite(ei.value)&&
+           ei.value>=0.8&&ei.value<=1)
+            this.powerFactor=ei.value;
+        if(n===6&&this.advancedReactive&&ei.choice)
+            this.reactiveSense=ei.choice.getSelectedIndex()===1?
+                "capacitivo":"inductivo";
     }
     getInfo(arr:string[]):void{
         arr[0]=this.mode==="grid"?"Inversor FV conectado a red":
@@ -263,12 +289,13 @@ export class PVInverterElm extends CurrentElm {
         }
         const op=this.operation(),ref=this.gridReference();
         arr[3]="P inyectada = "+CircuitElm.getUnitText(op.p,"W");
-        arr[4]="S = "+CircuitElm.getUnitText(op.s,"VA")+
-            "; cos φ = "+this.powerFactor.toFixed(3);
+        arr[4]="S actual = "+CircuitElm.getUnitText(op.s,"VA")+
+            "; cos φ = "+(this.legacyReactive?
+                (op.s>0?Math.abs(op.p)/op.s:1):this.powerFactor).toFixed(3);
         arr[5]="Q resultante = "+CircuitElm.getUnitText(op.q,"VAr");
         arr[6]=ref?"Red: "+CircuitElm.getUnitText(ref.voltageRms,"V")+
             " RMS; "+CircuitElm.getUnitText(ref.frequency,"Hz"):
             "Red CA no detectada: inyección desactivada";
-        if(op.limited)arr[7]="Limitada por S nominal";
+        if(op.limited)arr[7]="Limitada por P nominal o S máxima";
     }
 }
