@@ -68,6 +68,7 @@ once(options,
  '            ei.choice.add("Valencià");\n'+
  '            ei.choice.add("Galego");\n'+
  '            ei.choice.add("Euskara");\n'+
+ '            ei.choice.add("Nederlands");\n'+
  '            return ei;');
 once(options,
  '            case 16: langString = "kr";  break;',
@@ -75,7 +76,8 @@ once(options,
  '            case 17: langString = "ca"; break;\n'+
  '            case 18: langString = "ca-es-valencia"; break;\n'+
  '            case 19: langString = "gl"; break;\n'+
- '            case 20: langString = "eu"; break;');
+ '            case 20: langString = "eu"; break;\n'+
+ '            case 21: langString = "nl"; break;');
 once(options,
  '            stor.setItem("language", langString);',
  '            stor.setItem("language", langString);\n'+

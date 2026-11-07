@@ -87,7 +87,7 @@ Object.assign(unitLabels,{
  ja:["表示する単位接頭辞","自動","マイクロ (µ)","ミリ (m)","基本単位","キロ (k)"],
  kr:["표시할 단위 접두어","자동","마이크로 (µ)","밀리 (m)","기본 단위","킬로 (k)"]
 });
-const names={ca:"Català","ca-es-valencia":"Valencià",gl:"Galego",eu:"Euskara",csx:"Čeština",da:"Dansk",de:"Deutsch",en:"English",
+const names={ca:"Català","ca-es-valencia":"Valencià",gl:"Galego",eu:"Euskara",nl:"Nederlands",csx:"Čeština",da:"Dansk",de:"Deutsch",en:"English",
  es:"Español",fi:"Suomi",fr:"Français",it:"Italiano",
  nb:"Norsk bokmål",pl:"Polski",pt:"Português",ru:"Русский",
  zh:"中文（中国大陆）","zh-tw":"中文（台灣）",ja:"日本語",kr:"한국어"};
