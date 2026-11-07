@@ -35,6 +35,40 @@ const unitLabels={
  nl:["Weergegeven eenheidsvoorvoegsel","Automatisch","Micro (µ)","Milli (m)","Basiseenheid","Kilo (k)"],
  pl:["Wyświetlany przedrostek jednostki","Automatyczny","Mikro (µ)","Mili (m)","Jednostka podstawowa","Kilo (k)"]
 };
+// Textos explicativos y opciones regionales de los nueve idiomas adicionales.
+Object.assign(settingsHelp,{
+ csx:"Tato nastavení můžete později změnit v nabídce Nastavení v pravém dolním rohu laboratoře.",
+ da:"Du kan ændre disse indstillinger senere under Indstillinger nederst til højre i laboratoriet.",
+ fi:"Voit muuttaa näitä asetuksia myöhemmin laboratorion oikean alakulman Asetukset-valikosta.",
+ nb:"Du kan endre disse innstillingene senere via Innstillinger nederst til høyre i laboratoriet.",
+ ru:"Позже эти параметры можно изменить в разделе «Настройки» в правом нижнем углу лаборатории.",
+ zh:"稍后可以通过实验室右下角的“设置”更改这些选项。",
+ "zh-tw":"稍後可以透過實驗室右下角的「設定」變更這些選項。",
+ ja:"これらの設定は、実験室の右下にある「設定」から後で変更できます。",
+ kr:"이 설정은 나중에 실험실 오른쪽 아래의 설정 메뉴에서 변경할 수 있습니다."
+});
+Object.assign(precisionNotes,{
+ csx:"CircuitJS používá 64bitové výpočty s dvojitou přesností (přibližně 15–17 platných číslic). Toto nastavení mění jen zobrazení; poslední číslice se zaokrouhluje.",
+ da:"CircuitJS beregner med 64-bit flydende kommatal med dobbelt præcision (ca. 15–17 betydende cifre). Indstillingen ændrer kun visningen; sidste ciffer afrundes.",
+ fi:"CircuitJS laskee 64-bittisillä kaksinkertaisen tarkkuuden liukuluvuilla (noin 15–17 merkitsevää numeroa). Asetus vaikuttaa vain näyttöön; viimeinen numero pyöristetään.",
+ nb:"CircuitJS regner med 64-bits flyttall med dobbel presisjon (omtrent 15–17 signifikante sifre). Innstillingen endrer bare visningen; siste siffer avrundes.",
+ ru:"CircuitJS использует 64-битные числа двойной точности (примерно 15–17 значащих цифр). Параметр изменяет только отображение; последняя цифра округляется.",
+ zh:"CircuitJS 使用 64 位双精度浮点数计算（约 15–17 位有效数字）。此设置仅改变显示方式；末位数字会四舍五入。",
+ "zh-tw":"CircuitJS 使用 64 位元雙精度浮點數運算（約 15–17 位有效數字）。此設定僅改變顯示方式；最後一位會四捨五入。",
+ ja:"CircuitJS は64ビット倍精度浮動小数点数（約15～17桁の有効数字）で計算します。この設定は表示のみを変更し、末尾の桁は四捨五入されます。",
+ kr:"CircuitJS는 64비트 배정밀도 부동소수점(약 15~17자리 유효숫자)으로 계산합니다. 이 설정은 표시만 바꾸며 마지막 자리는 반올림됩니다."
+});
+Object.assign(unitLabels,{
+ csx:["Zobrazená předpona jednotky","Automaticky","Mikro (µ)","Mili (m)","Základní jednotka","Kilo (k)"],
+ da:["Vist enhedspræfiks","Automatisk","Mikro (µ)","Milli (m)","Grundenhed","Kilo (k)"],
+ fi:["Näytettävä yksikön etuliite","Automaattinen","Mikro (µ)","Milli (m)","Perusyksikkö","Kilo (k)"],
+ nb:["Vist enhetsprefiks","Automatisk","Mikro (µ)","Milli (m)","Grunnenhet","Kilo (k)"],
+ ru:["Отображаемая приставка единицы","Автоматически","Микро (µ)","Милли (m)","Основная единица","Кило (k)"],
+ zh:["显示的单位前缀","自动","微 (µ)","毫 (m)","基本单位","千 (k)"],
+ "zh-tw":["顯示的單位前綴","自動","微 (µ)","毫 (m)","基本單位","千 (k)"],
+ ja:["表示する単位接頭辞","自動","マイクロ (µ)","ミリ (m)","基本単位","キロ (k)"],
+ kr:["표시할 단위 접두어","자동","마이크로 (µ)","밀리 (m)","기본 단위","킬로 (k)"]
+});
 const names={csx:"Čeština",da:"Dansk",de:"Deutsch",en:"English",
  es:"Español",fi:"Suomi",fr:"Français",it:"Italiano",
  nb:"Norsk bokmål",pl:"Polski",pt:"Português",ru:"Русский",
@@ -88,7 +122,7 @@ function render(){
  const preview=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,gs)+(parts[1]?ds+parts[1]:"");
  const original=String(sample).split(".");
  const rawPreview=original[0].replace(/\B(?=(\d{3})+(?!\d))/g,gs)+ds+original[1];
- document.getElementById("lab-start-modal").innerHTML='<div class="lab-start-card" role="dialog" aria-modal="true" aria-labelledby="lab-start-title"><h2 id="lab-start-title">'+esc(t[0])+'</h2><p>'+esc(t[1])+'</p><label>'+esc(t[2])+'<select id="lab-start-language"><option value="auto" '+(languageMode==="auto"?"selected":"")+'>'+esc(autoNames[dialogLanguage]||autoNames.en)+' ('+esc(names[detected])+')</option>'+Object.entries(names).map(([code,name])=>'<option value="'+code+'" '+(languageMode==="manual"&&language===code?"selected":"")+'>'+esc(name)+'</option>').join("")+'</select></label><fieldset><legend>'+esc(t[3])+'</legend>'+["eu","uk","custom"].map((v,i)=>'<label class="lab-start-choice"><input type="radio" name="lab-start-format" value="'+v+'" '+(format===v?"checked":"")+'>'+esc(t[i+4])+'</label>').join("")+'</fieldset>'+(format==="custom"?'<div class="lab-start-pair"><label>'+esc(t[8])+'<select id="lab-start-decimal"><option value="," '+(decimal===","?"selected":"")+'>,</option><option value="." '+(decimal==="."?"selected":"")+'>.</option></select></label><label>'+esc(t[9])+'<select id="lab-start-group"><option value="." '+(grouping==="."?"selected":"")+'>.</option><option value="," '+(grouping===","?"selected":"")+'>,</option><option value="" '+(grouping===""?"selected":"")+'>'+esc(t[12])+'</option></select></label></div>':"")+'<div class="lab-start-digits"><span class="lab-start-digits-label">'+esc(t[7])+'</span><div class="lab-start-stepper"><button type="button" id="lab-start-minus" aria-label="'+esc(({en:"Decrease decimals",es:"Disminuir decimales",fr:"Réduire les décimales",de:"Dezimalstellen verringern",it:"Riduci decimali",pt:"Diminuir casas decimais",nl:"Minder decimalen",pl:"Zmniejsz liczbę miejsc dziesiętnych"})[dialogLanguage]||"Decrease decimals") +'" '+(digits===0?'disabled':'')+'>−</button><output id="lab-start-digits" aria-live="polite">'+digits+'</output><button type="button" id="lab-start-plus" aria-label="'+esc(({en:"Increase decimals",es:"Aumentar decimales",fr:"Augmenter les décimales",de:"Dezimalstellen erhöhen",it:"Aumenta decimali",pt:"Aumentar casas decimais",nl:"Meer decimalen",pl:"Zwiększ liczbę miejsc dziesiętnych"})[dialogLanguage]||"Increase decimals") +'" '+(digits===12?'disabled':'')+'>+</button></div><small>0–12</small></div><label>'+esc((unitLabels[dialogLanguage]||unitLabels.en)[0])+'<select id="lab-start-unit-scale">'+["auto","micro","milli","base","kilo"].map((v,i)=>'<option value="'+v+'" '+(unitScale===v?"selected":"")+'>'+esc((unitLabels[dialogLanguage]||unitLabels.en)[i+1])+'</option>').join("")+'</select></label><p class="lab-start-precision">'+esc(precisionNotes[dialogLanguage]||precisionNotes.en)+'</p><div class="lab-start-preview"><small>'+esc(t[10])+'</small><strong>'+esc(preview)+'</strong></div><p class="lab-start-settings-help">'+esc(settingsHelp[dialogLanguage]||settingsHelp.es)+'</p><button type="button" id="lab-start-accept">'+esc(t[11])+'</button></div>';
+ document.getElementById("lab-start-modal").innerHTML='<div class="lab-start-card" role="dialog" aria-modal="true" aria-labelledby="lab-start-title"><h2 id="lab-start-title">'+esc(t[0])+'</h2><p>'+esc(t[1])+'</p><label>'+esc(t[2])+'<select id="lab-start-language"><option value="auto" '+(languageMode==="auto"?"selected":"")+'>'+esc(autoNames[dialogLanguage]||autoNames.en)+' ('+esc(names[detected])+')</option>'+Object.entries(names).map(([code,name])=>'<option value="'+code+'" '+(languageMode==="manual"&&language===code?"selected":"")+'>'+esc(name)+'</option>').join("")+'</select></label><fieldset><legend>'+esc(t[3])+'</legend>'+["eu","uk","custom"].map((v,i)=>'<label class="lab-start-choice"><input type="radio" name="lab-start-format" value="'+v+'" '+(format===v?"checked":"")+'>'+esc(t[i+4])+'</label>').join("")+'</fieldset>'+(format==="custom"?'<div class="lab-start-pair"><label>'+esc(t[8])+'<select id="lab-start-decimal"><option value="," '+(decimal===","?"selected":"")+'>,</option><option value="." '+(decimal==="."?"selected":"")+'>.</option></select></label><label>'+esc(t[9])+'<select id="lab-start-group"><option value="." '+(grouping==="."?"selected":"")+'>.</option><option value="," '+(grouping===","?"selected":"")+'>,</option><option value="" '+(grouping===""?"selected":"")+'>'+esc(t[12])+'</option></select></label></div>':"")+'<div class="lab-start-digits"><span class="lab-start-digits-label">'+esc(t[7])+'</span><div class="lab-start-stepper"><button type="button" id="lab-start-minus" aria-label="'+esc(({en:"Decrease decimals",es:"Disminuir decimales",fr:"Réduire les décimales",de:"Dezimalstellen verringern",it:"Riduci decimali",pt:"Diminuir casas decimais",nl:"Minder decimalen",pl:"Zmniejsz liczbę miejsc dziesiętnych",csx:"Snížit počet desetinných míst",da:"Færre decimaler",fi:"Vähennä desimaaleja",nb:"Færre desimaler",ru:"Уменьшить число знаков",zh:"减少小数位数","zh-tw":"減少小數位數",ja:"小数桁数を減らす",kr:"소수 자릿수 줄이기"})[dialogLanguage]||"Decrease decimals") +'" '+(digits===0?'disabled':'')+'>−</button><output id="lab-start-digits" aria-live="polite">'+digits+'</output><button type="button" id="lab-start-plus" aria-label="'+esc(({en:"Increase decimals",es:"Aumentar decimales",fr:"Augmenter les décimales",de:"Dezimalstellen erhöhen",it:"Aumenta decimali",pt:"Aumentar casas decimais",nl:"Meer decimalen",pl:"Zwiększ liczbę miejsc dziesiętnych",csx:"Zvýšit počet desetinných míst",da:"Flere decimaler",fi:"Lisää desimaaleja",nb:"Flere desimaler",ru:"Увеличить число знаков",zh:"增加小数位数","zh-tw":"增加小數位數",ja:"小数桁数を増やす",kr:"소수 자릿수 늘리기"})[dialogLanguage]||"Increase decimals") +'" '+(digits===12?'disabled':'')+'>+</button></div><small>0–12</small></div><label>'+esc((unitLabels[dialogLanguage]||unitLabels.en)[0])+'<select id="lab-start-unit-scale">'+["auto","micro","milli","base","kilo"].map((v,i)=>'<option value="'+v+'" '+(unitScale===v?"selected":"")+'>'+esc((unitLabels[dialogLanguage]||unitLabels.en)[i+1])+'</option>').join("")+'</select></label><p class="lab-start-precision">'+esc(precisionNotes[dialogLanguage]||precisionNotes.en)+'</p><div class="lab-start-preview"><small>'+esc(t[10])+'</small><strong>'+esc(preview)+'</strong></div><p class="lab-start-settings-help">'+esc(settingsHelp[dialogLanguage]||settingsHelp.es)+'</p><button type="button" id="lab-start-accept">'+esc(t[11])+'</button></div>';
  document.getElementById("lab-start-language").onchange=e=>{
  languageMode=e.target.value==="auto"?"auto":"manual";
  language=languageMode==="auto"?detect():e.target.value;
