@@ -44,4 +44,26 @@ once(dialog,'                cbLabel.appendChild(document.createTextNode(ei.chec
  '                cbLabel.appendChild(document.createTextNode(Locale.LS(ei.checkbox.name)));');
 once(dialog,'                btn.textContent = ei.button.label ?? ei.button.textContent ?? String(ei.button);',
  '                btn.textContent = Locale.LS(ei.button.label ?? ei.button.textContent ?? String(ei.button));');
-console.log("Traducciones activadas: menús heredados, opciones de selección y 8 idiomas");
+// Extender «Otras opciones > Cambiar idioma» con las lenguas cooficiales.
+// Mantener los índices 1..16 existentes para evitar alterar su semántica.
+const options=join(dir,"EditOptions.ts");
+once(options,
+ '            ei.choice.add("한국어"); // Korean\n            return ei;',
+ '            ei.choice.add("한국어"); // Korean\n'+
+ '            ei.choice.add("Català");\n'+
+ '            ei.choice.add("Valencià");\n'+
+ '            ei.choice.add("Galego");\n'+
+ '            ei.choice.add("Euskara");\n'+
+ '            return ei;');
+once(options,
+ '            case 16: langString = "kr";  break;',
+ '            case 16: langString = "kr";  break;\n'+
+ '            case 17: langString = "ca"; break;\n'+
+ '            case 18: langString = "ca-es-valencia"; break;\n'+
+ '            case 19: langString = "gl"; break;\n'+
+ '            case 20: langString = "eu"; break;');
+once(options,
+ '            stor.setItem("language", langString);',
+ '            stor.setItem("language", langString);\n'+
+ '            stor.setItem("labLanguageMode", "manual");');
+console.log("Traducciones activadas: menús, controles de edición y 20 idiomas");
