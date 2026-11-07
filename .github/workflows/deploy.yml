@@ -54,6 +54,7 @@ jobs:
           node --experimental-strip-types laboratorio/tests/lab-pv-inverter.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-catalog-inverter.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-current-display.test.mjs
+          node --experimental-strip-types laboratorio/tests/lab-localizations.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-kirchhoff.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-capacitor-bank.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-capacitor-controller.test.mjs
@@ -94,6 +95,10 @@ jobs:
       - name: Registrar inversor fotovoltaico de corriente sincronizada
         run: |
           node laboratorio/scripts/patch-pv-inverter.mjs circuitjs-src/ts laboratorio/scripts/PVInverterElm.ts laboratorio/scripts/LabPVInverter.ts
+
+      - name: Incorporar traducciones de los elementos del laboratorio
+        run: |
+          node laboratorio/scripts/patch-lab-localization.mjs circuitjs-src/ts laboratorio/scripts/LabTranslations.ts
 
       - name: Instalar dependencias y compilar CircuitJS
         working-directory: circuitjs-src/ts
@@ -153,6 +158,7 @@ jobs:
           node laboratorio/tests/verify-pv-inverter.mjs
           node laboratorio/tests/verify-pv-inverter-modes.mjs
           node laboratorio/tests/verify-pv-unconnected.mjs
+          node laboratorio/tests/verify-lab-locales.mjs
           node --experimental-strip-types laboratorio/tests/verify-pv-three-phase-unbalanced.mjs
           node laboratorio/tests/verify-pv-commercial-delta-bank.mjs
           node laboratorio/tests/verify-pv-commercial-single-phase.mjs
