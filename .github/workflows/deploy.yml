@@ -113,6 +113,7 @@ jobs:
           cp laboratorio/index.html laboratorio/styles.css laboratorio/initial-settings.js laboratorio/app.js laboratorio/lab-circuits.js laboratorio/bridge.js laboratorio/wulflemm-xml.js laboratorio/wulflemm-ui.js laboratorio/impedance-export.js laboratorio/sce-practices.js laboratorio/curriculum.js laboratorio/networks-solar-curriculum.js laboratorio/networks-solar-practices.js laboratorio/practices.js laboratorio/publications-data.js laboratorio/paraninfo-activities.js laboratorio/textbook-exercises.js laboratorio/textbook-curriculum.js laboratorio/textbook-ui.js laboratorio/publications.js laboratorio/LICENSE public/
           mkdir -p public/tests/fixtures
           cp laboratorio/tests/fixtures/wulflemm-aron.xml public/tests/fixtures/
+          cp laboratorio/tests/fixtures/autoconsumo-*-vatimetros.xml public/tests/fixtures/
           cp -a circuitjs-src/ts/dist/. public/circuitjs/
           cp circuitjs-src/COPYING.txt public/circuitjs/COPYING.txt
           test -f public/index.html
@@ -149,6 +150,7 @@ jobs:
           node --experimental-strip-types laboratorio/tests/verify-pv-three-phase-unbalanced.mjs
           node laboratorio/tests/verify-pv-commercial-delta-bank.mjs
           node laboratorio/tests/verify-pv-commercial-single-phase.mjs
+          node laboratorio/tests/verify-pv-visual-gallery.mjs
           node laboratorio/tests/verify-pv-capacitor-switches.mjs
           node laboratorio/tests/verify-wattmeter-inbound.mjs
 
