@@ -33,9 +33,9 @@ once(locale,'        if (lang.startsWith("en")) {',
  '        Locale.activeLanguage = lang.toLowerCase();\n'+
  '        if (lang.startsWith("en")) {');
 once(locale,'                // Catálogo inexistente: utilizar el español del laboratorio.\n                await Locale.loadSpanishFallback();',
- '                // No existe catálogo oficial neerlandés: usar la interfaz\n'+
+ '                // Neerlandés y sueco aún no tienen catálogo oficial completo: usar la interfaz\n'+
  '                // base inglesa, pero traducir todos los elementos añadidos.\n'+
- '                if(Locale.activeLanguage==="nl") Locale.localizationMap=new Map();\n'+
+ '                if(["nl","sv"].includes(Locale.activeLanguage)) Locale.localizationMap=new Map();\n'+
  '                else await Locale.loadSpanishFallback();');
 // Windows usa ca-ES-valencia. No debe reducirse a «ca» al
 // normalizar variantes regionales antes de cargar el catálogo.
@@ -69,6 +69,7 @@ once(options,
  '            ei.choice.add("Galego");\n'+
  '            ei.choice.add("Euskara");\n'+
  '            ei.choice.add("Nederlands");\n'+
+ '            ei.choice.add("Svenska");\n'+
  '            return ei;');
 once(options,
  '            case 16: langString = "kr";  break;',
@@ -77,9 +78,10 @@ once(options,
  '            case 18: langString = "ca-es-valencia"; break;\n'+
  '            case 19: langString = "gl"; break;\n'+
  '            case 20: langString = "eu"; break;\n'+
- '            case 21: langString = "nl"; break;');
+ '            case 21: langString = "nl"; break;\n'+
+ '            case 22: langString = "sv"; break;');
 once(options,
  '            stor.setItem("language", langString);',
  '            stor.setItem("language", langString);\n'+
  '            stor.setItem("labLanguageMode", "manual");');
-console.log("Traducciones activadas: menús, controles de edición y 20 idiomas");
+console.log("Traducciones activadas: menús y controles de edición en 22 idiomas");

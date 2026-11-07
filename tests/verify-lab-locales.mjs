@@ -54,6 +54,9 @@ const cases=[
  {browser:"ko-KR",mode:"auto",saved:null,expected:"kr",
   input:"입력 및 전원",passive:"수동 소자",
   blocks:"능동 기능 블록",element:"태양광 인버터 (교류)"},
+ {browser:"sv-SE",mode:"auto",saved:null,expected:"sv",
+  input:"Ingångar och källor",passive:"Passiva komponenter",
+  blocks:"Aktiva funktionsblock",element:"Solcellsväxelriktare (AC)"},
  {browser:"nl-NL",mode:"auto",saved:null,expected:"nl",
   input:"Ingangen en bronnen",passive:"Passieve componenten",
   blocks:"Actieve bouwblokken",element:"PV-omvormer (AC)"},
@@ -116,6 +119,10 @@ try{
      pv:current.labels.find(h=>h.includes(c.element))});
    assert.equal(current.language,c.expected,
     "Idioma del navegador o elección manual incorrecta");
+   const htmlLanguage=await page.evaluate(()=>document.documentElement.lang);
+   const expectedHtmlLanguage={csx:"cs",kr:"ko",zh:"zh-Hans","zh-tw":"zh-Hant"}[c.expected]||c.expected;
+   assert.equal(htmlLanguage,expectedHtmlLanguage,
+    "Atributo lang incorrecto para lectores de pantalla: "+c.expected);
    assert(current.headings.some(x=>x.includes(c.input)),
     "Submenú Entradas y fuentes sin traducir: "+c.expected);
    assert(current.headings.some(x=>x.includes(c.passive)),
