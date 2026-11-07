@@ -62,4 +62,26 @@ for(const pvP of [100,120]){
  close(selection.capacitorQ,37.5);
  close(selection.gridQ,37.5);
 }
+// Autoconsumo total no implica corriente de acometida nula si queda Q.
+// La FV puede aportar Q; los condensadores aportan Q capacitiva.
+{
+ const noCompensation=pvGridBalance({loadP:100,loadQ:75,pvP:100,voltage:400});
+ close(noCompensation.gridP,0);
+ close(noCompensation.gridQ,75);
+ close(noCompensation.gridCurrent,75000/(Math.sqrt(3)*400));
+ assert(noCompensation.activeZeroReactiveNonzero);
+ const capacitorOnly=pvGridBalance({loadP:100,loadQ:75,pvP:100,capacitorQ:50,voltage:400});
+ close(capacitorOnly.gridQ,25);
+ close(capacitorOnly.gridCurrent,25000/(Math.sqrt(3)*400));
+ const pvAndCapacitor=pvGridBalance({loadP:100,loadQ:75,pvP:100,pvQ:25,capacitorQ:50,voltage:400});
+ close(pvAndCapacitor.gridP,0);
+ close(pvAndCapacitor.gridQ,0);
+ close(pvAndCapacitor.gridCurrent,0);
+ assert.equal(pvAndCapacitor.activeZeroReactiveNonzero,false);
+ const exportWithReactive=pvGridBalance({loadP:100,loadQ:75,pvP:120,pvQ:25,capacitorQ:50,voltage:400});
+ close(exportWithReactive.gridP,-20);
+ close(exportWithReactive.gridQ,0);
+ close(exportWithReactive.exportedP,20);
+ close(exportWithReactive.gridCurrent,20000/(Math.sqrt(3)*400));
+}
 console.log("OK: balance P/Q, corriente, autoconsumo y bloqueo del regulador FV");
