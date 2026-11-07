@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {labKeys,labLanguageCodes,labTranslation}
  from "../scripts/LabTranslations.ts";
 
-assert.deepEqual([...labLanguageCodes],["csx","da","de","en","es","fi","fr","it","nb","pl","pt","ru","zh","zh-tw","ja","kr"]);
+assert.deepEqual([...labLanguageCodes],["csx","da","de","en","es","fi","fr","it","nb","pl","pt","ru","zh","zh-tw","ja","kr","ca","ca-es-valencia","gl","eu"]);
 const keys=labKeys();
 assert(keys.length>=92,"Las etiquetas añadidas no deben quedar sin traducir");
 assert.equal(new Set(keys).size,keys.length,"No repetir claves de traducción");
@@ -52,6 +52,11 @@ assert.equal(labTranslation("zh-CN","Tipo de inversor"),"逆变器类型");
 assert.equal(labTranslation("zh-TW","Tipo de inversor"),"逆變器類型");
 assert.equal(labTranslation("ja-JP","Tipo de inversor"),"インバーターの種類");
 assert.equal(labTranslation("ko-KR","Tipo de inversor"),"인버터 종류");
+assert.equal(labTranslation("ca-ES","Tipo de inversor"),"Tipus d'inversor");
+assert.equal(labTranslation("ca-ES-valencia","Tensión de salida U RMS (V, fase-N)"),"Tensió d'eixida U RMS (V, fase-N)");
+assert.equal(labTranslation("gl-ES","Tipo de inversor"),"Tipo de inversor");
+assert.equal(labTranslation("eu-ES","Tipo de inversor"),"Inbertsore mota");
+
 assert.equal(labTranslation("zz","Tipo de inversor"),null);
 console.log("OK: "+keys.length+" etiquetas añadidas en "+labLanguageCodes.length+
  " idiomas, menús e información incluidos");
