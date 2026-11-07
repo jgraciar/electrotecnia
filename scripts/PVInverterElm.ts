@@ -372,21 +372,21 @@ export class PVInverterElm extends CurrentElm {
         arr[1]=currentDisplay.value===null?"…":
             CircuitElm.getUnitText(currentDisplay.value,unit);
         if(this.mode==="island"){
-            arr[3]="S nominal = "+CircuitElm.getUnitText(this.ratedApparent,"VA");
-            arr[4]="U salida = "+CircuitElm.getUnitText(this.voltageRms,"V")+" RMS";
-            arr[5]="f salida = "+CircuitElm.getUnitText(this.frequency,"Hz");
-            arr[6]="P y cos φ resultan de las cargas; no se imponen";
+            arr[3]=Locale.LS("S nominal = ")+CircuitElm.getUnitText(this.ratedApparent,"VA");
+            arr[4]=Locale.LS("U salida = ")+CircuitElm.getUnitText(this.voltageRms,"V")+" RMS";
+            arr[5]=Locale.LS("f salida = ")+CircuitElm.getUnitText(this.frequency,"Hz");
+            arr[6]=Locale.LS("P y cos φ resultan de las cargas; no se imponen");
             return;
         }
         const op=this.operation(),ref=this.gridReference();
-        arr[3]="P inyectada = "+CircuitElm.getUnitText(op.p,"W");
-        arr[4]="S actual = "+CircuitElm.getUnitText(op.s,"VA")+
+        arr[3]=Locale.LS("P inyectada = ")+CircuitElm.getUnitText(op.p,"W");
+        arr[4]=Locale.LS("S actual = ")+CircuitElm.getUnitText(op.s,"VA")+
             "; cos φ = "+(this.legacyReactive?
                 (op.s>0?Math.abs(op.p)/op.s:1):this.powerFactor).toFixed(3);
-        arr[5]="Q resultante = "+CircuitElm.getUnitText(op.q,"VAr");
-        arr[6]=ref?"Red: "+CircuitElm.getUnitText(ref.voltageRms,"V")+
+        arr[5]=Locale.LS("Q resultante = ")+CircuitElm.getUnitText(op.q,"VAr");
+        arr[6]=ref?Locale.LS("Red: ")+CircuitElm.getUnitText(ref.voltageRms,"V")+
             " RMS; "+CircuitElm.getUnitText(ref.frequency,"Hz"):
-            "Red CA no detectada: inyección desactivada";
-        if(op.limited)arr[7]="Limitada por P nominal o S máxima";
+            Locale.LS("Red CA no detectada: inyección desactivada");
+        if(op.limited)arr[7]=Locale.LS("Limitada por P nominal o S máxima");
     }
 }

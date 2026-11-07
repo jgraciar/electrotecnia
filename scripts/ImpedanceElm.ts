@@ -277,12 +277,12 @@ export class ImpedanceElm extends CompositeElm {
         arr[7]="L = "+CircuitElm.getUnitText(this.inductance,"H");
         arr[8]="C = "+CircuitElm.getUnitText(this.capacitance,"F");
         const auto=this.sourceFrequency();
-        arr[9]=(auto!==null ? "f de red = " : "f0 (referencia) = ") +
+        arr[9]=(auto!==null ? Locale.LS("f de red = ") : Locale.LS("f0 (referencia) = ")) +
             CircuitElm.getUnitText(this.activeFrequency(),"Hz");
     }
 
     getScopeText(v:number):string {
-        return "Z (CA, serie RLC)";
+        return Locale.LS("Z (CA, serie RLC)");
     }
     canViewInScope():boolean { return true; }
 
