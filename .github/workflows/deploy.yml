@@ -56,6 +56,8 @@ jobs:
           node --experimental-strip-types laboratorio/tests/lab-pv-capacitor-bank.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-capacitor-controller.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-regulator-integration.test.mjs
+          node --experimental-strip-types laboratorio/tests/lab-pv-commercial-installations.test.mjs
+          node --experimental-strip-types laboratorio/tests/lab-pv-sector-autoconsumption.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-pv-capacitor-contactors.test.mjs
           node --experimental-strip-types laboratorio/tests/lab-impedance.test.mjs
 
