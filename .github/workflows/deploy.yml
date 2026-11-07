@@ -146,7 +146,7 @@ jobs:
           node laboratorio/tests/verify-impedance.mjs
           node laboratorio/tests/verify-filtered-bridge.mjs
           node laboratorio/tests/verify-pv-inverter.mjs
-          node laboratorio/tests/verify-pv-three-phase-unbalanced.mjs
+          node --experimental-strip-types laboratorio/tests/verify-pv-three-phase-unbalanced.mjs
           node laboratorio/tests/verify-pv-capacitor-switches.mjs
           node laboratorio/tests/verify-wattmeter-inbound.mjs
 
