@@ -1,20 +1,20 @@
 <cir f="1" ts="0.00001" ic="12" cb="50" pb="50" vr="400" mts="5e-11">
-<x x="20 412 36 412" f="0" si="20" te="V02  VIVIENDA / CON EXCEDENTES"/>
-<x x="20 440 36 440" f="0" si="14" te="FV 4,1 kW; exportacion activa 2,7 kW"/>
-<x x="20 465 36 465" f="0" si="13" te="RED esperada P=-2.70 kW; Q=0.35 kVAr; 1 vatimetro P/Q1/S"/>
-<v x="80 495 80 671" f="0" wf="1" fr="50" maxv="325.2691193458119"/>
-<g x="80 671 80 703" f="0"/>
-<w x="80 495 208 495" f="0"/>
-<WattmeterTrue x="208 495 320 495" f="0" w="32" meter="1" labCurrentMode="2" labPowerMask="7" labShowCosPhi="1" labShowPowerFactor="1"/>
-<w x="208 527 208 495" f="0"/>
-<w x="320 527 320 671" f="0"/>
-<w x="320 495 464 495" f="0"/>
-<w x="464 495 624 495" f="0"/>
-<w x="464 495 464 543" f="0"/>
-<r x="464 543 464 599" f="0" r="35.563025210084035"/>
-<l x="464 599 464 671" f="0" l="0.02830015626743282" ic="0"/>
-<PVInverter x="624 671 624 495" f="0" pvP="4100" pvQ="0" pvV="230" pvF="50" pvPhase="0"/>
-<w x="80 671 320 671" f="0"/>
-<w x="320 671 464 671" f="0"/>
-<w x="464 671 624 671" f="0"/>
+<x x="20 77 36 77" f="0" si="20" te="V02  VIVIENDA / CON EXCEDENTES"/>
+<x x="20 105 36 105" f="0" si="14" te="FV 4,1 kW; exportacion activa 2,7 kW"/>
+<x x="20 130 36 130" f="0" si="13" te="RED esperada P=-2.70 kW; Q=0.35 kVAr; 1 vatimetro P/Q1/S"/>
+<v x="80 160 80 336" f="0" wf="1" fr="50" maxv="325.2691193458119"/>
+<g x="80 336 80 368" f="0"/>
+<w x="80 160 208 160" f="0"/>
+<WattmeterTrue x="208 160 320 160" f="0" w="32" meter="1" labCurrentMode="2" labPowerMask="7" labShowCosPhi="1" labShowPowerFactor="1"/>
+<w x="208 192 208 160" f="0"/>
+<w x="320 192 320 336" f="0"/>
+<w x="320 160 464 160" f="0"/>
+<w x="464 160 624 160" f="0"/>
+<w x="464 160 464 208" f="0"/>
+<r x="464 208 464 264" f="0" r="35.563025210084035"/>
+<l x="464 264 464 336" f="0" l="0.02830015626743282" ic="0"/>
+<PVInverter x="624 336 624 160" f="0" pvP="4100" pvQ="0" pvV="230" pvF="50" pvPhase="0"/>
+<w x="80 336 320 336" f="0"/>
+<w x="320 336 464 336" f="0"/>
+<w x="464 336 624 336" f="0"/>
 </cir>

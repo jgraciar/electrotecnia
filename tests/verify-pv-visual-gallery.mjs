@@ -19,10 +19,11 @@ const tri=[
  ...Array(3).fill([-4000/3,-9500/3]),
  [-1300,0],[0,0],[1300,0]
 ];
+const onePhaseIds=["V01","V02","C01","C02","M01","M02","M03"];
+const threePhaseIds=["T01","T02","I01","I02","D01","D02","N01"];
 const variants=[
- ["autoconsumo-monofasica-vatimetros.xml",mono],
- ["autoconsumo-trifasica-vatimetros.xml",tri],
- ["autoconsumo-galeria-vatimetros.xml",[...mono,...tri]]
+ ...onePhaseIds.map((id,i)=>[id+".xml",[mono[i]]]),
+ ...threePhaseIds.map((id,i)=>[id+".xml",tri.slice(i*3,i*3+3)])
 ];
 // La compilacion minifica los nombres internos de campos de WattmeterTrueElm.
 // Se comprueba su API publica (getInfo), que coincide con las lecturas visibles.
@@ -56,9 +57,24 @@ try{
   const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
   return !!sim?.importCircuit&&sim.getTime()>0.02;
  },null,{timeout:90000});
+ // Las galerías agrupadas son extensas; validar su estructura y todos sus
+ // wattmeters sin integrar 28 circuitos simultáneos en una misma simulación.
+ for(const [file,count,panels] of [
+  ["autoconsumo-monofasica-vatimetros.xml",7,7],
+  ["autoconsumo-trifasica-vatimetros.xml",21,7],
+  ["autoconsumo-galeria-vatimetros.xml",28,14]
+ ]){
+  const xml=await readFile(new URL("./fixtures/"+file,import.meta.url),"utf8");
+  assert.equal((xml.match(/<WattmeterTrue /g)||[]).length,count);
+  assert.equal((xml.match(/<PVInverter /g)||[]).length,count);
+  assert.equal((xml.match(/RED esperada/g)||[]).length,panels);
+  assert.equal((xml.match(/labPowerMask="7"/g)||[]).length,count);
+ }
+ // Cada caso se importa y mide individualmente: verifica el fichero que
+ // descargará el alumno y reduce el coste del solver en circuitos grandes.
  for(const [filename,expected] of variants){
-  const xml=await readFile(new URL("./fixtures/"+filename,import.meta.url),"utf8");
-  const expectedPanels=filename.includes("galeria")?14:7;
+  const xml=await readFile(new URL("./fixtures/autoconsumo-casos/"+filename,import.meta.url),"utf8");
+  const expectedPanels=1;
   assert.equal((xml.match(/<WattmeterTrue /g)||[]).length,expected.length);
   assert.equal((xml.match(/<PVInverter /g)||[]).length,expected.length);
   assert.equal((xml.match(/RED esperada/g)||[]).length,expectedPanels);
@@ -121,7 +137,7 @@ try{
     filename+" W"+i+" S incoherente: "+s+" vs "+expectedS+
     " VA; revisar corriente transitoria/numérica del capacitor");
   }
-  console.log("OK: catálogo",filename,"vatímetros",expected.length,
+  console.log("OK: circuito individual",filename,"vatímetros",expected.length,
    "P/Q/S físicas contrastadas en CircuitJS");
  }
  assert.deepEqual(errors,[],"Errores de JavaScript en el navegador");
