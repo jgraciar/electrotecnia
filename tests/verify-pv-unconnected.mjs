@@ -51,20 +51,38 @@ try {
    window.LabCircuit.importNativeCircuit(p.name,p.xml),
    {name:"Inversor desconectado "+mode,xml});
   assert(imported?.ok,mode+": fallo al colocar el inversor desconectado");
-  const state=await page.evaluate(async()=>{
+  // El tiempo de CircuitJS no avanza a velocidad real: depende de la
+  // carga del navegador y del número de iteraciones por fotograma.
+  // Asegurar progreso sostenido en DOS periodos consecutivos y detectar
+  // una parada verdadera, sin imponer 0,03 s simulados en 1,2 s reales.
+  const first=await page.evaluate(()=>{
    const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
-   const start=sim.getTime();
-   await new Promise(resolve=>setTimeout(resolve,1200));
+   return sim.getTime();
+  });
+  await page.waitForFunction((t0)=>{
+   const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+   return sim && sim.getTime()>t0+0.012;
+  },first,{timeout:45000,polling:250});
+  const middle=await page.evaluate(()=>{
+   return document.querySelector("#circuit-frame").contentWindow.CircuitJS1.getTime();
+  });
+  await page.waitForFunction((t0)=>{
+   const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+   return sim && sim.getTime()>t0+0.012;
+  },middle,{timeout:45000,polling:250});
+  const state=await page.evaluate(()=>{
+   const sim=document.querySelector("#circuit-frame").contentWindow.CircuitJS1;
    const e=[...sim.getElements()];
-   return {start,end:sim.getTime(),
+   return {start:0,end:sim.getTime(),
     inverters:e.filter(x=>x.getType()==="PVInverterElm").length,
     loadIrms:e.find(x=>x.getType()==="ResistorElm")?.getCurrent(),
     inverterCurrent:e.find(x=>x.getType()==="PVInverterElm")?.getCurrent()};
   });
-  console.log("Simulación con inversor aún sin conectar",mode,state);
+  console.log("Simulación con inversor aún sin conectar",mode,
+   {first,middle,...state});
+  assert(middle>first+0.012 && state.end>middle+0.012,
+   mode+": la simulación no avanza de forma sostenida");
   assert.equal(state.inverters,1,mode+": inversor ausente");
-  assert(state.end-state.start>.03,
-   mode+": colocar el inversor no debe detener el tiempo de la simulación");
   assert(Number.isFinite(state.inverterCurrent));
   assert(Number.isFinite(state.loadIrms));
  }
