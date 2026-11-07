@@ -161,6 +161,52 @@ try{
   assert.deepEqual(hiddenText,[],
    name+": el inversor muestra I RMS pese a estar desactivada la opción global");
   console.log("OK: opción global Mostrar valores respetada por inversor",name);
+
+  // Los controles son independientes: con f=0, "Mostrar valores" está
+  // activado pero "Mostrar corriente" (bolitas) desactivado.
+  const noDotsXml=xml.replace('<cir f="1"','<cir f="0"');
+  assert.notEqual(noDotsXml,xml);
+  const noDotsImport=await page.evaluate(c=>
+   window.LabCircuit.importNativeCircuit(c.name,c.xml),
+   {name:name+" sin bolitas",xml:noDotsXml});
+  assert(noDotsImport?.ok,name+": importación sin bolitas fallida");
+  await page.waitForFunction(()=>{
+   const sim=document.querySelector("#circuit-frame")?.contentWindow?.CircuitJS1;
+   return sim?.getTime()>0.04&&Array.from(sim.getElements())
+    .filter(e=>e.getType()==="PVInverterElm").length===1;
+  },null,{timeout:90000});
+  const noDotsScreen=await page.evaluate(async()=>{
+   const win=document.querySelector("#circuit-frame").contentWindow;
+   const proto=win.CanvasRenderingContext2D.prototype;
+   const originalRect=proto.fillRect,originalText=proto.fillText;
+   const dotsOnInverter=[],labels=[];
+   proto.fillRect=function(x,y,w,h){
+    // Ambos tramos del inversor son verticales en x=400.
+    // Se excluyen los terminales y el símbolo central.
+    if(w===4&&h===4&&x>=395&&x<=405&&
+       ((y>=306&&y<=346)||(y>=405&&y<=447)))
+     dotsOnInverter.push({x,y});
+    return originalRect.call(this,x,y,w,h);
+   };
+   proto.fillText=function(value,...args){
+    if(typeof value==="string"&&value.includes("I [RMS]"))
+     labels.push(value);
+    return originalText.call(this,value,...args);
+   };
+   try{await new Promise(resolve=>setTimeout(resolve,750));}
+   finally{
+    proto.fillRect=originalRect;
+    proto.fillText=originalText;
+   }
+   return {dotCount:dotsOnInverter.length,labels:[...new Set(labels)]};
+  });
+  assert.equal(noDotsScreen.dotCount,0,
+   name+": el inversor dibuja bolitas pese a desactivar Mostrar corriente");
+  assert(noDotsScreen.labels.some(x=>x.startsWith("I [RMS] = ")&&
+   !x.endsWith("…")),
+   name+": se oculta la intensidad al desactivar únicamente las bolitas");
+  console.log("OK: menú Mostrar corriente independiente de Mostrar valores",name);
+
   assert.equal(readings.fields.mode,mode);
   assert.equal(readings.fields.currentMode,"0",
    "RMS debe ser predeterminado al no especificar pvIView");
