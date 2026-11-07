@@ -40,6 +40,10 @@ try{
    const errors=[];
    page.on("pageerror",error=>errors.push(error.message));
    await page.addInitScript((pref)=>{
+    // La misma página contiene CircuitJS en un iframe del mismo origen:
+    // preparar las preferencias SOLO en el documento principal para que
+    // el iframe herede el idioma, en lugar de borrarlo en su arranque.
+    if(window.top!==window)return;
     localStorage.clear();
     localStorage.setItem("labStartConfigured","1");
     if(pref.mode==="manual"){
