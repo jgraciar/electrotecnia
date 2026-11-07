@@ -32,6 +32,7 @@ export interface PVCommercialSettings {
     cosPhi: number;
     sense: PVReactiveSense;
     ratedApparent: number;
+    ratedActive?: number;
 }
 export interface PVCommercialPower {
     requestedP: number;
@@ -42,19 +43,20 @@ export interface PVCommercialPower {
     limited: boolean;
 }
 export function commercialPVPower(settings: PVCommercialSettings): PVCommercialPower {
-    const {entry,value,cosPhi,sense,ratedApparent}=settings;
+    const {entry,value,cosPhi,sense,ratedApparent,ratedActive=Infinity}=settings;
     if(!["P","S"].includes(entry) ||
        !["inductivo","capacitivo"].includes(sense) ||
        ![value,cosPhi,ratedApparent].every(Number.isFinite) ||
+       !(ratedActive>0) ||
        value<0 || ratedApparent<=0 || cosPhi<=0 || cosPhi>1)
         throw Error("Consigna P/S, cosφ o potencia nominal no válida");
     const requestedS=entry==="S"?value:value/cosPhi;
     const requestedP=entry==="P"?value:value*cosPhi;
-    const s=Math.min(requestedS,ratedApparent);
+    const s=Math.min(requestedS,ratedApparent,ratedActive/cosPhi);
     const p=s*cosPhi;
     const q=(sense==="inductivo"?1:-1)*s*Math.sqrt(Math.max(0,1-cosPhi*cosPhi));
     return {requestedP,requestedS,p,q,s,
-        limited:requestedS>ratedApparent+1e-9};
+        limited:requestedS>s+1e-9};
 }
 
 // Aislada: fuente sinusoidal de tensión regulada con resistencia de salida
