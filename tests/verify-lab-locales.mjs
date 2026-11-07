@@ -5,7 +5,7 @@ const browser=await chromium.launch({headless:true});
 const cases=[
  {browser:"es-ES",mode:"auto",saved:null,expected:"es",
   input:"Entradas y fuentes",passive:"Componentes pasivos",
-  element:"Inversor fotovoltaico (CA)"},
+  element:"Inversor fotovoltaico FV (CA)"},
  {browser:"es-ES",mode:"manual",saved:"en",expected:"en",
   input:"Inputs and Sources",passive:"Passive Components",
   element:"PV inverter (AC)"},
