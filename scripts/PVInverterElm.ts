@@ -97,8 +97,11 @@ export class PVInverterElm extends CurrentElm {
         if(!candidates.length)return null;
         candidates.sort((a,b)=>{
             const rank=(source:VoltageElm)=>{
-                const terminal=source.nodes[1]===this.nodes[0]?0:1;
-                const post=source.getPost(1-terminal);
+                // Comparar las bornas de FASE, no las de neutro.
+                // Cuando L1, L2 y L3 comparten N, comparar el extremo
+                // del neutro puede sincronizar L2 con la fuente de L1.
+                const phasePost=source.nodes[1]===this.nodes[0]?0:1;
+                const post=source.getPost(phasePost);
                 return (post&&output?
                     Math.abs(post.y-output.y)*100+Math.abs(post.x-output.x):1e9);
             };
