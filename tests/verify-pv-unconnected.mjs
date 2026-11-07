@@ -3,7 +3,7 @@ import {chromium} from "playwright";
 
 const browser=await chromium.launch({headless:true});
 try {
- const page=await browser.newPage({viewport:{width:1400,height:900}});
+ const page=await browser.newPage({locale:"es-ES",viewport:{width:1400,height:900}});
  const errors=[];
  page.on("pageerror",e=>errors.push(e.message));
  await page.addInitScript(()=>localStorage.setItem("labStartConfigured","1"));

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {chromium} from "playwright";
 
 const browser=await chromium.launch({headless:true});
-const page=await browser.newPage({viewport:{width:1440,height:950}});
+const page=await browser.newPage({locale:"es-ES",viewport:{width:1440,height:950}});
 page.on("pageerror",e=>console.error("Error de navegador:",e.message));
 await page.addInitScript(()=>localStorage.setItem("labStartConfigured","1"));
 try{
