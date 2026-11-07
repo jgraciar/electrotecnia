@@ -119,6 +119,10 @@ try{
      pv:current.labels.find(h=>h.includes(c.element))});
    assert.equal(current.language,c.expected,
     "Idioma del navegador o elección manual incorrecta");
+   const htmlLanguage=await page.evaluate(()=>document.documentElement.lang);
+   const expectedHtmlLanguage={csx:"cs",kr:"ko",zh:"zh-Hans","zh-tw":"zh-Hant"}[c.expected]||c.expected;
+   assert.equal(htmlLanguage,expectedHtmlLanguage,
+    "Atributo lang incorrecto para lectores de pantalla: "+c.expected);
    assert(current.headings.some(x=>x.includes(c.input)),
     "Submenú Entradas y fuentes sin traducir: "+c.expected);
    assert(current.headings.some(x=>x.includes(c.passive)),
