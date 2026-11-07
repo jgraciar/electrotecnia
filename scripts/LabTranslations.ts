@@ -17,6 +17,12 @@ const nativeMenu:Record<string,string[]>={
  "Inputs and Sources":["Inputs and Sources","Entradas y fuentes","Entrées et sources","Eingänge und Quellen","Ingressi e sorgenti","Entradas e fontes","Ingangen en bronnen","Wejścia i źródła"],
  "Passive Components":["Passive Components","Componentes pasivos","Composants passifs","Passive Bauelemente","Componenti passivi","Componentes passivos","Passieve componenten","Elementy pasywne"],
  "Outputs and Labels":["Outputs and Labels","Salidas y etiquetas","Sorties et étiquettes","Ausgänge und Beschriftungen","Uscite ed etichette","Saídas e etiquetas","Uitgangen en labels","Wyjścia i etykiety"],
+ "Active Building Blocks":["Active Building Blocks","Bloques funcionales activos","Blocs fonctionnels actifs","Aktive Funktionsblöcke","Blocchi funzionali attivi","Blocos funcionais ativos","Actieve bouwblokken","Aktywne bloki funkcjonalne"],
+ "Logic Gates, Input and Output":["Logic Gates, Input and Output","Puertas lógicas, entradas y salidas","Portes logiques, entrées et sorties","Logikgatter, Ein- und Ausgänge","Porte logiche, ingressi e uscite","Portas lógicas, entradas e saídas","Logische poorten, in- en uitgangen","Bramki logiczne, wejścia i wyjścia"],
+ "Digital Chips":["Digital Chips","Circuitos integrados digitales","Circuits intégrés numériques","Digitale Bausteine","Circuiti integrati digitali","Circuitos integrados digitais","Digitale IC's","Układy scalone cyfrowe"],
+ "Analog and Hybrid Chips":["Analog and Hybrid Chips","Circuitos integrados analógicos e híbridos","Circuits intégrés analogiques et hybrides","Analoge und hybride Bausteine","Circuiti integrati analogici e ibridi","Circuitos integrados analógicos e híbridos","Analoge en hybride IC's","Układy scalone analogowe i hybrydowe"],
+ "Subcircuits":["Subcircuits","Subcircuitos","Sous-circuits","Teilschaltungen","Sottocircuiti","Subcircuitos","Subcircuits","Podobwody"],
+ "Drag":["Drag","Arrastrar","Déplacer","Ziehen","Trascina","Arrastar","Slepen","Przeciąganie"],
  "Show Ω Unit":["Show Ω Unit","Mostrar unidad Ω","Afficher l’unité Ω","Ω-Einheit anzeigen","Mostra unità Ω","Mostrar unidade Ω","Ω-eenheid tonen","Pokaż jednostkę Ω"],
  "Active Components":["Active Components","Componentes activos","Composants actifs","Aktive Bauelemente","Componenti attivi","Componentes ativos","Actieve componenten","Elementy aktywne"],
  "Options":["Options","Opciones","Options","Optionen","Opzioni","Opções","Opties","Opcje"]
