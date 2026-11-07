@@ -31,7 +31,7 @@ function readPower(info,prefix,unit){
  const line=info.find(x=>typeof x==="string"&&x.startsWith(prefix));
  assert(line,"Lectura "+prefix+" ausente: "+JSON.stringify(info));
  const raw=line.slice(prefix.length).trim();
- const match=raw.match(/^([+-]?(?:\\d+(?:[.,]\\d*)?|[.,]\\d+)(?:[Ee][+-]?\\d+)?)\\s*([numµkMGT]?)((?:W|VAr|VA))$/);
+ const match=raw.match(/^([+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)(?:[Ee][+-]?\d+)?)\s*([numµkMGT]?)((?:W|VAr|VA))$/);
  assert(match&&match[3]===unit,"Lectura incorrecta "+prefix+raw);
  const multiplier={"":1,n:1e-9,u:1e-6,"µ":1e-6,m:1e-3,k:1e3,M:1e6,G:1e9,T:1e12};
  return Number(match[1].replace(",","."))*multiplier[match[2]];
