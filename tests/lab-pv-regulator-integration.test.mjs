@@ -20,6 +20,19 @@ for(const pvP of [0,25,60,99.9,100,100.1,120,150]){
  });
  close(after.gridP,before.gridP);
  close(after.gridQ,selection.gridQ);
+ // Balance fasorial de corrientes en el PCC, por fase.
+ // Referencia de tensión real: I = (P - jQ)/(sqrt(3) U_LL).
+ const currentPhasor=(P,Q)=>({
+  real:P*1000/(Math.sqrt(3)*voltage),
+  imag:-Q*1000/(Math.sqrt(3)*voltage)
+ });
+ const loadI=currentPhasor(loadP,loadQ);
+ const pvI=currentPhasor(pvP,0);
+ const capacitorI=currentPhasor(0,-selection.capacitorQ);
+ const gridI=currentPhasor(after.gridP,after.gridQ);
+ close(gridI.real+pvI.real+capacitorI.real,loadI.real);
+ close(gridI.imag+pvI.imag+capacitorI.imag,loadI.imag);
+ close(Math.hypot(gridI.real,gridI.imag),after.gridCurrent);
  close(after.gridS,Math.hypot(after.gridP,after.gridQ));
  close(after.gridCurrent,after.gridS*1000/(Math.sqrt(3)*voltage));
  close(after.importedP-after.exportedP,after.gridP);
