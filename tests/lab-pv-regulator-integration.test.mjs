@@ -99,4 +99,26 @@ for(const pvP of [100,120]){
  close(exportWithReactive.exportedP,20);
  close(exportWithReactive.gridCurrent,20000/(Math.sqrt(3)*400));
 }
+// La inyección de reactiva por el inversor puede provocar sobrecompensación
+// cuando el regulador mantiene escalones previamente cerrados.
+{
+ const before=pvGridBalance({loadP:100,loadQ:75,pvP:120,pvQ:60,voltage:400});
+ const selection=selectCapacitorSteps({
+  gridP:before.gridP,reactiveBeforeCapacitors:before.gridQ,
+  steps,currentSelected:[0,2]
+ });
+ assert.equal(selection.action,"hold");
+ assert.deepEqual(selection.selected,[0,2]);
+ close(selection.capacitorQ,37.5);
+ close(selection.gridQ,-22.5);
+ const after=pvGridBalance({
+  loadP:100,loadQ:75,pvP:120,pvQ:60,
+  capacitorQ:selection.capacitorQ,voltage:400
+ });
+ close(after.gridP,-20);
+ close(after.gridQ,-22.5);
+ assert.equal(after.gridDirection,"export");
+ assert.equal(after.reactiveDirection,"capacitive");
+ close(after.gridCurrent,Math.hypot(20,22.5)*1000/(Math.sqrt(3)*400));
+}
 console.log("OK: balance P/Q, corriente, autoconsumo y bloqueo del regulador FV");
