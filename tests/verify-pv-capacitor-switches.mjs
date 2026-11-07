@@ -96,6 +96,7 @@ try {
     assert.deepEqual(roundTrip.switches,measured.switches,"Interruptores alterados tras exportación/importación");
     assert.equal(roundTrip.capacitors,3);
     assert.equal(roundTrip.inverter,1);
+    assert.equal(roundTrip.switches.length,3,"Número de interruptores alterado tras recargar");
     console.log("OK: combinación",mask, "Ired",measured.gridIrms,"P red",measured.gridP,"I condensadores",measured.capIrms);
   }
   assert.deepEqual(browserErrors,[],"Errores de ejecución del navegador");
