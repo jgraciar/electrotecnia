@@ -82,8 +82,9 @@ try{
    }
    const tag=new DOMParser().parseFromString(sim.exportCircuit(),"application/xml")
     .querySelector("PVInverter");
+   const details=[];inv.getInfo(details);
    return {seconds,samples:data.length,voltageRms:Math.sqrt(v2/seconds),
-    loadPower:energy/seconds,gridPower:sourceP/seconds,info:inv.getInfo(),
+    loadPower:energy/seconds,gridPower:sourceP/seconds,info:details,
     labels,fields:{mode:tag?.getAttribute("pvMode"),
      nominalP:tag?.getAttribute("pvPnom"),nominalS:tag?.getAttribute("pvSnom")},
     hasGridSource:!!source
