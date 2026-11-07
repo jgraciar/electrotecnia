@@ -8,6 +8,7 @@ import { VoltageElm } from "./VoltageElm";
 import { CircuitElm } from "./CircuitElm";
 import { SimulationManager } from "./SimulationManager";
 import { EditInfo } from "./EditInfo";
+import { Locale } from "./Locale";
 import { Graphics } from "./Graphics";
 import { LabPowerMeasurement } from "./LabPowerMeasurement";
 import { Choice } from "./Choice";
@@ -63,7 +64,7 @@ export class PVInverterElm extends CurrentElm {
     }
     getDumpType():number{return 1555;}
     getXmlDumpType():string{return "PVInverter";}
-    getElmType():string{return "Inversor fotovoltaico FV";}
+    getElmType():string{return Locale.LS("Inversor fotovoltaico FV");}
 
     private operation(){
         if(this.legacyReactive){
@@ -361,8 +362,8 @@ export class PVInverterElm extends CurrentElm {
                 "capacitivo":"inductivo";
     }
     getInfo(arr:string[]):void{
-        arr[0]=this.mode==="grid"?"Inversor FV conectado a red":
-            "Inversor FV aislado (fuente de tensión)";
+        arr[0]=Locale.LS(this.mode==="grid"?"Inversor FV conectado a red":
+            "Inversor FV aislado (fuente de tensión)");
         this.getBasicInfo(arr);
         // getBasicInfo() utiliza la intensidad instantánea por defecto.
         // Sustituirla por la indicación seleccionada en ambos modos.

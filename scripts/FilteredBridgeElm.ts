@@ -98,7 +98,7 @@ export class FilteredBridgeElm extends CompositeElm {
         super.undumpXml(xml);
     }
     getInfo(arr:string[]):void{
-        arr[0]="Puente rectificador monofásico con filtro capacitivo";
+        arr[0]=Locale.LS("Puente rectificador monofásico con filtro capacitivo");
         this.getBasicInfo(arr);
         arr[3]="R = "+CircuitElm.getUnitText(this.resistance,"Ω");
         arr[4]="C = "+CircuitElm.getUnitText(this.capacitance,"F");

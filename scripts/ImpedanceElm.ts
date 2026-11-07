@@ -268,7 +268,7 @@ export class ImpedanceElm extends CompositeElm {
 
     getInfo(arr:string[]):void {
         const z=atFrequency(this.values(),this.activeFrequency());
-        arr[0]="impedancia Z (solo CA, serie RLC)";
+        arr[0]=Locale.LS("Impedancia Z (solo CA)");
         this.getBasicInfo(arr);
         arr[3]="|Z| = "+CircuitElm.getUnitText(z.modulus,"Ω");
         arr[4]="φ = "+CircuitElm.showFormat.format(z.argument)+"°";
