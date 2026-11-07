@@ -16,7 +16,7 @@ import { CircuitXMLDeserializer } from "./CircuitXMLDeserializer";
 import {
     gridFollowingCurrent, commercialPVPower,
     islandOutputResistance, islandReferenceVoltage,
-    inverterCurrentDisplay, PVCurrentReadMode
+    inverterCurrentDisplay, type PVCurrentReadMode
 } from "./LabPVInverter";
 
 type GridReference={voltageRms:number;frequency:number;phase:number};
