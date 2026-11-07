@@ -8,6 +8,7 @@ import { VoltageElm } from "./VoltageElm";
 import { CircuitElm } from "./CircuitElm";
 import { SimulationManager } from "./SimulationManager";
 import { EditInfo } from "./EditInfo";
+import { Graphics } from "./Graphics";
 import { LabPowerMeasurement } from "./LabPowerMeasurement";
 import { Choice } from "./Choice";
 import { StringTokenizer } from "./StringTokenizer";
@@ -219,6 +220,64 @@ export class PVInverterElm extends CurrentElm {
         const sim=SimulationManager.theSim;
         if(sim)this.currentSamples.add(sim.t,0,this.getCurrent());
     }
+    // La fuente de corriente de Falstad dibuja por defecto i(t) y solo
+    // cuando está activada la opción global "Mostrar valores". En el inversor
+    // se indica siempre la magnitud seleccionada (RMS inicialmente), sin
+    // confundirla con la corriente instantánea del modelo.
+    private displayedCurrent(){
+        const frequency=this.mode==="island"?this.frequency:
+            (this.gridReference()?.frequency??this.frequency);
+        return inverterCurrentDisplay(
+            this.currentSamples,this.currentReadMode,frequency);
+    }
+    // Dibujo explícito sobre los DOS tramos visibles del inversor, evitando
+    // que la circunferencia o el símbolo de corriente oculten las bolitas.
+    // Se dibujan en cada fotograma de la simulación, aunque el menú general
+    // "Mostrar corriente" esté desactivado (solicitud específica del inversor).
+    private drawInverterDots(g:Graphics):void{
+        if(this.isCreating()||!CircuitElm.app.simIsRunning())return;
+        // El modelo FV de red estampa la fuente en sentido inverso al de
+        // CurrentElm.current. Para la animación se usa el sentido físico.
+        const physicalCurrent=this.mode==="grid"?-this.current:this.current;
+        if(!Number.isFinite(physicalCurrent)||Math.abs(physicalCurrent)<1e-12)
+            return;
+        this.curcount=this.updateDotCountImpl(physicalCurrent,this.curcount);
+        const ds=16;
+        const phase=this.curcount===this.CURRENT_TOO_FAST?
+            (SimulationManager.theSim.t*500%ds):
+            ((this.curcount%ds)+ds)%ds;
+        g.save();
+        g.setColor(CircuitElm.currentColor);
+        for(const [a,b] of [
+            [this.point1,this.lead1!],[this.lead2!,this.point2]
+        ]){
+            const dx=b.x-a.x,dy=b.y-a.y;
+            const length=Math.hypot(dx,dy);
+            if(length<1)continue;
+            for(let d=phase;d<length;d+=ds){
+                const x=Math.round(a.x+d*dx/length);
+                const y=Math.round(a.y+d*dy/length);
+                g.fillRect(x-2,y-2,4,4);
+            }
+        }
+        g.restore();
+    }
+    draw(g:Graphics):void{
+        const radius=12;
+        this.draw2Leads(g);
+        this.setVoltageColor(g,(this.nodes[0].v+this.nodes[1].v)/2);
+        this.setPowerColor(g,false);
+        CircuitElm.drawThickCircle(g,this.center!.x,this.center!.y,radius);
+        CircuitElm.drawThickLine(g,this.ashaft1!,this.ashaft2!);
+        g.fillPolygon(this.arrow!);
+        this.setBbox(this.point1,this.point2,radius);
+        this.drawInverterDots(g);
+        const measure=this.displayedCurrent();
+        const value=measure.value===null?"…":
+            CircuitElm.getShortUnitText(measure.value,"A");
+        this.drawValues(g,measure.label+" = "+value,radius+7);
+        this.drawPosts(g);
+    }
     private currentReadSelector():EditInfo{
         return this.option("Lectura de intensidad",
             ["Eficaz RMS (por defecto)","Instantánea i(t)"],
@@ -327,10 +386,7 @@ export class PVInverterElm extends CurrentElm {
         this.getBasicInfo(arr);
         // getBasicInfo() utiliza la intensidad instantánea por defecto.
         // Sustituirla por la indicación seleccionada en ambos modos.
-        const measurementFrequency=this.mode==="island"?this.frequency:
-            (this.gridReference()?.frequency??this.frequency);
-        const currentDisplay=inverterCurrentDisplay(
-            this.currentSamples,this.currentReadMode,measurementFrequency);
+        const currentDisplay=this.displayedCurrent();
         arr[1]=currentDisplay.label+" = "+(currentDisplay.value===null?
             "...":CircuitElm.getUnitText(currentDisplay.value,"A"));
         if(this.mode==="island"){
