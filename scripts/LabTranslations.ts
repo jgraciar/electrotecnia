@@ -94,12 +94,13 @@ for(const [code,translations] of Object.entries(extraNative)){
 }
 export function labTranslation(language:string,key:string):string|null{
  const normalized=language.toLowerCase().replace(/_/g,"-");
+ const base=normalized.split("-")[0];
  const code=normalized.startsWith("ca-es-valencia")||
   normalized==="ca-valencia"?"ca-es-valencia":
-  normalized==="zh-tw"||normalized==="zh-hk"?"zh-tw":
-  normalized.split("-")[0]==="cs"?"csx":
-  normalized.split("-")[0]==="ko"?"kr":
-  normalized.split("-")[0];
+  ["zh-tw","zh-hk","zh-mo","zh-hant"].some(x=>normalized.startsWith(x))?"zh-tw":
+  base==="cs"?"csx":
+  base==="ko"?"kr":
+  base==="no"||base==="nn"?"nb":base;
  return dictionaries[code]?.get(key)??null;
 }
 export function labKeys():string[]{return rows.map(row=>row[0]);}
