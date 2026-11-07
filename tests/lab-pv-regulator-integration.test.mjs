@@ -121,4 +121,26 @@ for(const pvP of [100,120]){
  assert.equal(after.reactiveDirection,"capacitive");
  close(after.gridCurrent,Math.hypot(20,22.5)*1000/(Math.sqrt(3)*400));
 }
+// Durante importación, si la FV ya suministra suficiente reactiva,
+// no se deben conectar nuevos escalones que produzcan sobrecompensación.
+{
+ const before=pvGridBalance({loadP:100,loadQ:75,pvP:60,pvQ:70,voltage:400});
+ close(before.gridP,40);
+ close(before.gridQ,5);
+ const selection=selectCapacitorSteps({
+  gridP:before.gridP,reactiveBeforeCapacitors:before.gridQ,
+  steps,targetCosPhi:0.95
+ });
+ assert.equal(selection.action,"recommend");
+ assert.deepEqual(selection.selected,[]);
+ close(selection.capacitorQ,0);
+ close(selection.gridQ,5);
+ const after=pvGridBalance({
+  loadP:100,loadQ:75,pvP:60,pvQ:70,
+  capacitorQ:selection.capacitorQ,voltage:400
+ });
+ close(after.gridP,40);
+ close(after.gridQ,5);
+ close(after.gridCurrent,Math.hypot(40,5)*1000/(Math.sqrt(3)*400));
+}
 console.log("OK: balance P/Q, corriente, autoconsumo y bloqueo del regulador FV");
