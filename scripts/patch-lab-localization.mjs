@@ -1,5 +1,5 @@
 // Adapta el cargador de idiomas del CircuitJS actual, conservando los catálogos
-// oficiales y añadiendo las traducciones propias del laboratorio en 8 idiomas.
+// oficiales y añadiendo las traducciones propias del laboratorio en los 16 idiomas de CircuitJS.
 import {readFileSync,writeFileSync,copyFileSync} from "node:fs";
 import {join} from "node:path";
 const [dir,translations]=process.argv.slice(2);
@@ -27,6 +27,9 @@ once(locale,'        if (sm != null)\n            return sm;',
  '        const legacy = Locale.localizationMap.get("&nbsp;</div>"+s);\n'+
  '        if(legacy!=null)return legacy.replace(/^.*?<\\/div>/i,"").trim();');
 once(locale,'        if (lang.startsWith("en")) {',
+ '        // CircuitJS usa csx para checo y kr para coreano.\n'+
+ '        if(lang==="cs")lang="csx";\n'+
+ '        if(lang==="ko")lang="kr";\n'+
  '        Locale.activeLanguage = lang.toLowerCase();\n'+
  '        if (lang.startsWith("en")) {');
 once(locale,'                // Catálogo inexistente: utilizar el español del laboratorio.\n                await Locale.loadSpanishFallback();',
