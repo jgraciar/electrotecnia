@@ -191,6 +191,10 @@ export class PVInverterElm extends CurrentElm {
             sim.stampResistor(this.nodes[0],this.nodes[1],
                 islandOutputResistance(this));
         }else{
+            // Una fuente de corriente recién colocada puede estar sin
+            // cablear. El resistor auxiliar de 100 MΩ evita una matriz
+            // singular; a 230 V sólo disipa 0,529 mW.
+            sim.stampResistor(this.nodes[0],this.nodes[1],1e8);
             sim.stampNonLinear(this.nodes[0]);
             sim.stampNonLinear(this.nodes[1]);
         }
