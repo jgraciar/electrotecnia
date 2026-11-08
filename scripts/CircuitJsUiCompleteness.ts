@@ -1,6 +1,6 @@
 // Etiquetas de opciones, menús y valores superpuestos en osciloscopios.
 // Los identificadores de configuración y símbolos eléctricos no se traducen.
-export const circuitJsUiCompletenessKeys=["Show Properties on Create","Show Properties on Click","Export Image...","default"," average","Plot ","Max=","Min=","P-P=","CH ","/div"] as const;
+export const circuitJsUiCompletenessKeys=["Show Properties on Create","Show Properties on Click","Export Image...","default"," average","Plot ","Max=","Min=","P-P=","CH ","/div","Framerate: ","Steprate: ","Steprate/iter: ","iterc: ","Frames: ","Mouse: ","exception, see console!"] as const;
 export const circuitJsUiCompleteness: Record<string,string[]> = {
   "en": [
     "Show Properties on Create",
@@ -13,7 +13,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Min=",
     "P-P=",
     "CH ",
-    "/div"
+    "/div",
+    "Framerate: ",
+    "Steprate: ",
+    "Steprate/iter: ",
+    "iterc: ",
+    "Frames: ",
+    "Mouse: ",
+    "exception, see console!"
   ],
   "es": [
     "Mostrar propiedades al crear",
@@ -26,7 +33,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Mín.=",
     "P-P=",
     "Canal ",
-    "/div."
+    "/div.",
+    "Fotogramas/s: ",
+    "Pasos/s: ",
+    "Pasos/s por iteración: ",
+    "Iteraciones: ",
+    "Fotogramas: ",
+    "Ratón: ",
+    "Excepción: consulta la consola"
   ],
   "ca-es-valencia": [
     "Mostra les propietats en crear",
@@ -39,7 +53,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Mín.=",
     "P-P=",
     "Canal ",
-    "/div."
+    "/div.",
+    "Fotogrames/s: ",
+    "Passos/s: ",
+    "Passos/s per iteració: ",
+    "Iteracions: ",
+    "Fotogrames: ",
+    "Ratolí: ",
+    "Excepció: consulta la consola"
   ],
   "ca": [
     "Mostra les propietats en crear",
@@ -52,7 +73,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Mín.=",
     "P-P=",
     "Canal ",
-    "/div."
+    "/div.",
+    "Fotogrames/s: ",
+    "Passos/s: ",
+    "Passos/s per iteració: ",
+    "Iteracions: ",
+    "Fotogrames: ",
+    "Ratolí: ",
+    "Excepció: consulta la consola"
   ],
   "gl": [
     "Mostrar as propiedades ao crear",
@@ -65,7 +93,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Mín.=",
     "P-P=",
     "Canle ",
-    "/div."
+    "/div.",
+    "Fotogramas/s: ",
+    "Pasos/s: ",
+    "Pasos/s por iteración: ",
+    "Iteracións: ",
+    "Fotogramas: ",
+    "Rato: ",
+    "Excepción: consulta a consola"
   ],
   "eu": [
     "Erakutsi propietateak sortzean",
@@ -78,7 +113,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Min.=",
     "P-P=",
     "Kanala ",
-    "/dib"
+    "/dib",
+    "Fotogramak/s: ",
+    "Urratsak/s: ",
+    "Urratsak/s iterazioko: ",
+    "Iterazioak: ",
+    "Fotogramak: ",
+    "Sagua: ",
+    "Salbuespena: ikusi kontsola"
   ],
   "fr": [
     "Afficher les propriétés à la création",
@@ -91,7 +133,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Min. =",
     "C-C=",
     "Canal ",
-    "/div"
+    "/div",
+    "Images/s : ",
+    "Pas/s : ",
+    "Pas/s par itération : ",
+    "Itérations : ",
+    "Images : ",
+    "Souris : ",
+    "Exception : consultez la console"
   ],
   "de": [
     "Eigenschaften beim Erstellen anzeigen",
@@ -104,7 +153,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Min.=",
     "S-S=",
     "Kanal ",
-    "/Div."
+    "/Div.",
+    "Bilder/s: ",
+    "Schritte/s: ",
+    "Schritte/s je Iteration: ",
+    "Iterationen: ",
+    "Bilder: ",
+    "Maus: ",
+    "Ausnahme: Konsole prüfen"
   ],
   "it": [
     "Mostra proprietà alla creazione",
@@ -117,7 +173,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Min.=",
     "P-P=",
     "Canale ",
-    "/div."
+    "/div.",
+    "Fotogrammi/s: ",
+    "Passi/s: ",
+    "Passi/s per iterazione: ",
+    "Iterazioni: ",
+    "Fotogrammi: ",
+    "Mouse: ",
+    "Eccezione: controlla la console"
   ],
   "pt": [
     "Mostrar propriedades ao criar",
@@ -130,7 +193,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Mín.=",
     "P-P=",
     "Canal ",
-    "/div."
+    "/div.",
+    "Fotogramas/s: ",
+    "Passos/s: ",
+    "Passos/s por iteração: ",
+    "Iterações: ",
+    "Fotogramas: ",
+    "Rato: ",
+    "Exceção: consulte a consola"
   ],
   "nl": [
     "Eigenschappen tonen bij aanmaken",
@@ -143,7 +213,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Min.=",
     "P-P=",
     "Kanaal ",
-    "/div."
+    "/div.",
+    "Beelden/s: ",
+    "Stappen/s: ",
+    "Stappen/s per iteratie: ",
+    "Iteraties: ",
+    "Beelden: ",
+    "Muis: ",
+    "Uitzondering: raadpleeg de console"
   ],
   "sv": [
     "Visa egenskaper vid skapande",
@@ -156,7 +233,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Min.=",
     "T-T=",
     "Kanal ",
-    "/ruta"
+    "/ruta",
+    "Bildrutor/s: ",
+    "Steg/s: ",
+    "Steg/s per iteration: ",
+    "Iterationer: ",
+    "Bildrutor: ",
+    "Mus: ",
+    "Undantag: se konsolen"
   ],
   "da": [
     "Vis egenskaber ved oprettelse",
@@ -169,7 +253,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Min.=",
     "T-T=",
     "Kanal ",
-    "/div."
+    "/div.",
+    "Billeder/s: ",
+    "Trin/s: ",
+    "Trin/s pr. iteration: ",
+    "Iterationer: ",
+    "Billeder: ",
+    "Mus: ",
+    "Undtagelse: se konsollen"
   ],
   "nb": [
     "Vis egenskaper ved opprettelse",
@@ -182,7 +273,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Min.=",
     "T-T=",
     "Kanal ",
-    "/div."
+    "/div.",
+    "Bilder/s: ",
+    "Steg/s: ",
+    "Steg/s per iterasjon: ",
+    "Iterasjoner: ",
+    "Bilder: ",
+    "Mus: ",
+    "Unntak: se konsollen"
   ],
   "fi": [
     "Näytä ominaisuudet luotaessa",
@@ -195,7 +293,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Min.=",
     "H-H=",
     "Kanava ",
-    "/jako"
+    "/jako",
+    "Kehystä/s: ",
+    "Askelta/s: ",
+    "Askelta/s iteraatiota kohti: ",
+    "Iteraatiot: ",
+    "Kehykset: ",
+    "Hiiri: ",
+    "Poikkeus: tarkista konsoli"
   ],
   "pl": [
     "Pokaż właściwości przy tworzeniu",
@@ -208,7 +313,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Min.=",
     "S-S=",
     "Kanał ",
-    "/dz."
+    "/dz.",
+    "Klatki/s: ",
+    "Kroki/s: ",
+    "Kroki/s na iterację: ",
+    "Iteracje: ",
+    "Klatki: ",
+    "Mysz: ",
+    "Wyjątek: sprawdź konsolę"
   ],
   "csx": [
     "Zobrazit vlastnosti při vytvoření",
@@ -221,7 +333,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Min.=",
     "Š-Š=",
     "Kanál ",
-    "/díl."
+    "/díl.",
+    "Snímky/s: ",
+    "Kroky/s: ",
+    "Kroky/s na iteraci: ",
+    "Iterace: ",
+    "Snímky: ",
+    "Myš: ",
+    "Výjimka: viz konzole"
   ],
   "ru": [
     "Показывать свойства при создании",
@@ -234,7 +353,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Мин.=",
     "П-П=",
     "Канал ",
-    "/дел."
+    "/дел.",
+    "Кадров/с: ",
+    "Шагов/с: ",
+    "Шагов/с на итерацию: ",
+    "Итерации: ",
+    "Кадры: ",
+    "Мышь: ",
+    "Исключение: см. консоль"
   ],
   "ja": [
     "作成時にプロパティを表示",
@@ -247,7 +373,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "最小=",
     "ピーク間=",
     "チャンネル ",
-    "/目盛"
+    "/目盛",
+    "フレーム/秒: ",
+    "ステップ/秒: ",
+    "反復当たりステップ/秒: ",
+    "反復回数: ",
+    "フレーム: ",
+    "マウス: ",
+    "例外: コンソールを確認"
   ],
   "kr": [
     "만들 때 속성 표시",
@@ -260,7 +393,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "최소=",
     "피크 간=",
     "채널 ",
-    "/눈금"
+    "/눈금",
+    "프레임/초: ",
+    "단계/초: ",
+    "반복당 단계/초: ",
+    "반복 횟수: ",
+    "프레임: ",
+    "마우스: ",
+    "예외: 콘솔 확인"
   ],
   "zh": [
     "创建时显示属性",
@@ -273,7 +413,14 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "最小=",
     "峰峰值=",
     "通道 ",
-    "/格"
+    "/格",
+    "帧/秒：",
+    "步数/秒：",
+    "每次迭代的步数/秒：",
+    "迭代次数：",
+    "帧数：",
+    "鼠标：",
+    "异常：请查看控制台"
   ],
   "zh-tw": [
     "建立時顯示屬性",
@@ -286,6 +433,13 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "最小=",
     "峰對峰值=",
     "通道 ",
-    "/格"
+    "/格",
+    "影格/秒：",
+    "步數/秒：",
+    "每次迭代步數/秒：",
+    "迭代次數：",
+    "影格數：",
+    "滑鼠：",
+    "例外：請查看主控台"
   ]
 };
