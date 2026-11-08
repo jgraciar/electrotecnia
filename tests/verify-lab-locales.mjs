@@ -179,6 +179,18 @@ try{
       "Comando del menú aún en inglés: "+english);
     }
    }
+   // Español: abrir la paleta con doble Mayús y comprobar el texto visible
+   // de un diálogo que no figuraba en el catálogo original.
+   if(c.expected==="es"){
+    const simulator=page.frameLocator("#circuit-frame");
+    await simulator.locator("body").press("Shift");
+    await simulator.locator("body").press("Shift");
+    const palette=simulator.locator(".command-palette-input");
+    await palette.waitFor({state:"visible",timeout:12000});
+    assert.equal(await palette.getAttribute("placeholder"),"Escribe un comando...",
+     "La paleta de comandos conserva texto en inglés");
+    await palette.press("Escape");
+   }
    // Verificar en navegador real que Dibujo no muestra el prefijo de inserción.
    if(c.expected==="es"||c.expected==="ca-es-valencia"){
     const prefix=c.expected==="es"?/^Añadir\s/i:/^(?:Afig|Afegir)\s/i;
