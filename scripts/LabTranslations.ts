@@ -1,3 +1,4 @@
+import {uiSpanish,uiValencian} from "./LabTranslationsMenus.ts";
 // Traducciones añadidas para los componentes propios del Laboratorio.
 // Las claves originales de CircuitJS se conservan en sus catálogos oficiales.
 // Catálogos adicionales incorporados directamente para compatibilidad con Node y TypeScript.
@@ -94,6 +95,12 @@ for(const [code,translations] of Object.entries(extraNative)){
   throw Error("Submenús incompletos: "+code);
  translations.forEach((value,index)=>dictionaries[code].set(nativeKeys[index],value));
 }
+// Priorizar las etiquetas revisadas sobre los catálogos heredados.
+for(const [code,overrides] of [["es",uiSpanish],["ca-es-valencia",uiValencian]] as const)
+ for(const [key,value] of Object.entries(overrides)){
+  if(!value.trim())throw Error("Traducción vacía: "+code+" "+key);
+  dictionaries[code].set(key,value);
+ }
 export function labTranslation(language:string,key:string):string|null{
  const normalized=language.toLowerCase().replace(/_/g,"-");
  const base=normalized.split("-")[0];

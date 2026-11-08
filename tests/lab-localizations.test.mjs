@@ -60,6 +60,34 @@ assert.equal(labTranslation("sv-SE","Tipo de inversor"),"Typ av växelriktare");
 assert.equal(labTranslation("sv-SE","Inputs and Sources"),"Ingångar och källor");
 assert.equal(labTranslation("eu-ES","Tipo de inversor"),"Inbertsore mota");
 
+for(const [key,spanish,valencian] of [
+ ["Export As Image...","Exportar como imagen...","Exporta com a imatge..."],
+ ["Export As SVG...","Exportar como SVG...","Exporta com a SVG..."],
+ ["Find Component/Command...","Buscar componente o comando...","Busca un component o una ordre..."],
+ ["Add Controlled Voltage Source (2-terminal)","Fuente de tensión controlada (2 terminales)","Font de tensió controlada (2 terminals)"],
+ ["Add Controlled Current Source (2-terminal)","Fuente de corriente controlada (2 terminales)","Font d'intensitat controlada (2 terminals)"],
+ ["Add Transformer","Transformador","Transformador"],
+ ["Add Test Point","Punto de prueba","Punt de prova"],
+ ["Add Wattmeter","Vatímetro","Vatímetre"],
+ ["Command Palette","Paleta de comandos","Paleta d'ordres"]
+]){
+ assert.equal(labTranslation("es-ES",key),spanish,"Error español: "+key);
+ assert.equal(labTranslation("ca-ES-valencia",key),valencian,"Error valenciano: "+key);
+}
+assert.equal(labTranslation("es-ES","Show Cursor Cross Hairs"),"Mostrar la cruz del cursor");
+for(const [key,value] of [
+ ["Other Options","Altres opcions"],
+ ["Change Language","Canvia l'idioma"],
+ ["Show Properties on Create","Mostra les propietats en crear"],
+ ["# of Decimal Digits (long format)","Nombre de decimals (format llarg)"],
+ ["Matrix Solver","Resolutor matricial"],
+ ["Apply","Aplica"],
+ ["Voltage","Tensió"],
+ ["Current","Intensitat"]
+]){
+ assert.equal(labTranslation("ca-ES-valencia",key),value,
+  "Falta traducción de controles valencianos: "+key);
+}
 assert.equal(labTranslation("zz","Tipo de inversor"),null);
 console.log("OK: "+keys.length+" etiquetas añadidas en "+labLanguageCodes.length+
  " idiomas, menús e información incluidos");
