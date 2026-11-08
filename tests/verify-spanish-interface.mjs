@@ -79,6 +79,22 @@ for(const key of ["Scope Properties","Vertical Scale","Horizontal Scale",
 for(const key of ["Plot ","Max=","Min=","P-P=","/div"])
  assert(readFileSync(join(dir,"ScopeOverlays.ts"),"utf8").includes('Locale.LS("'+key+'")'),
   "Texto del osciloscopio sin pasar por el traductor: "+key);
+// Los rótulos de rendimiento y las advertencias del modo desarrollador
+// no pueden saltarse la traducción por estar dibujados sobre el lienzo.
+const canvasUI=readFileSync(join(dir,"UIManager.ts"),"utf8");
+for(const [key,expected] of [
+ ["Framerate: ","Fotogramas/s: "],
+ ["Steprate: ","Pasos/s: "],
+ ["Steprate/iter: ","Pasos/s por iteración: "],
+ ["iterc: ","Iteraciones: "],
+ ["Frames: ","Fotogramas: "],
+ ["Mouse: ","Ratón: "],
+ ["exception, see console!","Excepción: consulta la consola"]
+]){
+ assert.equal(labTranslation("es",key),expected,"Falta indicador español: "+key);
+ assert(canvasUI.includes('Locale.LS("'+key+'")'),
+  "La etiqueta del modo desarrollador se muestra en inglés: "+key);
+}
 assert(readFileSync(join(dir,"ScopePropertiesDialog.ts"),"utf8")
  .includes("Locale.LS('CH ')"));
 console.log("OK español: "+files.length+" archivos, "+found.size+
