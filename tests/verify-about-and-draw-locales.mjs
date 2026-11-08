@@ -54,7 +54,7 @@ for(const [key,translated,language,expected] of [
 assert.equal(circuitJsDrawLabel("Adder","Adder","en"),"Adder");
 // Auditar los 147 componentes de Dibujo contra los catálogos oficiales,
 // además de los elementos desarrollados para el laboratorio.
-const menuKeys=[...new Set([...menus.matchAll(/"(Add [^"]+)"\\s*,\\s*"[^"]*Elm(?:[:][^"]*)?"/g)]
+const menuKeys=[...new Set([...menus.matchAll(/"(Add [^"]+)"\s*,\s*"[^"]*Elm(?:[:][^"]*)?"/g)]
  .map(m=>m[1]))];
 assert(menuKeys.length>=147,"Faltan comandos de los submenús de Dibujo");
 const nativeCodes=["csx","da","de","es","fi","fr","it","ja","kr","nb","pl","pt","ru","zh","zh-tw"];
