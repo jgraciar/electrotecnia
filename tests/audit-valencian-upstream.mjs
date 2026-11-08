@@ -33,6 +33,9 @@ for(const p of files(dir)){
   re.lastIndex=0;
   for(const m of contents.matchAll(re)){
    const key=m[1];if(!key.trim()||key.length<3||/^[\d+\-\s.]+$/.test(key))continue;
+   // Unidades de tiempo y ejemplos en comentarios no son etiquetas traducibles.
+   if(/^\d+\s*(?:ms|s|Hz|V|A|Ω)$/.test(key))continue;
+   if(key==="Nombre"&&p.endsWith("Locale.ts"))continue;
    seen++;
    if(!translated.has(key)&&!intentional.has(key)&&labTranslation("ca-es-valencia",key)===null)
     missing.push({file:p.slice(dir.length+1),key});
