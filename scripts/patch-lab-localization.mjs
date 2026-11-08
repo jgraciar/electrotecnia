@@ -13,6 +13,7 @@ copyFileSync(join(dirname(translations),"CircuitJsSupplementalUi.ts"),join(dir,"
 copyFileSync(join(dirname(translations),"CircuitJsUiCompleteness.ts"),join(dir,"CircuitJsUiCompleteness.ts"));
 copyFileSync(join(dirname(translations),"CircuitJsScopeOptions.ts"),join(dir,"CircuitJsScopeOptions.ts"));
 copyFileSync(join(dirname(translations),"CircuitJsGeneralOptions.ts"),join(dir,"CircuitJsGeneralOptions.ts"));
+copyFileSync(join(dirname(translations),"CircuitJsEditDialogTitles.ts"),join(dir,"CircuitJsEditDialogTitles.ts"));
 function once(path,oldText,newText){
  const src=readFileSync(path,"utf8");
  if(src.split(oldText).length!==2)
@@ -71,6 +72,17 @@ once(locale,
  '        const originalLang = ["gl","eu"].includes(lang)?"es":lang;\n'+
  '        const url = moduleBaseURL + "locale/locale_" + originalLang + ".txt";');
 const dialog=join(dir,"EditDialog.ts");
+ // El título «Edit resistor» se formaba de forma dinámica. Buscar la frase
+ // completa en el catálogo falla para todos los idiomas.
+ // Localizar de forma independiente la acción y el nombre del componente.
+once(dialog,
+ '        titleEl.textContent = Locale.LS(title);',
+ '        const componentName = ce instanceof CircuitElm && !ce.getEditTitle\n'+
+ '            ? ce.getElmType() : null;\n'+
+ '        titleEl.textContent = componentName\n'+
+ '            ? Locale.LS("Edit Component") + ": " + Locale.LS(componentName)\n'+
+ '            : Locale.LS(title);');
+
 once(dialog,'                    opt.textContent = ei.choice.items[j];',
  '                    opt.textContent = Locale.LS(ei.choice.items[j]);');
 once(dialog,'                cbLabel.appendChild(document.createTextNode(ei.checkbox.name));',
