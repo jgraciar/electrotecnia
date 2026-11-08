@@ -5,13 +5,13 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {labLanguageCodes,labTranslation} from "../scripts/LabTranslations.ts";
-import {componentEditDialogLabels} from "../scripts/CircuitJsEditDialogTitles.ts";
+import {componentEditDialogLabels, componentEditTitleTemplates, localizedComponentEditTitle} from "../scripts/CircuitJsEditDialogTitles.ts";
 
 const dir=process.argv[2];
 if(!dir)throw Error("Uso: verify-edit-dialog-titles.mjs <ts-dir>");
 const source=readFileSync(join(dir,"EditDialog.ts"),"utf8");
-assert(source.includes('Locale.LS("Edit Component") + ": " + Locale.LS(componentName)'),
- "El encabezado sigue buscando la frase dinámica completa en inglés");
+assert(source.includes('localizedComponentEditTitle(Locale.activeLanguage, Locale.LS(componentName))'),
+ "El encabezado del componente no utiliza la plantilla del idioma activo");
 assert(source.includes("const customTitle = !!ce.getEditTitle;") &&
  source.includes("!customTitle && ce instanceof CircuitElm"),
  "No se distingue el título de un componente del de otras ventanas");
@@ -24,6 +24,8 @@ assert(patch.includes("./CircuitJsEditDialogTitles"),
 const native=["csx","da","de","es","fi","fr","it","ja","kr","nb","pl","pt","ru","zh","zh-tw"];
 const extra=["ca","ca-es-valencia","gl","eu","nl","sv"];
 assert.equal(labLanguageCodes.length,22);
+assert.deepEqual(Object.keys(componentEditTitleTemplates).sort(), [...labLanguageCodes].sort(),
+ "No existe una plantilla de encabezado por cada idioma");
 assert.deepEqual([...new Set([...native,"en",...extra])].sort(),[...labLanguageCodes].sort());
 const examples=["resistor","capacitor","capacitor (polarized)","inductor",
  "inductor (sat)","voltage source","A/C source","current source",
@@ -59,14 +61,18 @@ for(const code of labLanguageCodes){
    labTranslation(code,"resistor") ??
    new Map([...readFileSync(join(dir,"public/locale/locale_"+code+".txt"),"utf8")
     .matchAll(/^"(.*?)"="(.*)"$/gm)].map(m=>[m[1],m[2]])).get("resistor");
- const header=code==="en"?"Edit Component":
-   labTranslation(code,"Edit Component") ??
-   new Map([...readFileSync(join(dir,"public/locale/locale_"+code+".txt"),"utf8")
-    .matchAll(/^"(.*?)"="(.*)"$/gm)].map(m=>[m[1],m[2]])).get("Edit Component");
- assert(name?.trim()&&header?.trim(),
-  "No es posible construir un encabezado localizable en "+code);
- assert(!(/^Edit resistor$/i).test(header+": "+name),
+ assert(name?.trim(), "Nombre de resistencia sin traducir: "+code);
+ assert(componentEditTitleTemplates[code].includes("{component}"),
+  "Plantilla sin marcador de componente: "+code);
+ const header=localizedComponentEditTitle(code,name);
+ assert(header.includes(name)&&!header.includes("{component}"),
+  "El título no incorpora el nombre traducido: "+code);
+ assert(code==="en" || header!=="Edit resistor",
   "El encabezado aparece en inglés en "+code);
 }
+assert.equal(localizedComponentEditTitle("es","resistencia"), "Editar resistencia");
+assert.equal(localizedComponentEditTitle("ca","resistència"), "Editar resistència");
+assert.equal(localizedComponentEditTitle("ca-es-valencia","resistència"), "Editar resistència");
+assert.equal(localizedComponentEditTitle("en","resistor"), "Edit resistor");
 console.log("OK: encabezados de edición de los 22 idiomas, "+
  checks+" traducciones de componentes y títulos específicos preservados.");
