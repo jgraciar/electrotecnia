@@ -50,5 +50,24 @@ for(const lang of nativeCodes){
   assert.notEqual(result,essential,"Etiqueta inglesa sin traducir en "+lang+": "+essential);
  }
 }
+// La relación de ejemplos llega de setuplist.txt. El archivo del circuito
+// permanece en inglés, pero la etiqueta de las 12 fuentes CCS/CVS se traduce.
+const exampleLines=readFileSync(join(tsDir,"public/setuplist.txt"),"utf8").split(/\r?\n/);
+const expectedExamples=[
+ ["cs-resistor.txt","CCS Resistor"],["cs-varyresistor.txt","CCS Varying Resistor"],
+ ["cs-opamp.txt","CVS Op-Amp"],["cs-opamprail.txt","VCVS Op-Amp With Rails"],
+ ["cs-multiplier.txt","VCVS Multiplier"],["cs-fullrectifier.txt","CVS Full Rectifier"],
+ ["cs-ramp.txt","CVS Voltage Ramp"],["cs-currentadder.txt","CCS Current Adder"],
+ ["cs-integrator.txt","CVS Integrator"],["cs-diff.txt","CVS Differentiator"],
+ ["cs-varinduct.txt","CCS Variable Inductor"],["cs-varicap.txt","CCS Variable Capacitor"]
+];
+for(const [file,key] of expectedExamples){
+ assert(exampleLines.includes(file+" "+key),"Cambia la clave del ejemplo: "+file);
+ for(const lang of ["en","es","ca-es-valencia","ca","gl","eu","fr","de","ja","zh"]){
+  const label=labTranslation(lang,key);
+  assert(label&&label.trim()&& (lang==="en"||label!==key),
+   "Ejemplo CCS/CVS sin localizar: "+lang+" "+key);
+ }
+}
 console.log("OK: "+keys.length+" claves de menús originales con español cubierto; "+
  components.length+" componentes con traducción valenciana y comandos principales comprobados.");
