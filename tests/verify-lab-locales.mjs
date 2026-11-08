@@ -194,6 +194,9 @@ try{
       "Comando del menú aún en inglés: "+english);
     }
    }
+   if(c.expected==="ca")
+    assert(localeResponses.some(url=>url.includes("/locale/locale_ca.txt")),
+     "El català ha de carregar el seu propi catàleg, no el valencià o el castellà");
    if(c.expected==="ca-es-valencia")
     assert(localeResponses.some(url=>url.includes("/locale/locale_ca-es-valencia.txt")),
      "El valencià s'ha de carregar del seu catàleg, no del fitxer espanyol");
