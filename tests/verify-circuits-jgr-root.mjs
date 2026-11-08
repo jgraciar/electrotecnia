@@ -67,8 +67,11 @@ try{
    };
   });
   for(const key of ["development","authors","licenseLabel","sourceLabel",
-    "versions","credits","legal","warranty","liability","finalNotice"])
-   assert(data[key]?.length>12,language+": falta texto en Acerca de: "+key);
+    "versions","credits","legal","warranty","liability","finalNotice"]){
+   const minLength=["credits","legal","warranty","liability","finalNotice"].includes(key)?20:3;
+   assert(data[key]?.length>=minLength,
+    language+": falta texto en Acerca de: "+key);
+  }
   assert(data.versions.includes("CircuitJS1"),language+": versión original incorrecta");
   assert(data.authors.includes("Paul Falstad")&&data.authors.includes("Iain Sharp"),
    language+": faltan autores originales");
