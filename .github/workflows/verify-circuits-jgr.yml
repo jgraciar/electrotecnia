@@ -1,0 +1,78 @@
+name: Verificar versión independiente Circuits JGR 1.0
+
+on:
+  push:
+    branches: [circuits-jgr-1.0]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Compilar Circuits JGR y verificar URL raíz
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Obtener adaptación Circuits JGR
+        uses: actions/checkout@v4
+        with:
+          path: adaptacion
+
+      - name: Obtener versión base CircuitJS1 5.0.4ts
+        uses: actions/checkout@v4
+        with:
+          repository: pfalstad/circuitjs1
+          ref: 8ac55f22a03606579b822b3dccd4dc10de1ddc5b
+          path: circuitjs-src
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Componer el motor y las traducciones
+        run: |
+          node adaptacion/scripts/embed-default-aron.mjs circuitjs-src/ts/CirSim.ts adaptacion/tests/fixtures/sistema-iii-n-startup.xml
+          node adaptacion/scripts/patch-wattmeter-powers.mjs circuitjs-src/ts/WattmeterTrueElm.ts adaptacion/scripts/LabPowerMeasurement.ts
+          node adaptacion/scripts/patch-impedance.mjs circuitjs-src/ts adaptacion/scripts/ImpedanceElm.ts adaptacion/scripts/LabImpedance.ts
+          node adaptacion/scripts/patch-pv-inverter.mjs circuitjs-src/ts adaptacion/scripts/PVInverterElm.ts adaptacion/scripts/LabPVInverter.ts
+          node adaptacion/scripts/patch-lab-localization.mjs circuitjs-src/ts adaptacion/scripts/LabTranslations.ts
+          node adaptacion/scripts/prepare-circuits-jgr.mjs circuitjs-src/ts
+          node --experimental-strip-types adaptacion/tests/verify-edit-regional-numbers.mjs circuitjs-src/ts
+          node --experimental-strip-types adaptacion/tests/verify-edit-dialog-titles.mjs circuitjs-src/ts
+
+      - name: Compilar página principal circuitjgr.html
+        working-directory: circuitjs-src/ts
+        run: |
+          npm ci
+          npm run build
+          test -f dist/circuitjgr.html
+          ! test -f dist/circuitjs.html
+
+      - name: Empaquetar sitio independiente en la raíz
+        run: |
+          node adaptacion/scripts/package-circuits-jgr.mjs circuitjs-src/ts site-root adaptacion
+          test -f site-root/circuitjgr.html
+          test -f site-root/initial-settings.js
+          test -f site-root/circuitjs/about.html
+          test -f site-root/LICENSE-GPLv3.txt
+          test -f site-root/COPYING-CircuitJS.txt
+          ! test -f site-root/index.html
+
+      - name: Instalar navegador de pruebas
+        working-directory: adaptacion/tests
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Probar en navegador CircuitJS y Acerca de
+        run: |
+          python3 -m http.server 8767 --directory site-root >/tmp/circuitjgr-http.log 2>&1 &
+          sleep 2
+          node adaptacion/tests/verify-circuits-jgr-root.mjs site-root
+
+      - name: Publicar paquete verificable sin modificar el laboratorio
+        uses: actions/upload-artifact@v4
+        with:
+          name: Circuits-JGR-1.0-sitio-raiz
+          path: site-root/
