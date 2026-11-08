@@ -18,6 +18,7 @@ for(const key of ["Decimal digits: integer from 0 to 10","Decimal and grouping s
  assert(options.includes('Locale.LS("'+key+'")'),"Error de formato sin localizar: "+key);
 
 const script=readFileSync(new URL("../scripts/circuitjs-about-i18n.js",import.meta.url),"utf8");
+const legalScript=readFileSync(new URL("../scripts/circuitjs-about-legal.js",import.meta.url),"utf8");
 assert(menus.includes('import { circuitJsDrawLabel } from "./CircuitJsDrawLabels"'));
 assert(menus.includes('circuitJsDrawLabel(items[i], Locale.LS(items[i]), Locale.activeLanguage)'));
 assert(aboutBox.includes("encodeURIComponent(Locale.activeLanguage)"));
@@ -109,6 +110,27 @@ for(const code of labLanguageCodes){
   Node:{TEXT_NODE:3},
   URLSearchParams
  });
+ if(code!=="en"){
+  runInNewContext(legalScript,{
+   location:{search:"?lang="+encodeURIComponent(code)},
+   navigator:{language:"en",languages:["en"]},
+   document:dom,
+   URLSearchParams
+  });
+  if(code!=="es"&&code!=="ca-es-valencia"){
+   for(const index of [6,7,11,12,13,15])
+    assert(labels[index].textContent.length>70,
+     "Aviso legal sin traducir en "+code+" párrafo "+index);
+   assert(labels[4].textContent.includes("Edward Calver")&&
+    labels[4].textContent.includes("Colin Howell")&&
+    labels[4].textContent.includes("Pablo Sanz Martin"),
+    "Se han perdido las aportaciones del equipo en "+code);
+   assert(!/for 15 new components|This program is free software|IN NO EVENT SHALL|THE SOFTWARE IS PROVIDED/.test(
+    [labels[4],labels[6],labels[7],labels[11],labels[12],labels[13],labels[15]]
+     .map(x=>x.textContent).join(" ")),
+    "Créditos o licencia todavía en inglés: "+code);
+  }
+ }
  if(code==="en"){
   assert.equal(labels[0].childNodes[0].nodeValue,"Circuit Simulator version ");
  }else{
@@ -123,4 +145,4 @@ for(const code of labLanguageCodes){
   assert(labels[12].textContent.length>100,"Falta el aviso legal traducido: "+code);
  }
 }
-console.log("OK: ventana Acerca de, 22 códigos de idioma, créditos y licencias en español/valenciano; nombres de Dibujo sin prefijo y formatos regionales.");
+console.log("OK: ventana Acerca de y textos legales completos en 22 idiomas; créditos íntegros, Dibujo y formatos regionales.");
