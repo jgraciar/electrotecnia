@@ -1,6 +1,6 @@
 // Etiquetas de opciones, menús y valores superpuestos en osciloscopios.
 // Los identificadores de configuración y símbolos eléctricos no se traducen.
-export const circuitJsUiCompletenessKeys=["Show Properties on Create","Show Properties on Click","Export Image...","default"," average","Plot ","Max=","Min=","P-P=","CH ","/div","Framerate: ","Steprate: ","Steprate/iter: ","iterc: ","Frames: ","Mouse: ","exception, see console!","File too large!","Dropbox links must start https://www.dropbox.com/","Node \"{name}\" can't be connected to ground","Element \"{name}\" refers to a node outside the selection","Node \"{name}\" is not used!"] as const;
+export const circuitJsUiCompletenessKeys=["Show Properties on Create","Show Properties on Click","Export Image...","default"," average","Plot ","Max=","Min=","P-P=","CH ","/div","Framerate: ","Steprate: ","Steprate/iter: ","iterc: ","Frames: ","Mouse: ","exception, see console!","File too large!","Dropbox links must start https://www.dropbox.com/","Node {name} cannot be connected to ground","Element {name} refers to a node outside the selection","Node {name} is not used!"] as const;
 export const circuitJsUiCompleteness: Record<string,string[]> = {
   "en": [
     "Show Properties on Create",
