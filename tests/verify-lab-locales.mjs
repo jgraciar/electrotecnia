@@ -179,11 +179,18 @@ try{
       "Comando del menú aún en inglés: "+english);
     }
    }
-   // Español: abrir la paleta con el atajo / y comprobar el texto visible
-   // de un diálogo que no figuraba en el catálogo original.
+   // La paleta utiliza un oyente de teclado en document. En el iframe,
+   // sintetizar los eventos en ese document evita problemas de foco al
+   // ejecutar Playwright en modo headless.
    if(c.expected==="es"){
     const simulator=page.frameLocator("#circuit-frame");
-    await simulator.locator("body").press("/");
+    await page.evaluate(()=>{
+     const doc=document.querySelector("#circuit-frame").contentDocument;
+     const press=(type)=>doc.dispatchEvent(new KeyboardEvent(type,{
+      key:"Shift",code:"ShiftLeft",keyCode:16,which:16,bubbles:true
+     }));
+     press("keydown");press("keyup");press("keydown");press("keyup");
+    });
     const palette=simulator.locator(".command-palette-input");
     await palette.waitFor({state:"visible",timeout:12000});
     assert.equal(await palette.getAttribute("placeholder"),"Escribe un comando...",
