@@ -43,8 +43,20 @@ function word(w){
 }
 function translate(s){
  const parts=s.split(/(<[^>]*>|&[a-zA-Z]+;|\\[a-zA-Z][0-9]*)/g);
- return parts.map((p,i)=>i%2?p:
-  p.replace(/[a-zA-ZáéíóúüñÁÉÍÓÚÜÑçÇàÀèÈòÒïÏ·]+/g,word)).join("");
+ return parts.map((p,i)=>{
+  if(i%2)return p;
+  let value=p.replace(/[a-zA-ZáéíóúüñÁÉÍÓÚÜÑçÇàÀèÈòÒïÏ·]+/g,word);
+  // Contracciones y apostrofaciones valencianas habituales.
+  // Se aplican al texto, nunca a las etiquetas HTML ni a las expresiones.
+  value=value.replace(/\bper a els\b/g,"per als")
+   .replace(/\bper a el\b/g,"per al")
+   .replace(/\bde els\b/g,"dels")
+   .replace(/\bde el\b/g,"del")
+   .replace(/\ba el\b/g,"al")
+   .replace(/\bde (un|una)\b/g,(_,article)=>"d'"+article)
+   .replace(/\bde ([aeiouàèéíòóú][a-zA-Zà-ÿ·]*)/gi,(_,name)=>"d'"+name);
+  return value;
+ }).join("");
 }
 const out=[];
 let changed=0,unaltered=0,unique=new Set();
