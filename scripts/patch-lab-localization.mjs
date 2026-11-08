@@ -108,6 +108,20 @@ once(dialog,
 once(dialog,
  '                } catch (ex) { /* ignored */ }',
  '                } catch (ex) { ei.setError(circuitEditNumberError(Locale.activeLanguage)); }');
+// El texto rojo de validación mostraba la clave inglesa ("Threshold")
+ // aunque el rótulo del campo sí se traducía como "Umbral".
+once(dialog,
+ '                const field = ei.errorFieldName ?? ei.name;',
+ '                const field = Locale.LS(ei.errorFieldName ?? ei.name);');
+// Si el usuario corrige un valor, no dejar visible el error de la
+// comprobación anterior. La nueva entrada se valida al aplicar.
+once(dialog,
+ '                    inp.value = formatCircuitEditValue(this.unitString(ei), Locale.activeLanguage);',
+ '                    inp.value = formatCircuitEditValue(this.unitString(ei), Locale.activeLanguage);\n'+
+ '                    inp.addEventListener("input", () => {\n'+
+ '                        this.errorLabel.textContent = "";\n'+
+ '                        this.errorLabel.style.display = "none";\n'+
+ '                    });');
 
 // Todos los controles visibles de «Añadir deslizadores» deben utilizar Locale.LS.
 // Los textos suministrados por el usuario (por ejemplo, el nombre del deslizador) no se traducen.
