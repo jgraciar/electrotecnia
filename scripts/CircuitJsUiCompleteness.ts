@@ -1,6 +1,6 @@
 // Etiquetas de opciones, menús y valores superpuestos en osciloscopios.
 // Los identificadores de configuración y símbolos eléctricos no se traducen.
-export const circuitJsUiCompletenessKeys=["Show Properties on Create","Show Properties on Click","Export Image...","default"," average","Plot ","Max=","Min=","P-P=","CH "] as const;
+export const circuitJsUiCompletenessKeys=["Show Properties on Create","Show Properties on Click","Export Image...","default"," average","Plot ","Max=","Min=","P-P=","CH ","/div"] as const;
 export const circuitJsUiCompleteness: Record<string,string[]> = {
   "en": [
     "Show Properties on Create",
@@ -12,7 +12,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Max=",
     "Min=",
     "P-P=",
-    "CH "
+    "CH ",
+    "/div"
   ],
   "es": [
     "Mostrar propiedades al crear",
@@ -24,7 +25,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Máx.=",
     "Mín.=",
     "P-P=",
-    "Canal "
+    "Canal ",
+    "/div."
   ],
   "ca-es-valencia": [
     "Mostra les propietats en crear",
@@ -36,7 +38,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Màx.=",
     "Mín.=",
     "P-P=",
-    "Canal "
+    "Canal ",
+    "/div."
   ],
   "ca": [
     "Mostra les propietats en crear",
@@ -48,7 +51,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Màx.=",
     "Mín.=",
     "P-P=",
-    "Canal "
+    "Canal ",
+    "/div."
   ],
   "gl": [
     "Mostrar as propiedades ao crear",
@@ -60,7 +64,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Máx.=",
     "Mín.=",
     "P-P=",
-    "Canle "
+    "Canle ",
+    "/div."
   ],
   "eu": [
     "Erakutsi propietateak sortzean",
@@ -72,7 +77,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Max.=",
     "Min.=",
     "P-P=",
-    "Kanala "
+    "Kanala ",
+    "/dib"
   ],
   "fr": [
     "Afficher les propriétés à la création",
@@ -84,7 +90,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Max. =",
     "Min. =",
     "C-C=",
-    "Canal "
+    "Canal ",
+    "/div"
   ],
   "de": [
     "Eigenschaften beim Erstellen anzeigen",
@@ -96,7 +103,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Max.=",
     "Min.=",
     "S-S=",
-    "Kanal "
+    "Kanal ",
+    "/Div."
   ],
   "it": [
     "Mostra proprietà alla creazione",
@@ -108,7 +116,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Max.=",
     "Min.=",
     "P-P=",
-    "Canale "
+    "Canale ",
+    "/div."
   ],
   "pt": [
     "Mostrar propriedades ao criar",
@@ -120,7 +129,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Máx.=",
     "Mín.=",
     "P-P=",
-    "Canal "
+    "Canal ",
+    "/div."
   ],
   "nl": [
     "Eigenschappen tonen bij aanmaken",
@@ -132,7 +142,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Max.=",
     "Min.=",
     "P-P=",
-    "Kanaal "
+    "Kanaal ",
+    "/div."
   ],
   "sv": [
     "Visa egenskaper vid skapande",
@@ -144,7 +155,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Max.=",
     "Min.=",
     "T-T=",
-    "Kanal "
+    "Kanal ",
+    "/ruta"
   ],
   "da": [
     "Vis egenskaber ved oprettelse",
@@ -156,7 +168,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Maks.=",
     "Min.=",
     "T-T=",
-    "Kanal "
+    "Kanal ",
+    "/div."
   ],
   "nb": [
     "Vis egenskaper ved opprettelse",
@@ -168,7 +181,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Maks.=",
     "Min.=",
     "T-T=",
-    "Kanal "
+    "Kanal ",
+    "/div."
   ],
   "fi": [
     "Näytä ominaisuudet luotaessa",
@@ -180,7 +194,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Maks.=",
     "Min.=",
     "H-H=",
-    "Kanava "
+    "Kanava ",
+    "/jako"
   ],
   "pl": [
     "Pokaż właściwości przy tworzeniu",
@@ -192,7 +207,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Maks.=",
     "Min.=",
     "S-S=",
-    "Kanał "
+    "Kanał ",
+    "/dz."
   ],
   "csx": [
     "Zobrazit vlastnosti při vytvoření",
@@ -204,7 +220,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Max.=",
     "Min.=",
     "Š-Š=",
-    "Kanál "
+    "Kanál ",
+    "/díl."
   ],
   "ru": [
     "Показывать свойства при создании",
@@ -216,7 +233,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Макс.=",
     "Мин.=",
     "П-П=",
-    "Канал "
+    "Канал ",
+    "/дел."
   ],
   "ja": [
     "作成時にプロパティを表示",
@@ -228,7 +246,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "最大=",
     "最小=",
     "ピーク間=",
-    "チャンネル "
+    "チャンネル ",
+    "/目盛"
   ],
   "kr": [
     "만들 때 속성 표시",
@@ -240,7 +259,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "최대=",
     "최소=",
     "피크 간=",
-    "채널 "
+    "채널 ",
+    "/눈금"
   ],
   "zh": [
     "创建时显示属性",
@@ -252,7 +272,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "最大=",
     "最小=",
     "峰峰值=",
-    "通道 "
+    "通道 ",
+    "/格"
   ],
   "zh-tw": [
     "建立時顯示屬性",
@@ -264,6 +285,7 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "最大=",
     "最小=",
     "峰對峰值=",
-    "通道 "
+    "通道 ",
+    "/格"
   ]
 };
