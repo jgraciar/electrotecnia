@@ -49,7 +49,7 @@ const identity=`
   <p style="margin:3px 0"><span id="jgr-development">Desarrollo y adaptación</span>:
     <strong>Jesús Gracia Ruiz</strong> · 2026</p>
   <p style="margin:3px 0"><span id="jgr-based">Basado en</span>
-    <strong>CircuitJS1 5.0.4ts</strong> (Paul Falstad, Iain Sharp y colaboradores).</p>
+    <strong>CircuitJS1 5.0.4ts</strong> (<span id="jgr-authors">Paul Falstad, Iain Sharp y colaboradores</span>).</p>
   <p style="margin:3px 0"><span id="jgr-license">Adaptaciones propias: GNU GPLv3</span>.
     <a href="../LICENSE-GPLv3.txt" target="_blank" rel="noopener">GPLv3</a>.
     <span id="jgr-code">Código fuente</span>:
@@ -60,10 +60,14 @@ const identity=`
 (() => {
  const requested=new URLSearchParams(location.search).get("lang")||navigator.language||"es";
  const lang=requested.toLowerCase().replace(/_/g,"-");
- const code=lang.startsWith("ca-es-valencia")?"ca-es-valencia":lang.split("-")[0];
+ const code=lang.startsWith("ca-es-valencia")?"ca-es-valencia":
+   ["zh-tw","zh-hant","zh-hk","zh-mo"].some(prefix=>lang.startsWith(prefix))?"zh-tw":
+   lang.startsWith("cs")?"csx":lang.startsWith("ko")?"kr":
+   ["no","nn","nb"].some(prefix=>lang===prefix||lang.startsWith(prefix+"-"))?"nb":
+   lang.split("-")[0];
  const languages={
   es:["Desarrollo y adaptación","Basado en","Adaptaciones propias: GNU GPLv3","Código fuente","Se conservan a continuación los créditos y las licencias originales."],
-  en:["Development and adaptation","Based on","Original adaptations: GNU GPLv3","Source code","The original credits and licenses follow."],
+  en:["Development and adaptation","Based on","Custom adaptations: GNU GPLv3","Source code","The original credits and license notices follow."],
   ca:["Desenvolupament i adaptació","Basat en","Adaptacions pròpies: GNU GPLv3","Codi font","A continuació es conserven els crèdits i les llicències originals."],
   "ca-es-valencia":["Desenvolupament i adaptació","Basat en","Adaptacions pròpies: GNU GPLv3","Codi font","A continuació es conserven els crèdits i les llicències originals."],
   gl:["Desenvolvemento e adaptación","Baseado en","Adaptacións propias: GNU GPLv3","Código fonte","A continuación consérvanse os créditos e as licenzas orixinais."],
@@ -85,9 +89,16 @@ const identity=`
   ja:["開発と改変","基盤","独自の変更部分：GNU GPLv3","ソースコード","元の著作者とライセンス情報は以下に記載されています。"],
   kr:["개발 및 수정","기반","독자적 변경 사항: GNU GPLv3","소스 코드","원저작자 및 라이선스 정보는 아래에 있습니다."]
  };
+ const contributors={
+   en:"Paul Falstad, Iain Sharp and contributors",
+   es:"Paul Falstad, Iain Sharp y colaboradores",
+   "ca-es-valencia":"Paul Falstad, Iain Sharp i col·laboradors"
+ };
  const t=languages[lang]||languages[code]||languages.en;
  ["jgr-development","jgr-based","jgr-license","jgr-code","jgr-credits"]
   .forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=t[i]});
+ const authors=document.getElementById("jgr-authors");
+ if(authors)authors.textContent=contributors[code]||contributors.en;
 })();
 </script>
 `;
