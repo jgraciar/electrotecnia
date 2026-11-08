@@ -76,6 +76,22 @@ const cases=[
   input:"Sarrerak eta iturriak",passive:"Osagai pasiboak",
   blocks:"Bloke funtzional aktiboak",element:"Inbertsore fotovoltaikoa (AC)"}
 ];
+const nativeControlled={
+  "csx": "Řízený zdroj napětí (2 svorky)",
+  "da": "Styret spændingskilde (2 terminaler)",
+  "de": "Gesteuerte Spannungsquelle (2 Anschlüsse)",
+  "fi": "Ohjattu jännitelähde (2 napaa)",
+  "fr": "Source de tension commandée (2 bornes)",
+  "it": "Generatore di tensione controllato (2 terminali)",
+  "ja": "制御電圧源（2端子）",
+  "kr": "제어 전압원(2단자)",
+  "nb": "Styrt spenningskilde (2 terminaler)",
+  "pl": "Sterowane źródło napięcia (2 zaciski)",
+  "pt": "Fonte de tensão controlada (2 terminais)",
+  "ru": "Управляемый источник напряжения (2 вывода)",
+  "zh-tw": "受控電壓源（雙端）",
+  "zh": "受控电压源（双端）"
+};
 try{
  for(const c of cases){
   const context=await browser.newContext({locale:c.browser,
@@ -136,6 +152,9 @@ try{
     "Submenú Bloques activos sin traducir: "+c.expected);
    assert(current.labels.some(x=>x.includes(c.element)),
     "Inversor sin traducir: "+c.expected);
+   if(nativeControlled[c.expected])
+    assert(current.labels.some(x=>x===nativeControlled[c.expected]),
+     "La fuente de tensión controlada aparece en inglés: "+c.expected);
    if(c.expected==="es"||c.expected==="ca-es-valencia"){
     const expected=c.expected==="es"
      ?["Fuente de tensión controlada (2 terminales)","Fuente de corriente controlada (2 terminales)",
