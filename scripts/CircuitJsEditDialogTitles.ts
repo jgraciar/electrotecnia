@@ -28,7 +28,20 @@ export const componentEditDialogLabels: Record<string, Record<string,string>> = 
     "wire": "conductor",
     "potentiometer": "potenciòmetre",
     "motor": "motor",
-    "ground": "terra"
+    "ground": "terra",
+    "switch (SPST)": "interruptor (SPST)",
+    "push switch (SPST)": "polsador (SPST)",
+    "switch (SPDT)": "commutador (SPDT)",
+    "switch (DPDT)": "commutador (DPDT)",
+    "switch (SPDT, MBB)": "commutador (SPDT, MBB)",
+    "analog switch": "interruptor analògic",
+    "analog switch (SPDT)": "commutador analògic (SPDT)",
+    "photoresistor": "fotorresistència",
+    "thermistor": "termistor",
+    "memristor": "memristor",
+    "transistor": "transistor",
+    "triode": "tríode",
+    "LED": "LED"
   },
   "ca-es-valencia": {
     "Edit Component": "Edita el component",
@@ -54,7 +67,20 @@ export const componentEditDialogLabels: Record<string, Record<string,string>> = 
     "wire": "conductor",
     "potentiometer": "potenciòmetre",
     "motor": "motor",
-    "ground": "terra"
+    "ground": "terra",
+    "switch (SPST)": "interruptor (SPST)",
+    "push switch (SPST)": "polsador (SPST)",
+    "switch (SPDT)": "commutador (SPDT)",
+    "switch (DPDT)": "commutador (DPDT)",
+    "switch (SPDT, MBB)": "commutador (SPDT, MBB)",
+    "analog switch": "interruptor analògic",
+    "analog switch (SPDT)": "commutador analògic (SPDT)",
+    "photoresistor": "fotorresistència",
+    "thermistor": "termistor",
+    "memristor": "memristor",
+    "transistor": "transistor",
+    "triode": "tríode",
+    "LED": "LED"
   },
   "gl": {
     "Edit Component": "Editar compoñente",
@@ -80,7 +106,20 @@ export const componentEditDialogLabels: Record<string, Record<string,string>> = 
     "wire": "condutor",
     "potentiometer": "potenciómetro",
     "motor": "motor",
-    "ground": "terra"
+    "ground": "terra",
+    "switch (SPST)": "interruptor (SPST)",
+    "push switch (SPST)": "pulsador (SPST)",
+    "switch (SPDT)": "conmutador (SPDT)",
+    "switch (DPDT)": "conmutador (DPDT)",
+    "switch (SPDT, MBB)": "conmutador (SPDT, MBB)",
+    "analog switch": "interruptor analóxico",
+    "analog switch (SPDT)": "conmutador analóxico (SPDT)",
+    "photoresistor": "fotorresistencia",
+    "thermistor": "termistor",
+    "memristor": "memristor",
+    "transistor": "transistor",
+    "triode": "tríodo",
+    "LED": "LED"
   },
   "eu": {
     "Edit Component": "Osagaia editatu",
@@ -106,7 +145,20 @@ export const componentEditDialogLabels: Record<string, Record<string,string>> = 
     "wire": "eroalea",
     "potentiometer": "potentziometroa",
     "motor": "motorra",
-    "ground": "lurra"
+    "ground": "lurra",
+    "switch (SPST)": "etengailua (SPST)",
+    "push switch (SPST)": "sakagailua (SPST)",
+    "switch (SPDT)": "konmutadorea (SPDT)",
+    "switch (DPDT)": "konmutadorea (DPDT)",
+    "switch (SPDT, MBB)": "konmutadorea (SPDT, MBB)",
+    "analog switch": "etengailu analogikoa",
+    "analog switch (SPDT)": "konmutadore analogikoa (SPDT)",
+    "photoresistor": "fotoerresistentzia",
+    "thermistor": "termistorea",
+    "memristor": "memristorea",
+    "transistor": "transistorea",
+    "triode": "triodoa",
+    "LED": "LED"
   },
   "nl": {
     "Edit Component": "Component bewerken",
@@ -132,7 +184,20 @@ export const componentEditDialogLabels: Record<string, Record<string,string>> = 
     "wire": "draad",
     "potentiometer": "potentiometer",
     "motor": "motor",
-    "ground": "aarde"
+    "ground": "aarde",
+    "switch (SPST)": "schakelaar (SPST)",
+    "push switch (SPST)": "drukknop (SPST)",
+    "switch (SPDT)": "wisselschakelaar (SPDT)",
+    "switch (DPDT)": "wisselschakelaar (DPDT)",
+    "switch (SPDT, MBB)": "wisselschakelaar (SPDT, MBB)",
+    "analog switch": "analoge schakelaar",
+    "analog switch (SPDT)": "analoge wisselschakelaar (SPDT)",
+    "photoresistor": "fotoweerstand",
+    "thermistor": "thermistor",
+    "memristor": "memristor",
+    "transistor": "transistor",
+    "triode": "triode",
+    "LED": "LED"
   },
   "sv": {
     "Edit Component": "Redigera komponent",
@@ -158,7 +223,20 @@ export const componentEditDialogLabels: Record<string, Record<string,string>> = 
     "wire": "ledning",
     "potentiometer": "potentiometer",
     "motor": "motor",
-    "ground": "jord"
+    "ground": "jord",
+    "switch (SPST)": "strömbrytare (SPST)",
+    "push switch (SPST)": "tryckknapp (SPST)",
+    "switch (SPDT)": "omkopplare (SPDT)",
+    "switch (DPDT)": "omkopplare (DPDT)",
+    "switch (SPDT, MBB)": "omkopplare (SPDT, MBB)",
+    "analog switch": "analog brytare",
+    "analog switch (SPDT)": "analog omkopplare (SPDT)",
+    "photoresistor": "fotomotstånd",
+    "thermistor": "termistor",
+    "memristor": "memristor",
+    "transistor": "transistor",
+    "triode": "triod",
+    "LED": "LED"
   }
 };
 
