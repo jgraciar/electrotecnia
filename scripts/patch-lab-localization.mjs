@@ -1,16 +1,20 @@
 // Adapta el cargador de idiomas del CircuitJS actual, conservando los catálogos
 // oficiales y añadiendo las traducciones propias del laboratorio en los 16 idiomas de CircuitJS.
 import {readFileSync,writeFileSync,copyFileSync} from "node:fs";
-import {join} from "node:path";
+import {join,dirname} from "node:path";
 const [dir,translations]=process.argv.slice(2);
 if(!dir||!translations)throw Error("Uso: patch-lab-localization.mjs ts-dir LabTranslations.ts");
 copyFileSync(translations,join(dir,"LabTranslations.ts"));
+copyFileSync(join(dirname(translations),"LabTranslationsMenus.ts"),join(dir,"LabTranslationsMenus.ts"));
 function once(path,oldText,newText){
  const src=readFileSync(path,"utf8");
  if(src.split(oldText).length!==2)
   throw Error("Anclaje de traducciones ausente o duplicado: "+path+" "+oldText.slice(0,90));
  writeFileSync(path,src.replace(oldText,newText));
 }
+// TypeScript 6 permite imports .ts explícitos para el cargador nativo de Node.
+once(join(dir,"tsconfig.json"),'    "noEmit": true,',
+ '    "noEmit": true,\n    "allowImportingTsExtensions": true,');
 const locale=join(dir,"Locale.ts");
 once(locale,'import { moduleBaseURL } from "./ModuleBase";',
  'import { moduleBaseURL } from "./ModuleBase";\nimport { labTranslation } from "./LabTranslations";');
