@@ -40,7 +40,7 @@ try{
     const menuItem=await page.evaluate(()=>{
         const doc=document.querySelector("#circuit-frame")?.contentDocument;
         const label=Array.from(doc?.querySelectorAll(".itemLabel")??[])
-            .find(e=>e.textContent?.includes("Añadir impedancia Z"));
+            .find(e=>e.textContent?.includes("impedancia Z") && !e.textContent?.startsWith("Añadir "));
         return {label:label?.textContent,shortcut:label?.parentElement
             ?.querySelector(".shortcutHint")?.textContent?.trim()};
     });
