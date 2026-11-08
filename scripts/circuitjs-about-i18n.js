@@ -9,6 +9,12 @@
     lower.startsWith("cs") ? "csx" : lower.startsWith("ko") ? "kr" :
     lower.startsWith("no") || lower.startsWith("nn") ? "nb" : lower.split("-")[0];
   const strings = {
+    en: ["Original CircuitJS1, version ", "Original by Paul Falstad.",
+      "JavaScript conversion by Iain Sharp.",
+      "GitHub repository for reporting issues and viewing the original source: ",
+      "Thanks to: ", "This program uses free icons. See the ",
+      "authors and licenses of the icons and web fonts",
+      "For licensing details, visit ", "Source code (Paul): ", "Source code (Iain): "],
     es: ["Simulador de circuitos, versión ", "Original de Paul Falstad.", "Conversión a JavaScript de Iain Sharp.",
       "Repositorio de GitHub para comunicar incidencias y consultar el código fuente: ",
       "Agradecimientos a: ", "Este programa utiliza iconos libres. Para más información, consulta la ",
@@ -102,7 +108,14 @@
       "圖示與字型的作者及授權清單", "授權資訊：", "原始碼（Paul）：", "原始碼（Iain）："]
   };
   const t = strings[lang];
-  if (!t) return; // Inglés: conservar los textos originales.
+  if (!t) return;
+  // Identificar el motor original como tal: la versión propia es Circuit JGR 1.0.
+  // No cambiar la versión 5.0.4ts del motor que aparece en el span .ver.
+  const baseVersion={
+    en:"Original CircuitJS1, version ",
+    es:"CircuitJS1 original, versión ",
+    "ca-es-valencia":"CircuitJS1 original, versió "
+  };
   document.documentElement.lang = lang === "ca-es-valencia" ? "ca-ES-valencia" : lang === "csx" ? "cs" : lang === "kr" ? "ko" : lang;
   const p = [...document.querySelectorAll("div > p")];
   const lead = (index, value) => {
@@ -110,7 +123,7 @@
     const node = [...p[index].childNodes].find(x => x.nodeType === Node.TEXT_NODE);
     if (node) node.nodeValue = value;
   };
-  lead(0,t[0]); lead(1,t[1]); lead(2,t[2]); lead(3,t[3]);
+  lead(0,baseVersion[lang]||t[0]); lead(1,t[1]); lead(2,t[2]); lead(3,t[3]);
   // En los otros idiomas se conserva íntegra la relación original de autores.
   // El crédito es un único nodo de texto: no sustituirlo por el encabezado.
   const creditNode = p[4]?.firstChild;
