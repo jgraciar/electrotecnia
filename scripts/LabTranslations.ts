@@ -1,6 +1,7 @@
 import {uiSpanish,uiValencian} from "./LabTranslationsMenus.ts";
 import {nativeMenuExtensions} from "./LabTranslationsNativeMenus.ts";
 import {circuitJsSupplementKeys,circuitJsSupplement} from "./CircuitJsSupplementalUi.ts";
+import {circuitJsUiCompletenessKeys,circuitJsUiCompleteness} from "./CircuitJsUiCompleteness.ts";
 // Traducciones añadidas para los componentes propios del Laboratorio.
 // Las claves originales de CircuitJS se conservan en sus catálogos oficiales.
 // Catálogos adicionales incorporados directamente para compatibilidad con Node y TypeScript.
@@ -342,6 +343,13 @@ const originalExampleGaps: Record<string,Record<string,string>> = {
 for(const [code,values] of Object.entries(originalExampleGaps))
  for(const [key,value] of Object.entries(values))dictionaries[code].set(key,value);
 
+// Completar etiquetas visibles en opciones, menús y osciloscopios.
+for(const code of labLanguageCodes){
+ const row=circuitJsUiCompleteness[code];
+ if(!row||row.length!==circuitJsUiCompletenessKeys.length)
+  throw Error("Interfaz incompleta: "+code);
+ circuitJsUiCompletenessKeys.forEach((key,index)=>dictionaries[code].set(key,row[index]));
+}
 export function labTranslation(language:string,key:string):string|null{
  const normalized=language.toLowerCase().replace(/_/g,"-");
  const base=normalized.split("-")[0];
