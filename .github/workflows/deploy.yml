@@ -106,11 +106,15 @@ jobs:
       - name: Comprobar traduccion efectiva del dialogo de deslizadores
         run: node --experimental-strip-types laboratorio/tests/verify-slider-dialog-locale.mjs circuitjs-src/ts
 
+      - name: Comprobar cobertura integral del valenciano en CircuitJS
+        run: node laboratorio/tests/verify-valencian-complete.mjs circuitjs-src/ts
+
       - name: Instalar dependencias y compilar CircuitJS
         working-directory: circuitjs-src/ts
         run: |
           npm ci
           npm run build
+          test -s dist/locale/locale_ca-es-valencia.txt || { echo "::error::No se publica el catálogo valenciano"; exit 1; }
 
       - name: Confirmar vatímetro ampliado en el JavaScript compilado
         working-directory: circuitjs-src/ts
