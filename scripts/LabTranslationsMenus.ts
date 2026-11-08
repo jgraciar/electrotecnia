@@ -20,6 +20,8 @@ export const uiSpanish: Record<string,string> = {
   "Test Point": "Punto de prueba",
   "To save this URL select it all (eg click in text and type control-A) and copy to your clipboard (eg control-C) before pasting to a suitable place.": "Para guardar esta URL, selecciona todo el texto (Ctrl+A), cópialo (Ctrl+C) y pégalo donde corresponda (Ctrl+V).",
   "To save this file select it all (eg click in text and type control-A) and copy to your clipboard (eg control-C) before pasting to an empty text file (eg on Windows Notepad) and saving as a new file.": "Para guardar este archivo, selecciona todo el texto (Ctrl+A), cópialo (Ctrl+C), pégalo en un archivo de texto nuevo (por ejemplo, en el Bloc de notas de Windows) y guárdalo.",
+  "Scroll Speed": "Velocidad de desplazamiento",
+  "JK\\q01: Reset": "JK\\q01: Reposición",
   "Zoom In": "Ampliar",
   "Zoom Out": "Reducir",
   "serial in left": "entrada serie por la izquierda",
