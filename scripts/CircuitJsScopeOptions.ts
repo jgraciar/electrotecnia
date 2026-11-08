@@ -1,6 +1,6 @@
 // Traducción de todas las etiquetas de propiedades y menú del osciloscopio
 // a las seis lenguas añadidas a CircuitJS sin catálogo original.
-export const scopeOptionKeys=["Scope Properties","Reset Position","Apply","# of Divisions","Edge","Level","Trail Persistence (time steps)","OK","Save as Default","None","default","Scale","/div","Position","Max Value","Vertical Scale","Horizontal Scale","Trigger","Plots","Show Voltage","Show Current","Show Ib","Show Ic","Show Ie","Show Vbe","Show Vbc","Show Vce","Show Power Consumed","Show Charge","Show Resistance","Show Spectrum","Log Spectrum","Show Vce vs Ic","X-Y Plots","Show V vs I","Plot X/Y","X Axis:","Y Axis:","Brightness:","Red:","Green:","Blue:","Show Info","Show Scale","Show Peak Value","Show Negative Peak Value","Show Peak-to-Peak","Show Frequency","Show Average","Show RMS Average","Show Duty Cycle","Show Phase Angle","Show Extended Info","Custom Label","Auto","Auto (Max Scale)","Manual","DC Coupled","AC Coupled","Free Run","Normal","Rising","Falling","Max Scale","Remove Scope","Dock Scope","Undock Scope","Stack","Unstack","Combine","Remove Plot","Reset","Export CSV...","Export Image...","Properties..."] as const;
+export const scopeOptionKeys=["Scope Properties","Reset Position","Apply","# of Divisions","Edge","Level","Trail Persistence (time steps)","OK","Save as Default","None","default","Scale","/div","Position","Max Value","Vertical Scale","Horizontal Scale","Trigger","Plots","Show Voltage","Show Current","Show Ib","Show Ic","Show Ie","Show Vbe","Show Vbc","Show Vce","Show Power Consumed","Show Charge","Show Resistance","Show Spectrum","Log Spectrum","Show Vce vs Ic","X-Y Plots","Show V vs I","Plot X/Y","X Axis:","Y Axis:","Brightness:","Red:","Green:","Blue:","Show Info","Show Scale","Show Peak Value","Show Negative Peak Value","Show Peak-to-Peak","Show Frequency","Show Average","Show RMS Average","Show Duty Cycle","Show Phase Angle","Show Extended Info","Custom Label","Auto","Auto (Max Scale)","Manual","DC Coupled","AC Coupled","Free Run","Normal","Rising","Falling","Max Scale","Remove Scope","Dock Scope","Undock Scope","Stack","Unstack","Combine","Remove Plot","Reset","Export CSV...","Export Image...","Properties...","Duty cycle ","Phase angle: "] as const;
 export const scopeOptionTranslations: Record<string,string[]> = {
   "ca": [
     "Propietats de l'oscil·loscopi",
@@ -77,7 +77,9 @@ export const scopeOptionTranslations: Record<string,string[]> = {
     "Restableix",
     "Exporta CSV...",
     "Exporta la imatge...",
-    "Propietats..."
+    "Propietats...",
+    "Cicle de treball ",
+    "Angle de fase: "
   ],
   "ca-es-valencia": [
     "Propietats de l'oscil·loscopi",
@@ -154,7 +156,9 @@ export const scopeOptionTranslations: Record<string,string[]> = {
     "Restablix",
     "Exporta CSV...",
     "Exporta la imatge...",
-    "Propietats..."
+    "Propietats...",
+    "Cicle de treball ",
+    "Angle de fase: "
   ],
   "gl": [
     "Propiedades do osciloscopio",
@@ -231,7 +235,9 @@ export const scopeOptionTranslations: Record<string,string[]> = {
     "Restablecer",
     "Exportar CSV...",
     "Exportar imaxe...",
-    "Propiedades..."
+    "Propiedades...",
+    "Ciclo de traballo ",
+    "Ángulo de fase: "
   ],
   "eu": [
     "Osziloskopioaren propietateak",
@@ -308,7 +314,9 @@ export const scopeOptionTranslations: Record<string,string[]> = {
     "Berrezarri",
     "Esportatu CSV...",
     "Esportatu irudia...",
-    "Propietateak..."
+    "Propietateak...",
+    "Lan-zikloa ",
+    "Fase-angelua: "
   ],
   "nl": [
     "Oscilloscoopeigenschappen",
@@ -385,7 +393,9 @@ export const scopeOptionTranslations: Record<string,string[]> = {
     "Herstellen",
     "CSV exporteren...",
     "Afbeelding exporteren...",
-    "Eigenschappen..."
+    "Eigenschappen...",
+    "Arbeidscyclus ",
+    "Fasehoek: "
   ],
   "sv": [
     "Oscilloskopets egenskaper",
@@ -462,6 +472,8 @@ export const scopeOptionTranslations: Record<string,string[]> = {
     "Återställ",
     "Exportera CSV...",
     "Exportera bild...",
-    "Egenskaper..."
+    "Egenskaper...",
+    "Arbetscykel ",
+    "Fasvinkel: "
   ]
 };
