@@ -19,6 +19,9 @@ for(const line of lexicon.split(/\r?\n/)){
  if(key&&value)words.set(key,value);
 }
 function word(w){
+ // Los identificadores eléctricos de un solo carácter son símbolos, no palabras.
+ // Y (admitancia/eje), V, I, R, X, Z, etc. nunca deben pasar por el glosario.
+ if(/^[A-Z]$/.test(w))return w;
  const low=w.toLocaleLowerCase("es");
  let result=words.get(low);
  if(!result){
