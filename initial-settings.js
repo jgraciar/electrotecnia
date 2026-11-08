@@ -143,6 +143,13 @@ const previousFormat=get("labRegionalFormat");
 let format=previousFormat==="eu"||previousFormat==="uk"?previousFormat:
  previousFormat==="custom"?(get("labDecimalSeparator")==="."?"uk":"eu"):
  (detected==="en"?"uk":"eu");
+// Normalizar también el almacenamiento: sin ello CircuitJS podría seguir
+// interpretando el formato personalizado antiguo aunque la ventana muestre EU/UK.
+if(previousFormat==="custom"){
+ set("labRegionalFormat",format);
+ set("labDecimalSeparator",format==="eu"?",":".");
+ set("labGroupingSeparator",format==="eu"?".":",");
+}
 let unitScale=get("labDisplayUnitScale")||"auto";
 let digits=Math.max(0,Math.min(12,Number(get("labDecimalDigits")??4)||0));
 let decimal=get("labDecimalSeparator")||",";
