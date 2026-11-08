@@ -1,0 +1,105 @@
+# Colocar este archivo en jgraciar/jgraciar.github.io,
+# ruta: .github/workflows/pages.yml
+# Publica Circuit JGR 1.0 en https://jgraciar.github.io/circuitjgr.html.
+# El proyecto original y el laboratorio no se modifican.
+name: Publicar Circuit JGR 1.0
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Compilar Circuit JGR con entrada propia
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Obtener adaptación Circuit JGR
+        uses: actions/checkout@v4
+        with:
+          repository: jgraciar/electrotecnia
+          ref: circuits-jgr-1.0
+          path: adaptacion
+          persist-credentials: false
+
+      - name: Obtener versión base de CircuitJS
+        uses: actions/checkout@v4
+        with:
+          repository: pfalstad/circuitjs1
+          ref: 8ac55f22a03606579b822b3dccd4dc10de1ddc5b
+          path: circuitjs-src
+          persist-credentials: false
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Preparar motor, componentes, traducciones e identidad
+        run: |
+          node adaptacion/scripts/embed-default-aron.mjs circuitjs-src/ts/CirSim.ts adaptacion/tests/fixtures/sistema-iii-n-startup.xml
+          node adaptacion/scripts/patch-wattmeter-powers.mjs circuitjs-src/ts/WattmeterTrueElm.ts adaptacion/scripts/LabPowerMeasurement.ts
+          node adaptacion/scripts/patch-impedance.mjs circuitjs-src/ts adaptacion/scripts/ImpedanceElm.ts adaptacion/scripts/LabImpedance.ts
+          node adaptacion/scripts/patch-pv-inverter.mjs circuitjs-src/ts adaptacion/scripts/PVInverterElm.ts adaptacion/scripts/LabPVInverter.ts
+          node adaptacion/scripts/patch-lab-localization.mjs circuitjs-src/ts adaptacion/scripts/LabTranslations.ts
+          node adaptacion/scripts/prepare-circuits-jgr.mjs circuitjs-src/ts
+          node --experimental-strip-types adaptacion/tests/verify-edit-regional-numbers.mjs circuitjs-src/ts
+          node --experimental-strip-types adaptacion/tests/verify-edit-dialog-titles.mjs circuitjs-src/ts
+
+      - name: Compilar circuitjgr.html como entrada real
+        working-directory: circuitjs-src/ts
+        run: |
+          npm ci
+          npm run build
+          test -s dist/circuitjgr.html
+          ! test -f dist/circuitjs.html
+
+      - name: Generar sitio raíz y portada
+        run: |
+          node adaptacion/scripts/package-circuits-jgr.mjs circuitjs-src/ts site-root adaptacion
+          test -s site-root/index.html
+          test -s site-root/circuitjgr.html
+          test -s site-root/circuitjs/about.html
+          test -s site-root/LICENSE-GPLv3.txt
+          test -s site-root/COPYING-CircuitJS.txt
+
+      - name: Instalar Chromium para prueba funcional
+        working-directory: adaptacion/tests
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Verificar portada, simulador y Acerca de
+        run: |
+          python3 -m http.server 8767 --directory site-root >/tmp/circuitjgr-http.log 2>&1 &
+          sleep 2
+          node adaptacion/tests/verify-circuits-jgr-root.mjs site-root
+
+      - name: Preparar GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Adjuntar sitio de Circuit JGR
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site-root
+
+  deploy:
+    name: Desplegar Circuit JGR en la raíz
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - name: Publicar en GitHub Pages
+        id: pages
+        uses: actions/deploy-pages@v4
