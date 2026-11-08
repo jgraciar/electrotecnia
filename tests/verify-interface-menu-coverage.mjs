@@ -71,7 +71,7 @@ for(const [file,key] of expectedExamples){
 }
 // Auditar todas las entradas de Ejemplos de circuitos. Se usan las claves
 // originales del índice: nunca los nombres de archivo traducidos.
-const allExampleTitles=[...new Set(exampleLines.filter(line=>/^\\S+\\.txt /.test(line))
+const allExampleTitles=[...new Set(exampleLines.filter(line=>/^\S+\.txt /.test(line))
  .map(line=>line.slice(line.indexOf(" ")+1).trim()))];
 assert(allExampleTitles.length>=350,
  "El índice de ejemplos está incompleto: "+allExampleTitles.length);
