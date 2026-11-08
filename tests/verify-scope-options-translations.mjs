@@ -26,7 +26,8 @@ for(const pattern of [
 for(const match of sources.popup.matchAll(/addPlain\(\s*['"]([^'"]+)['"]/g))
  scopeLabels.add(match[1]);
 scopeLabels.add("Max Scale");
-const extraScopeLabels=[...scopeLabels].filter(key=>!scopeOptionKeys.includes(key));
+const extraScopeLabels=[...scopeLabels].filter(key=>
+ !scopeOptionKeys.includes(key)&&!circuitJsUiCompletenessKeys.includes(key));
 assert.deepEqual(extraScopeLabels,[],
  "CircuitJS ha añadido etiquetas de osciloscopio sin traducir");
 for(const key of ["Plot ","Max=","Min=","P-P="])
