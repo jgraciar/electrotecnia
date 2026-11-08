@@ -110,7 +110,7 @@ replaceOnce(opts,'        // add new options here (before the adjustTimeStep con
 replaceOnce(opts,'        if (n === 11)\n            CircuitElm.setDecimalDigits(Math.trunc(ei.value), true, true);\n        if (n === 12)\n            CircuitElm.setDecimalDigits(Math.trunc(ei.value), false, true);',
 `        if(n===11){
             if(!Number.isInteger(ei.value)||ei.value<0||ei.value>10){
-                ei.setError("Decimales: entero de 0 a 10");return;
+                ei.setError(Locale.LS("Decimal digits: integer from 0 to 10"));return;
             }
             CircuitElm.setDecimalDigits(ei.value,true,true);
             CircuitElm.setDecimalDigits(ei.value,false,true);
@@ -124,7 +124,7 @@ replaceOnce(opts,'        if (n === 11)\n            CircuitElm.setDecimalDigits
             const idx=ei.choice!.getSelectedIndex();
             const grouping=idx===0?".":idx===1?",":"";
             if(grouping && grouping===NumberFormat.decimalSeparator){
-                ei.setError("Los separadores deben ser distintos");return;
+                ei.setError(Locale.LS("Decimal and grouping separators must differ"));return;
             }
             NumberFormat.setSeparators(NumberFormat.decimalSeparator,grouping);
         }`);
@@ -165,11 +165,14 @@ replaceOnce(editDialog,'                    this.activeCol.appendChild(this.make
                     hint.style.cssText="color:#68727d;font-size:9px;font-weight:normal;";
                     const decimal=NumberFormat.decimalSeparator;
                     const grouping=NumberFormat.groupingSeparator;
-                    const regional=decimal==="," && grouping==="."?"europeo":
-                        decimal==="." && grouping===","?"anglosajón":"personalizado";
+                    const european=decimal==="," && grouping===".";
+                    const anglo=decimal==="." && grouping===",";
+                    const regional=european?Locale.LS("European number format"):
+                        anglo?Locale.LS("Anglo-American number format"):
+                        Locale.LS("Custom number format");
                     const example=grouping?"1"+grouping+"234"+decimal+"5678":"1234"+decimal+"5678";
-                    hint.textContent="; formato "+regional+
-                        (regional==="personalizado"?" ("+example+")":"");
+                    hint.textContent="; "+regional+
+                        (!european&&!anglo?" ("+example+")":"");
                     label.appendChild(hint);`);
 replaceOnce(editDialog,'        if (ei !== null && ei.dimensionless) return noCommaFormat(v);',
 '        if (ei !== null && ei.dimensionless) return NumberFormat.localizedInput(noCommaFormat(v));');
