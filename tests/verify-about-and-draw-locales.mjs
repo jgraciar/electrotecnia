@@ -132,12 +132,15 @@ for(const code of labLanguageCodes){
   }
  }
  if(code==="en"){
-  assert.equal(labels[0].childNodes[0].nodeValue,"Circuit Simulator version ");
+  assert.equal(labels[0].childNodes[0].nodeValue,"Original CircuitJS1, version ");
  }else{
   if(code!=="es" && code!=="ca-es-valencia")
    assert(labels[4].firstChild.nodeValue.includes("Edward Calver"),
     "Se han perdido los créditos al traducir Acerca de: "+code);
-  assert.notEqual(labels[0].childNodes[0].nodeValue,"Circuit Simulator version ",code+" About no traducido");
+  assert(labels[0].childNodes[0].nodeValue.includes("CircuitJS1"),
+   "La versión del motor original no está identificada: "+code);
+  assert.notEqual(labels[0].childNodes[0].nodeValue,"Circuit Simulator version ",
+   code+" Acerca de no traducido");
  }
  if(code==="es"||code==="ca-es-valencia"){
   assert(labels[4].textContent.includes("Edward Calver"),"Faltan los créditos: "+code);
