@@ -32,5 +32,23 @@ for(const key of ["File","Edit","Draw","Options","New Blank Circuit",
  assert(labTranslation("ca-es-valencia",key),
   "Falta traducción valenciana de menú: "+key);
 }
+// La traducción manual de CircuitJS debe cubrir los menús originales de cada
+// idioma instalado sin degradar sus traducciones oficiales existentes.
+const nativeCodes=["csx","da","de","es","fi","fr","it","ja","kr","nb","pl","pt","ru","zh-tw","zh"];
+for(const lang of nativeCodes){
+ const file=join(tsDir,"public/locale/locale_"+lang+".txt");
+ const source=readFileSync(file,"utf8");
+ const official=new Map([...source.matchAll(/^"(.*?)"="(.*)"$/gm)]
+  .map(m=>[m[1],m[2]]));
+ const uncovered=keys.filter(key=>labTranslation(lang,key)==null && !official.has(key));
+ assert.deepEqual(uncovered,[],"Menús con textos ingleses al seleccionar "+lang);
+ for(const essential of ["Add Controlled Voltage Source (2-terminal)",
+    "Add Controlled Current Source (2-terminal)","Find Component/Command...",
+    "Command Palette","Please select one or more subcircuits."]){
+  const result=labTranslation(lang,essential)??official.get(essential);
+  assert(result?.trim(),"Falta término técnico en "+lang+": "+essential);
+  assert.notEqual(result,essential,"Etiqueta inglesa sin traducir en "+lang+": "+essential);
+ }
+}
 console.log("OK: "+keys.length+" claves de menús originales con español cubierto; "+
  components.length+" componentes con traducción valenciana y comandos principales comprobados.");
