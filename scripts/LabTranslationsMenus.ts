@@ -7,6 +7,18 @@ export const uiSpanish: Record<string,string> = {
   "Export As SVG...": "Exportar como SVG...",
   "Find Component/Command...": "Buscar componente o comando...",
   "Command Palette": "Paleta de comandos",
+  "Export Image": "Exportar imagen",
+  "Transparent Background": "Fondo transparente",
+  "Type a command...": "Escribe un comando...",
+  "Recent": "Recientes",
+  // Cadenas del catálogo español original que seguían literalmente en inglés.
+  // Mantener en su forma original las siglas, componentes y señales eléctricas.
+  "Bessel vs Butterworth": "Bessel frente a Butterworth",
+  "LM137000 Gain Oddity": "Comportamiento anómalo de la ganancia del LM137000",
+  "Zoom 100%": "Ampliación al 100 %",
+  "inductor (sat)": "bobina saturable",
+  "dur = ": "duración = ",
+  "ext": "externo",
   "Please select one or more subcircuits.": "Selecciona uno o varios subcircuitos.",
   "Are you sure you want to delete ": "¿Seguro que quieres eliminar ",
   "Add Controlled Voltage Source (2-terminal)": "Fuente de tensión controlada (2 terminales)",
