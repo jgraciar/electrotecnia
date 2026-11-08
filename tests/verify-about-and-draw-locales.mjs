@@ -92,10 +92,12 @@ for(const code of labLanguageCodes){
   "Decimal digits: integer from 0 to 10","Decimal and grouping separators must differ"])
   assert(labTranslation(code,key)?.trim(),"Falta formato numérico "+code+" "+key);
 
- const labels=Array.from({length:16},(_,index)=>({
-  childNodes:[{nodeType:3,nodeValue:index===0?"Circuit Simulator version ":"Original by "}],
-  textContent:"",querySelector:()=>({textContent:"list of authors and licenses"})
- }));
+ const labels=Array.from({length:16},(_,index)=>{
+  const firstChild={nodeType:3,nodeValue:index===0?"Circuit Simulator version ":
+   index===4?"Thanks to: Edward Calver for 15 new components": "Original by "};
+  return {firstChild,childNodes:[firstChild],textContent:"",
+   querySelector:()=>({textContent:"list of authors and licenses"})};
+ });
  const dom={
   documentElement:{lang:"en"},
   querySelectorAll:()=>labels
@@ -110,6 +112,9 @@ for(const code of labLanguageCodes){
  if(code==="en"){
   assert.equal(labels[0].childNodes[0].nodeValue,"Circuit Simulator version ");
  }else{
+  if(code!=="es" && code!=="ca-es-valencia")
+   assert(labels[4].firstChild.nodeValue.includes("Edward Calver"),
+    "Se han perdido los créditos al traducir Acerca de: "+code);
   assert.notEqual(labels[0].childNodes[0].nodeValue,"Circuit Simulator version ",code+" About no traducido");
  }
  if(code==="es"||code==="ca-es-valencia"){
