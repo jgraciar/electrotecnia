@@ -148,6 +148,17 @@ for(const [oldText,newText] of [
  ['"Min=" + plot.getUnitText(this.scope.minValue)','Locale.LS("Min=") + plot.getUnitText(this.scope.minValue)'],
  ['"P-P=" + plot.getUnitText(this.scope.maxValue - this.scope.minValue)','Locale.LS("P-P=") + plot.getUnitText(this.scope.maxValue - this.scope.minValue)']
 ])once(scopeOverlays,oldText,newText);
+// Unidades por división: el texto "/div" aparecía fijado en inglés
+// sobre las escalas, incluso cuando el idioma de la interfaz era ruso.
+for(const [before,after] of [
+ ['+ "/div";','+ Locale.LS("/div");'],
+ ['+ "/div");','+ Locale.LS("/div"));']
+]){
+ const source=readFileSync(scopeOverlays,"utf8");
+ const count=source.split(before).length-1;
+ if(count<1)throw Error("Se ha modificado la leyenda de escalas: "+before);
+ writeFileSync(scopeOverlays,source.split(before).join(after));
+}
 const scopeProperties=join(dir,"ScopePropertiesDialog.ts");
 once(scopeProperties,"('Plot ' + (i + 1))","(Locale.LS('Plot ') + (i + 1))");
 const channelPrefix="'CH ' + (this.plotSelection + 1)";
