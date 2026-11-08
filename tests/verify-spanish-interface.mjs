@@ -41,6 +41,9 @@ assert.deepEqual(missing,[],"Cadenas visibles sin traducción al español");
 // Comprobar traducciones de ventanas que no figuraban en el catálogo español.
 const reviewed=[
  ["Export Image","Exportar imagen"],
+ ["Node {name} cannot be connected to ground","El nodo «{name}» no puede conectarse a tierra"],
+ ["Element {name} refers to a node outside the selection","El elemento «{name}» hace referencia a un nodo fuera de la selección"],
+ ["Node {name} is not used!","¡El nodo «{name}» no se utiliza!"],
  ["File too large!","¡El archivo es demasiado grande!"],
  ["Dropbox links must start https://www.dropbox.com/","Los enlaces de Dropbox deben empezar por https://www.dropbox.com/"],
  ["Transparent Background","Fondo transparente"],
@@ -105,5 +108,13 @@ assert(readFileSync(join(dir,"UIManager.ts"),"utf8")
 assert(readFileSync(join(dir,"ImportFromDropboxDialog.ts"),"utf8")
  .includes('window.alert(Locale.LS("Dropbox links must start https://www.dropbox.com/"))'),
  "La advertencia del enlace Dropbox sigue en inglés");
+const subcircuitText=readFileSync(join(dir,"GetCircuitAsSubcircuit.ts"),"utf8");
+for(const key of ["Node {name} cannot be connected to ground",
+ "Element {name} refers to a node outside the selection","Node {name} is not used!"]){
+ assert(subcircuitText.includes("Locale.LS("+JSON.stringify(key)+")"),
+  "El aviso de subcircuitos sigue en inglés: "+key);
+}
+assert(!/window\\.alert\\('Node "|window\\.alert\\('Element "/.test(subcircuitText),
+ "Persiste un aviso de subcircuitos sin traducir");
 console.log("OK español: "+files.length+" archivos, "+found.size+
  " etiquetas visibles y "+reviewed.length+" traducciones revisadas.");
