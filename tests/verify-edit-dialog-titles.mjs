@@ -12,7 +12,8 @@ if(!dir)throw Error("Uso: verify-edit-dialog-titles.mjs <ts-dir>");
 const source=readFileSync(join(dir,"EditDialog.ts"),"utf8");
 assert(source.includes('Locale.LS("Edit Component") + ": " + Locale.LS(componentName)'),
  "El encabezado sigue buscando la frase dinámica completa en inglés");
-assert(source.includes("ce instanceof CircuitElm && !ce.getEditTitle"),
+assert(source.includes("const customTitle = !!ce.getEditTitle;") &&
+ source.includes("!customTitle && ce instanceof CircuitElm"),
  "No se distingue el título de un componente del de otras ventanas");
 assert(source.includes(": Locale.LS(title);"),
  "Se han alterado los títulos específicos de las ventanas");
