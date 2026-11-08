@@ -63,7 +63,7 @@ export const generalOptionTranslations: Record<string,string[]> = {
     "Sensibilitat de la roda del ratolí",
     "Calcula automàticament el punt de treball de CC en reiniciar",
     "Ajusta automàticament el pas de temps",
-    "Mètode de resolució matricial",
+    "Resolutor matricial",
     "Grandària de la lletra dels valors",
     "Duració mínima del pas de temps (s)",
     "Velocitat de simulació",
