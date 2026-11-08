@@ -30,6 +30,8 @@ function word(w){
   for(const [re,repl] of suffixes)
    if(re.test(result)){result=result.replace(re,repl);break;}
  }
+ // Conservar MOSFETs, NiMH, mA y otras siglas con mayúsculas internas.
+ if(!words.has(low)&&/[A-Z].*[A-Z]|[a-z][A-Z]/.test(w))return w;
  if(w===w.toLocaleUpperCase("es"))return result.toLocaleUpperCase("ca");
  if(w[0]===w[0].toLocaleUpperCase("es")&&
     w.slice(1)===w.slice(1).toLocaleLowerCase("es"))
