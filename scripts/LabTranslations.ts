@@ -364,6 +364,22 @@ for(const [source,keys] of [
   keys.forEach((key,index)=>dictionaries[code].set(key,row[index]));
  }
 }
+// Corregir anglicismos de los catálogos oficiales en los paneles de opciones
+// y osciloscopios. Se mantienen las siglas técnicas y los nombres propios.
+const reviewedNativeLabels:Record<string,Record<string,string>>={
+ da:{"Trigger":"Udløsning","Plots":"Grafer","Plot X/Y":"Tegn X/Y","Auto":"Automatisk"},
+ de:{"Trigger":"Auslöser","Plots":"Diagramme","Auto":"Automatisch","Free Run":"Freilauf","Reset":"Zurücksetzen"},
+ es:{"Auto":"Automático"},
+ fi:{"Auto":"Automaattinen","Manual":"Manuaalinen"},
+ fr:{"Auto":"Automatique","Reset":"Réinitialiser"},
+ it:{"Trigger":"Attivazione","Auto":"Automatico","Free Run":"Funzionamento libero","Reset":"Ripristina"},
+ nb:{"Trigger":"Utløser","Auto":"Automatisk"},
+ pl:{"Auto":"Automatycznie"},
+ pt:{"Auto":"Automático"},
+ ru:{"Reset":"Сброс"}
+};
+for(const [code,labels] of Object.entries(reviewedNativeLabels))
+ for(const [key,value] of Object.entries(labels))dictionaries[code].set(key,value);
 export function labTranslation(language:string,key:string):string|null{
  const normalized=language.toLowerCase().replace(/_/g,"-");
  const base=normalized.split("-")[0];
