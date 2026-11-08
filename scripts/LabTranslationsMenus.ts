@@ -3,6 +3,7 @@
 // El valenciano utiliza la terminología de la Acadèmia Valenciana de la Llengua.
 export const uiSpanish: Record<string,string> = {
   "Export As Image...": "Exportar como imagen...",
+  "Show Cursor Cross Hairs": "Mostrar la cruz del cursor",
   "Export As SVG...": "Exportar como SVG...",
   "Find Component/Command...": "Buscar componente o comando...",
   "Command Palette": "Paleta de comandos",
