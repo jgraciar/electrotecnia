@@ -160,9 +160,34 @@ try{
       "Comando del menú aún en inglés: "+english);
     }
    }
-   if(c.expected==="ca-es-valencia")
+   if(c.expected==="ca-es-valencia"){
+    const shell=await page.evaluate(()=>({
+     title:document.title,
+     heading:document.querySelector(".header h1")?.textContent?.trim(),
+     publications:document.querySelector('[data-mode="publications"]')?.textContent?.trim(),
+     generator:document.querySelector("#generator-controls h2")?.textContent?.trim(),
+     phase:document.querySelector("#threephase-controls h2")?.textContent?.trim(),
+     scope:document.querySelector("#scope-panel h2")?.textContent?.trim(),
+     activity:document.querySelector("#publicationActivityType option[value='comprobacion']")?.textContent?.trim(),
+     filePlaceholder:document.querySelector("#wulflemmValue")?.getAttribute("placeholder"),
+     scopeSubtitle:document.querySelector("#scope-subtitle")?.textContent?.trim(),
+     circuitWarning:document.querySelector(".disclaimer")?.textContent?.trim(),
+     originalStatements:[...document.querySelectorAll(".practice-statement")].map(x=>x.textContent)
+    }));
+    assert.equal(shell.title,"Laboratori virtual d'Electrotècnia");
+    assert.equal(shell.heading,"Laboratori virtual");
+    assert.equal(shell.publications,"Publicacions");
+    assert.equal(shell.generator,"Generador de funcions");
+    assert.equal(shell.phase,"Xarxa trifàsica equilibrada");
+    assert.equal(shell.scope,"Oscil·loscopi virtual");
+    assert.equal(shell.activity,"Comprovació");
+    assert.equal(shell.filePlaceholder,"Valor nou");
+    assert(shell.scopeSubtitle?.startsWith("Senyal de CircuitJS"),"Subtítol del simulador en castellà");
+    assert(shell.circuitWarning?.includes("No connectes xarxes de 230/400 V"),
+     "S'ha de conservar l'avís elèctric en valencià");
     assert(localeResponses.some(url=>url.includes("/locale/locale_ca-es-valencia.txt")),
      "El valencià s'ha de carregar del seu catàleg, no del fitxer espanyol");
+   }
    assert.deepEqual(errors,[],"Errores JS para "+c.expected);
   }finally{await context.close();}
  }
