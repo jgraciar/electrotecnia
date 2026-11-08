@@ -14,6 +14,13 @@ try{
  const context=await browser.newContext({locale:"es-ES",viewport:{width:1280,height:850}});
  const page=await context.newPage();
  page.on("pageerror",error=>console.error("Error en Circuit JGR:",error.message));
+ await page.goto("http://127.0.0.1:8767/",{waitUntil:"domcontentloaded"});
+ assert.equal(await page.title(),"Circuit JGR | Inicio");
+ assert.equal(await page.locator('a[href="./circuitjgr.html"]').count(),1,
+  "La portada debe ofrecer acceso al simulador");
+ assert.equal(await page.locator('a[href="./electrotecnia/"]').count(),1,
+  "La portada debe conservar el acceso al laboratorio");
+
  await page.goto("http://127.0.0.1:8767/circuitjgr.html",{waitUntil:"domcontentloaded"});
  assert.equal(await page.title(),"Circuit JGR 1.0");
  await page.locator("#lab-start-modal").waitFor({state:"visible",timeout:30000});
@@ -33,6 +40,7 @@ try{
  const files=await page.locator('#circuits-jgr-identity a').evaluateAll(
   nodes=>nodes.map(n=>n.getAttribute("href")));
  assert(files.includes("../LICENSE-GPLv3.txt"));
+ console.log("OK: portada principal con accesos a Circuit JGR y laboratorio");
  console.log("OK: Vite abre Circuit JGR 1.0 en la raíz, configuración regional "+
   "y Acerca de con autor, créditos y licencia; sin rutas del laboratorio.");
  await context.close();
