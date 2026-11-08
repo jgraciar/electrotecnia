@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {labTranslation} from "../scripts/LabTranslations.ts";
+import {componentKeys,otherMenuKeys} from "../scripts/LabTranslationsOtherComponents.ts";
 
 const tsDir=process.argv[2];
 if(!tsDir)throw Error("Uso: verify-interface-menu-coverage.mjs <directorio ts de CircuitJS>");
@@ -49,6 +50,20 @@ for(const lang of nativeCodes){
   assert(result?.trim(),"Falta término técnico en "+lang+": "+essential);
   assert.notEqual(result,essential,"Etiqueta inglesa sin traducir en "+lang+": "+essential);
  }
+}
+// Los cinco idiomas incorporados tienen 147 elementos y 98 comandos
+// independientes de los textos de la interfaz del laboratorio.
+assert.deepEqual(componentKeys,components,
+ "CircuitJS cambió su menú: deben revisarse las nuevas denominaciones eléctricas");
+const currentOther=keys.filter(key=>!components.includes(key));
+assert.deepEqual(otherMenuKeys,currentOther,
+ "CircuitJS cambió los comandos del menú: faltan traducciones por revisar");
+for(const lang of ["ca","gl","eu","nl","sv"]){
+ const missing=keys.filter(key=>!labTranslation(lang,key)?.trim());
+ assert.deepEqual(missing,[],"Faltan opciones de menú en "+lang);
+ for(const key of components)
+  assert.notEqual(labTranslation(lang,key),key,
+   "Texto de componente no traducido: "+lang+" "+key);
 }
 console.log("OK: "+keys.length+" claves de menús originales con español cubierto; "+
  components.length+" componentes con traducción valenciana y comandos principales comprobados.");
