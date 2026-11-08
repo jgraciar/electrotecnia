@@ -9,6 +9,18 @@ const dir=process.argv[2];
 if(!dir)throw Error("Uso: verify-edit-regional-numbers.mjs <ts-dir>");
 const source=readFileSync(join(dir,"EditDialog.ts"),"utf8");
 const formatter=readFileSync(join(dir,"CircuitJsEditNumbers.ts"),"utf8");
+const optionsSource=readFileSync(join(dir,"EditOptions.ts"),"utf8");
+// La opción de miles se muestra siempre a continuación del separador decimal:
+// el índice 20 original de CircuitJS es condicional (paso de tiempo mínimo).
+assert(optionsSource.includes('if(n===13){\n            const ei=new EditInfo("Separador de miles"'),
+ "El separador de miles debe estar inmediatamente después del decimal");
+assert(optionsSource.includes('if(n>=14)n--;'),
+ "No se han desplazado correctamente las opciones posteriores");
+assert(optionsSource.includes('if (n === 20 && this.sim.adjustTimeStep)'),
+ "Debe conservarse el campo condicional de tamaño mínimo del paso de tiempo");
+assert(optionsSource.includes('new EditInfo("Minimum time step size (s)"'),
+ "La opción de tiempo mínimo no se debe confundir con el separador de miles");
+
 for(const fragment of [
  "formatCircuitEditValue(this.unitString(ei), Locale.activeLanguage)",
  "formatCircuitEditValue(EditDialog.unitStringVal(ei, next), Locale.activeLanguage)",
