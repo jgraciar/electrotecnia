@@ -138,11 +138,29 @@ const autoNames={
  ru:"Автоматически (браузер)",zh:"自动（浏览器）",
  "zh-tw":"自動（瀏覽器）",ja:"自動（ブラウザー）",kr:"자동 (브라우저)"
 };
-let format=get("labRegionalFormat")||((detected==="en")?"uk":"eu");
+const previousFormat=get("labRegionalFormat");
+// Conservar el separador decimal de configuraciones personalizadas anteriores.
+let format=previousFormat==="eu"||previousFormat==="uk"?previousFormat:
+ previousFormat==="custom"?(get("labDecimalSeparator")==="."?"uk":"eu"):
+ (detected==="en"?"uk":"eu");
 let unitScale=get("labDisplayUnitScale")||"auto";
 let digits=Math.max(0,Math.min(12,Number(get("labDecimalDigits")??4)||0));
 let decimal=get("labDecimalSeparator")||",";
 let grouping=get("labGroupingSeparator")??".";
+const inSimulator=/(?:\\/)(?:circuitjs|circuitjgr)\\.html$/i.test(location.pathname);
+const simulatorAccept={
+ en:"Save and open CircuitJS",es:"Guardar y abrir CircuitJS",
+ fr:"Enregistrer et ouvrir CircuitJS",de:"Speichern und CircuitJS öffnen",
+ it:"Salva e apri CircuitJS",pt:"Guardar e abrir CircuitJS",
+ ca:"Desa i obre CircuitJS","ca-es-valencia":"Guarda i obri CircuitJS",
+ gl:"Gardar e abrir CircuitJS",eu:"Gorde eta ireki CircuitJS",
+ nl:"Opslaan en CircuitJS openen",sv:"Spara och öppna CircuitJS",
+ da:"Gem og åbn CircuitJS",fi:"Tallenna ja avaa CircuitJS",
+ nb:"Lagre og åpne CircuitJS",pl:"Zapisz i otwórz CircuitJS",
+ csx:"Uložit a otevřít CircuitJS",ru:"Сохранить и открыть CircuitJS",
+ zh:"保存并打开 CircuitJS","zh-tw":"儲存並開啟 CircuitJS",
+ ja:"保存して CircuitJS を開く",kr:"저장하고 CircuitJS 열기"
+};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function render(){
  const t=catalogs[dialogLanguage]||catalogs.en;
@@ -153,7 +171,7 @@ function render(){
  const preview=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,gs)+(parts[1]?ds+parts[1]:"");
  const original=String(sample).split(".");
  const rawPreview=original[0].replace(/\B(?=(\d{3})+(?!\d))/g,gs)+ds+original[1];
- document.getElementById("lab-start-modal").innerHTML='<div class="lab-start-card" role="dialog" aria-modal="true" aria-labelledby="lab-start-title"><h2 id="lab-start-title">'+esc(t[0])+'</h2><p>'+esc(t[1])+'</p><label>'+esc(t[2])+'<select id="lab-start-language"><option value="auto" '+(languageMode==="auto"?"selected":"")+'>'+esc(autoNames[dialogLanguage]||autoNames.en)+' ('+esc(names[detected])+')</option>'+Object.entries(names).map(([code,name])=>'<option value="'+code+'" '+(languageMode==="manual"&&language===code?"selected":"")+'>'+esc(name)+'</option>').join("")+'</select></label><fieldset><legend>'+esc(t[3])+'</legend>'+["eu","uk","custom"].map((v,i)=>'<label class="lab-start-choice"><input type="radio" name="lab-start-format" value="'+v+'" '+(format===v?"checked":"")+'>'+esc(t[i+4])+'</label>').join("")+'</fieldset>'+(format==="custom"?'<div class="lab-start-pair"><label>'+esc(t[8])+'<select id="lab-start-decimal"><option value="," '+(decimal===","?"selected":"")+'>,</option><option value="." '+(decimal==="."?"selected":"")+'>.</option></select></label><label>'+esc(t[9])+'<select id="lab-start-group"><option value="." '+(grouping==="."?"selected":"")+'>.</option><option value="," '+(grouping===","?"selected":"")+'>,</option><option value="" '+(grouping===""?"selected":"")+'>'+esc(t[12])+'</option></select></label></div>':"")+'<div class="lab-start-digits"><span class="lab-start-digits-label">'+esc(t[7])+'</span><div class="lab-start-stepper"><button type="button" id="lab-start-minus" aria-label="'+esc(({en:"Decrease decimals",sv:"Färre decimaler",es:"Disminuir decimales",fr:"Réduire les décimales",de:"Dezimalstellen verringern",it:"Riduci decimali",pt:"Diminuir casas decimais",nl:"Minder decimalen",pl:"Zmniejsz liczbę miejsc dziesiętnych",csx:"Snížit počet desetinných míst",da:"Færre decimaler",fi:"Vähennä desimaaleja",nb:"Færre desimaler",ru:"Уменьшить число знаков",zh:"减少小数位数","zh-tw":"減少小數位數",ja:"小数桁数を減らす",kr:"소수 자릿수 줄이기"})[dialogLanguage]||"Decrease decimals") +'" '+(digits===0?'disabled':'')+'>−</button><output id="lab-start-digits" aria-live="polite">'+digits+'</output><button type="button" id="lab-start-plus" aria-label="'+esc(({en:"Increase decimals",sv:"Fler decimaler",es:"Aumentar decimales",fr:"Augmenter les décimales",de:"Dezimalstellen erhöhen",it:"Aumenta decimali",pt:"Aumentar casas decimais",nl:"Meer decimalen",pl:"Zwiększ liczbę miejsc dziesiętnych",csx:"Zvýšit počet desetinných míst",da:"Flere decimaler",fi:"Lisää desimaaleja",nb:"Flere desimaler",ru:"Увеличить число знаков",zh:"增加小数位数","zh-tw":"增加小數位數",ja:"小数桁数を増やす",kr:"소수 자릿수 늘리기"})[dialogLanguage]||"Increase decimals") +'" '+(digits===12?'disabled':'')+'>+</button></div><small>0–12</small></div><label>'+esc((unitLabels[dialogLanguage]||unitLabels.en)[0])+'<select id="lab-start-unit-scale">'+["auto","micro","milli","base","kilo"].map((v,i)=>'<option value="'+v+'" '+(unitScale===v?"selected":"")+'>'+esc((unitLabels[dialogLanguage]||unitLabels.en)[i+1])+'</option>').join("")+'</select></label><p class="lab-start-precision">'+esc(precisionNotes[dialogLanguage]||precisionNotes.en)+'</p><div class="lab-start-preview"><small>'+esc(t[10])+'</small><strong>'+esc(preview)+'</strong></div><p class="lab-start-settings-help">'+esc(settingsHelp[dialogLanguage]||settingsHelp.es)+'</p><button type="button" id="lab-start-accept">'+esc(t[11])+'</button></div>';
+ document.getElementById("lab-start-modal").innerHTML='<div class="lab-start-card" role="dialog" aria-modal="true" aria-labelledby="lab-start-title"><h2 id="lab-start-title">'+esc(t[0])+'</h2><p>'+esc(t[1])+'</p><label>'+esc(t[2])+'<select id="lab-start-language"><option value="auto" '+(languageMode==="auto"?"selected":"")+'>'+esc(autoNames[dialogLanguage]||autoNames.en)+' ('+esc(names[detected])+')</option>'+Object.entries(names).map(([code,name])=>'<option value="'+code+'" '+(languageMode==="manual"&&language===code?"selected":"")+'>'+esc(name)+'</option>').join("")+'</select></label><fieldset><legend>'+esc(t[3])+'</legend>'+["eu","uk"].map((v,i)=>'<label class="lab-start-choice"><input type="radio" name="lab-start-format" value="'+v+'" '+(format===v?"checked":"")+'>'+esc(t[i+4])+'</label>').join("")+'</fieldset>'+'<div class="lab-start-digits"><span class="lab-start-digits-label">'+esc(t[7])+'</span><div class="lab-start-stepper"><button type="button" id="lab-start-minus" aria-label="'+esc(({en:"Decrease decimals",sv:"Färre decimaler",es:"Disminuir decimales",fr:"Réduire les décimales",de:"Dezimalstellen verringern",it:"Riduci decimali",pt:"Diminuir casas decimais",nl:"Minder decimalen",pl:"Zmniejsz liczbę miejsc dziesiętnych",csx:"Snížit počet desetinných míst",da:"Færre decimaler",fi:"Vähennä desimaaleja",nb:"Færre desimaler",ru:"Уменьшить число знаков",zh:"减少小数位数","zh-tw":"減少小數位數",ja:"小数桁数を減らす",kr:"소수 자릿수 줄이기"})[dialogLanguage]||"Decrease decimals") +'" '+(digits===0?'disabled':'')+'>−</button><output id="lab-start-digits" aria-live="polite">'+digits+'</output><button type="button" id="lab-start-plus" aria-label="'+esc(({en:"Increase decimals",sv:"Fler decimaler",es:"Aumentar decimales",fr:"Augmenter les décimales",de:"Dezimalstellen erhöhen",it:"Aumenta decimali",pt:"Aumentar casas decimais",nl:"Meer decimalen",pl:"Zwiększ liczbę miejsc dziesiętnych",csx:"Zvýšit počet desetinných míst",da:"Flere decimaler",fi:"Lisää desimaaleja",nb:"Flere desimaler",ru:"Увеличить число знаков",zh:"增加小数位数","zh-tw":"增加小數位數",ja:"小数桁数を増やす",kr:"소수 자릿수 늘리기"})[dialogLanguage]||"Increase decimals") +'" '+(digits===12?'disabled':'')+'>+</button></div><small>0–12</small></div><label>'+esc((unitLabels[dialogLanguage]||unitLabels.en)[0])+'<select id="lab-start-unit-scale">'+["auto","micro","milli","base","kilo"].map((v,i)=>'<option value="'+v+'" '+(unitScale===v?"selected":"")+'>'+esc((unitLabels[dialogLanguage]||unitLabels.en)[i+1])+'</option>').join("")+'</select></label><p class="lab-start-precision">'+esc(precisionNotes[dialogLanguage]||precisionNotes.en)+'</p><div class="lab-start-preview"><small>'+esc(t[10])+'</small><strong>'+esc(preview)+'</strong></div><p class="lab-start-settings-help">'+esc(inSimulator?"":(settingsHelp[dialogLanguage]||settingsHelp.es))+'</p><button type="button" id="lab-start-accept">'+esc(inSimulator?(simulatorAccept[dialogLanguage]||simulatorAccept.en):t[11])+'</button></div>';
  document.getElementById("lab-start-language").onchange=e=>{
  languageMode=e.target.value==="auto"?"auto":"manual";
  language=languageMode==="auto"?detect():e.target.value;
@@ -163,10 +181,6 @@ function render(){
  document.getElementById("lab-start-unit-scale").onchange=e=>{unitScale=e.target.value};
  document.getElementById("lab-start-minus").onclick=()=>{digits=Math.max(0,digits-1);render()};
  document.getElementById("lab-start-plus").onclick=()=>{digits=Math.min(12,digits+1);render()};
- if(format==="custom"){
- document.getElementById("lab-start-decimal").onchange=e=>{decimal=e.target.value;if(decimal===grouping)grouping="";render()};
- document.getElementById("lab-start-group").onchange=e=>{grouping=e.target.value;if(grouping===decimal)decimal=grouping==="."?",":".";render()};
- }
  document.getElementById("lab-start-accept").onclick=()=>{
  set("labLanguageMode",languageMode);set("language",language);
  set("labRegionalFormat",format);set("labDecimalSeparator",ds);set("labGroupingSeparator",gs);set("labDecimalDigits",String(digits));set("labDisplayUnitScale",unitScale);set("labStartConfigured","1");location.reload();
