@@ -40,6 +40,7 @@ jobs:
           node adaptacion/scripts/prepare-circuits-jgr.mjs circuitjs-src/ts
           node --experimental-strip-types adaptacion/tests/verify-edit-regional-numbers.mjs circuitjs-src/ts
           node --experimental-strip-types adaptacion/tests/verify-edit-dialog-titles.mjs circuitjs-src/ts
+          node --experimental-strip-types adaptacion/tests/verify-about-and-draw-locales.mjs circuitjs-src/ts
 
       - name: Compilar página principal circuitjgr.html
         working-directory: circuitjs-src/ts
