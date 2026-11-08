@@ -13,7 +13,7 @@ function parse(file){
 }
 const original=parse(es),valencian=parse(va);
 assert(original.size>=1600,"Catálogo original inesperadamente corto");
-assert.equal(valencian.size,original.size,"El valenciano debe cubrir todas las claves del catálogo original");
+assert(valencian.size>=original.size,"El valenciano debe cubrir las claves originales y los componentes nuevos");
 for(const [key,spanish] of original){
  assert(valencian.has(key),"Clave original sin traducción: "+key);
  const target=valencian.get(key);
