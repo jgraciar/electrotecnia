@@ -39,6 +39,8 @@ try {
  await page.locator('button[data-mode="falstad"]').click();
  const simulator=page.frameLocator("#circuit-frame");
  await simulator.locator(".lab-start-settings").waitFor({state:"visible",timeout:90000});
+ await simulator.locator(".lab-start-settings").click();
+ await simulator.locator("#lab-start-modal").waitFor({state:"visible"});
  const embeddedModes=await simulator.locator('input[name="lab-start-format"]').evaluateAll(
   nodes=>nodes.map(node=>node.value));
  assert.deepEqual(embeddedModes,["eu","uk"]);
