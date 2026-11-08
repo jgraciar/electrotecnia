@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import {chromium} from "playwright";
 
 // Validación real de la misma configuración al abrir CircuitJS directamente.
-// El navegador comparte localStorage entre / y /circuitjs/circuitjs.html.
+// El navegador comparte localStorage entre / y /circuitjs/circuitjgr.html.
 const browser=await chromium.launch({headless:true});
 try {
  const context=await browser.newContext({locale:"es-ES",viewport:{width:1280,height:800}});
  const page=await context.newPage();
  page.on("pageerror",error=>console.error("Error de configuración:",error.message));
- await page.goto("http://127.0.0.1:8765/circuitjs/circuitjs.html",
+ await page.goto("http://127.0.0.1:8765/circuitjs/circuitjgr.html",
   {waitUntil:"domcontentloaded"});
  const modal=page.locator("#lab-start-modal");
  await modal.waitFor({state:"visible",timeout:30000});
@@ -64,7 +64,7 @@ try {
   localStorage.setItem("labDecimalSeparator",",");
   localStorage.setItem("labGroupingSeparator","");
  });
- await page.goto("http://127.0.0.1:8765/circuitjs/circuitjs.html",
+ await page.goto("http://127.0.0.1:8765/circuitjs/circuitjgr.html",
   {waitUntil:"domcontentloaded"});
  await page.waitForFunction(()=>localStorage.getItem("labRegionalFormat")==="eu");
  assert.equal(await page.evaluate(()=>localStorage.getItem("labDecimalSeparator")),",");
