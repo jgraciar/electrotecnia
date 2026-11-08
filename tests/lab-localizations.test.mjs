@@ -74,6 +74,20 @@ for(const [key,spanish,valencian] of [
  assert.equal(labTranslation("es-ES",key),spanish,"Error español: "+key);
  assert.equal(labTranslation("ca-ES-valencia",key),valencian,"Error valenciano: "+key);
 }
+assert.equal(labTranslation("es-ES","Show Cursor Cross Hairs"),"Mostrar la cruz del cursor");
+for(const [key,value] of [
+ ["Other Options","Altres opcions"],
+ ["Change Language","Canvia l'idioma"],
+ ["Show Properties on Create","Mostra les propietats en crear"],
+ ["# of Decimal Digits (long format)","Nombre de decimals (format llarg)"],
+ ["Matrix Solver","Resolutor matricial"],
+ ["Apply","Aplica"],
+ ["Voltage","Tensió"],
+ ["Current","Intensitat"]
+]){
+ assert.equal(labTranslation("ca-ES-valencia",key),value,
+  "Falta traducción de controles valencianos: "+key);
+}
 assert.equal(labTranslation("zz","Tipo de inversor"),null);
 console.log("OK: "+keys.length+" etiquetas añadidas en "+labLanguageCodes.length+
  " idiomas, menús e información incluidos");
