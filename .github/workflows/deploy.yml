@@ -126,8 +126,8 @@ jobs:
         run: |
           npm ci
           npm run build
-          test -s dist/circuitjs/locale/locale_ca-es-valencia.txt
-          test -s dist/circuitjs/locale/locale_ca.txt || { echo "::error::Falta el archivo catalán de CircuitJS"; exit 1; } || { echo "::error::No se publica el catálogo valenciano"; exit 1; }
+          test -s dist/circuitjs/locale/locale_ca-es-valencia.txt || { echo "::error::No se publica el catálogo valenciano"; exit 1; }
+          test -s dist/circuitjs/locale/locale_ca.txt || { echo "::error::Falta el archivo catalán de CircuitJS"; exit 1; }
 
       - name: Confirmar vatímetro ampliado en el JavaScript compilado
         working-directory: circuitjs-src/ts
