@@ -108,6 +108,48 @@ for(const [code,translations] of Object.entries(nativeMenuExtensions))
   if(!value.trim())throw Error("Texto nativo sin traducir: "+code+" "+key);
   dictionaries[code].set(key,value);
  }
+// Controles de presentación que los catálogos originales no incluyen en las
+// lenguas añadidas. No confundir formato de números con simbología IEC.
+const displayOptions: Record<string,Record<string,string>> = {
+ ca: {
+  "European Resistors":"Símbols europeus per a resistències",
+  "IEC Gates":"Portes lògiques IEC",
+  "Show Ω Unit":"Mostra la unitat Ω",
+  "# of Decimal Digits (short format)":"Nombre de decimals (format curt)",
+  "# of Decimal Digits (long format)":"Nombre de decimals (format llarg)"
+ },
+ gl: {
+  "European Resistors":"Símbolos europeos para resistencias",
+  "IEC Gates":"Portas lóxicas IEC",
+  "Show Ω Unit":"Mostrar a unidade Ω",
+  "# of Decimal Digits (short format)":"Número de decimais (formato curto)",
+  "# of Decimal Digits (long format)":"Número de decimais (formato longo)"
+ },
+ eu: {
+  "European Resistors":"Erresistentzien Europako sinboloak",
+  "IEC Gates":"IEC ate logikoak",
+  "Show Ω Unit":"Erakutsi Ω unitatea",
+  "# of Decimal Digits (short format)":"Dezimal kopurua (formatu laburra)",
+  "# of Decimal Digits (long format)":"Dezimal kopurua (formatu luzea)"
+ },
+ nl: {
+  "European Resistors":"Europese weerstandssymbolen",
+  "IEC Gates":"IEC-logische poorten",
+  "Show Ω Unit":"Ω-eenheid weergeven",
+  "# of Decimal Digits (short format)":"Aantal decimalen (kort formaat)",
+  "# of Decimal Digits (long format)":"Aantal decimalen (lang formaat)"
+ },
+ sv: {
+  "European Resistors":"Europeiska resistorsymboler",
+  "IEC Gates":"IEC-logikgrindar",
+  "Show Ω Unit":"Visa enheten Ω",
+  "# of Decimal Digits (short format)":"Antal decimaler (kort format)",
+  "# of Decimal Digits (long format)":"Antal decimaler (långt format)"
+ }
+};
+for (const [code,translations] of Object.entries(displayOptions))
+ for (const [key,value] of Object.entries(translations))
+  dictionaries[code].set(key,value);
 export function labTranslation(language:string,key:string):string|null{
  const normalized=language.toLowerCase().replace(/_/g,"-");
  const base=normalized.split("-")[0];
