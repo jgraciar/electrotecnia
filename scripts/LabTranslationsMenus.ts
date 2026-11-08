@@ -24,6 +24,7 @@ export const uiSpanish: Record<string,string> = {
   "Add Delay Buffer": "Búfer de retardo",
   "Add Ohmmeter": "Óhmetro",
   "Add Test Point": "Punto de prueba",
+  "Add Wattmeter": "Vatímetro",
   "Add Decimal Display": "Visualizador decimal",
   "Add SIPO shift register": "Registro de desplazamiento SIPO",
   "Add PISO shift register": "Registro de desplazamiento PISO",
