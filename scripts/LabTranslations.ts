@@ -404,7 +404,14 @@ const russianSourceCorrections:Record<string,string>={
   "reset": "сброс",
   "off": "выкл.",
   "on": "вкл.",
-  "End": "Конец"
+  "End": "Конец",
+  // Cuadros que el catálogo oficial ruso de CircuitJS no incluye.
+  "Can't delete subcircuits in use in the current circuit: ": "Нельзя удалить подсхемы, используемые в текущей схеме: ",
+  "Share Slider: ": "Совместное использование ползунка: ",
+  "Export Image": "Экспорт изображения",
+  "Transparent Background": "Прозрачный фон",
+  "Type a command...": "Введите команду...",
+  "Recent": "Последние команды"
 };
 for(const [key,value]of Object.entries(russianSourceCorrections))
  dictionaries.ru.set(key,value);
