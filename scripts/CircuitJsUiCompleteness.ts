@@ -1,6 +1,6 @@
 // Etiquetas de opciones, menús y valores superpuestos en osciloscopios.
 // Los identificadores de configuración y símbolos eléctricos no se traducen.
-export const circuitJsUiCompletenessKeys=["Show Properties on Create","Show Properties on Click","Export Image...","default"," average","Plot ","Max=","Min=","P-P=","CH ","/div","Framerate: ","Steprate: ","Steprate/iter: ","iterc: ","Frames: ","Mouse: ","exception, see console!","File too large!","Dropbox links must start https://www.dropbox.com/"] as const;
+export const circuitJsUiCompletenessKeys=["Show Properties on Create","Show Properties on Click","Export Image...","default"," average","Plot ","Max=","Min=","P-P=","CH ","/div","Framerate: ","Steprate: ","Steprate/iter: ","iterc: ","Frames: ","Mouse: ","exception, see console!","File too large!","Dropbox links must start https://www.dropbox.com/","Node \"{name}\" can't be connected to ground","Element \"{name}\" refers to a node outside the selection","Node \"{name}\" is not used!"] as const;
 export const circuitJsUiCompleteness: Record<string,string[]> = {
   "en": [
     "Show Properties on Create",
@@ -22,7 +22,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Mouse: ",
     "exception, see console!",
     "File too large!",
-    "Dropbox links must start https://www.dropbox.com/"
+    "Dropbox links must start https://www.dropbox.com/",
+    "Node \"{name}\" can't be connected to ground",
+    "Element \"{name}\" refers to a node outside the selection",
+    "Node \"{name}\" is not used!"
   ],
   "es": [
     "Mostrar propiedades al crear",
@@ -44,7 +47,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Ratón: ",
     "Excepción: consulta la consola",
     "¡El archivo es demasiado grande!",
-    "Los enlaces de Dropbox deben empezar por https://www.dropbox.com/"
+    "Los enlaces de Dropbox deben empezar por https://www.dropbox.com/",
+    "El nodo «{name}» no puede conectarse a tierra",
+    "El elemento «{name}» hace referencia a un nodo fuera de la selección",
+    "¡El nodo «{name}» no se utiliza!"
   ],
   "ca-es-valencia": [
     "Mostra les propietats en crear",
@@ -66,7 +72,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Ratolí: ",
     "Excepció: consulta la consola",
     "El fitxer és massa gran!",
-    "Els enllaços de Dropbox han de començar per https://www.dropbox.com/"
+    "Els enllaços de Dropbox han de començar per https://www.dropbox.com/",
+    "El node «{name}» no es pot connectar a terra",
+    "L’element «{name}» fa referència a un node fora de la selecció",
+    "El node «{name}» no s’utilitza!"
   ],
   "ca": [
     "Mostra les propietats en crear",
@@ -88,7 +97,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Ratolí: ",
     "Excepció: consulta la consola",
     "El fitxer és massa gran!",
-    "Els enllaços de Dropbox han de començar per https://www.dropbox.com/"
+    "Els enllaços de Dropbox han de començar per https://www.dropbox.com/",
+    "El node «{name}» no es pot connectar a terra",
+    "L’element «{name}» fa referència a un node fora de la selecció",
+    "El node «{name}» no es fa servir!"
   ],
   "gl": [
     "Mostrar as propiedades ao crear",
@@ -110,7 +122,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Rato: ",
     "Excepción: consulta a consola",
     "O ficheiro é demasiado grande!",
-    "As ligazóns de Dropbox deben comezar por https://www.dropbox.com/"
+    "As ligazóns de Dropbox deben comezar por https://www.dropbox.com/",
+    "O nó «{name}» non se pode conectar a terra",
+    "O elemento «{name}» fai referencia a un nó fóra da selección",
+    "O nó «{name}» non se utiliza!"
   ],
   "eu": [
     "Erakutsi propietateak sortzean",
@@ -132,7 +147,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Sagua: ",
     "Salbuespena: ikusi kontsola",
     "Fitxategia handiegia da!",
-    "Dropbox estekek https://www.dropbox.com/ helbidearekin hasi behar dute"
+    "Dropbox estekek https://www.dropbox.com/ helbidearekin hasi behar dute",
+    "«{name}» nodoa ezin da lurrera konektatu",
+    "«{name}» elementuak hautapenetik kanpoko nodo bati egiten dio erreferentzia",
+    "«{name}» nodoa ez da erabiltzen!"
   ],
   "fr": [
     "Afficher les propriétés à la création",
@@ -154,7 +172,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Souris : ",
     "Exception : consultez la console",
     "Le fichier est trop volumineux !",
-    "Les liens Dropbox doivent commencer par https://www.dropbox.com/"
+    "Les liens Dropbox doivent commencer par https://www.dropbox.com/",
+    "Le nœud « {name} » ne peut pas être relié à la masse",
+    "L’élément « {name} » fait référence à un nœud hors de la sélection",
+    "Le nœud « {name} » n’est pas utilisé !"
   ],
   "de": [
     "Eigenschaften beim Erstellen anzeigen",
@@ -176,7 +197,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Maus: ",
     "Ausnahme: Konsole prüfen",
     "Die Datei ist zu groß!",
-    "Dropbox-Links müssen mit https://www.dropbox.com/ beginnen"
+    "Dropbox-Links müssen mit https://www.dropbox.com/ beginnen",
+    "Knoten „{name}“ kann nicht mit Masse verbunden werden",
+    "Element „{name}“ verweist auf einen Knoten außerhalb der Auswahl",
+    "Knoten „{name}“ wird nicht verwendet!"
   ],
   "it": [
     "Mostra proprietà alla creazione",
@@ -198,7 +222,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Mouse: ",
     "Eccezione: controlla la console",
     "Il file è troppo grande!",
-    "I collegamenti Dropbox devono iniziare con https://www.dropbox.com/"
+    "I collegamenti Dropbox devono iniziare con https://www.dropbox.com/",
+    "Il nodo «{name}» non può essere collegato a terra",
+    "L’elemento «{name}» fa riferimento a un nodo esterno alla selezione",
+    "Il nodo «{name}» non viene utilizzato!"
   ],
   "pt": [
     "Mostrar propriedades ao criar",
@@ -220,7 +247,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Rato: ",
     "Exceção: consulte a consola",
     "O ficheiro é demasiado grande!",
-    "As ligações do Dropbox devem começar por https://www.dropbox.com/"
+    "As ligações do Dropbox devem começar por https://www.dropbox.com/",
+    "O nó «{name}» não pode ser ligado à terra",
+    "O elemento «{name}» refere-se a um nó fora da seleção",
+    "O nó «{name}» não é utilizado!"
   ],
   "nl": [
     "Eigenschappen tonen bij aanmaken",
@@ -242,7 +272,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Muis: ",
     "Uitzondering: raadpleeg de console",
     "Het bestand is te groot!",
-    "Dropbox-links moeten beginnen met https://www.dropbox.com/"
+    "Dropbox-links moeten beginnen met https://www.dropbox.com/",
+    "Knooppunt ‘{name}’ kan niet met aarde worden verbonden",
+    "Element ‘{name}’ verwijst naar een knooppunt buiten de selectie",
+    "Knooppunt ‘{name}’ wordt niet gebruikt!"
   ],
   "sv": [
     "Visa egenskaper vid skapande",
@@ -264,7 +297,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Mus: ",
     "Undantag: se konsolen",
     "Filen är för stor!",
-    "Dropbox-länkar måste börja med https://www.dropbox.com/"
+    "Dropbox-länkar måste börja med https://www.dropbox.com/",
+    "Noden ”{name}” kan inte anslutas till jord",
+    "Elementet ”{name}” hänvisar till en nod utanför markeringen",
+    "Noden ”{name}” används inte!"
   ],
   "da": [
     "Vis egenskaber ved oprettelse",
@@ -286,7 +322,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Mus: ",
     "Undtagelse: se konsollen",
     "Filen er for stor!",
-    "Dropbox-links skal begynde med https://www.dropbox.com/"
+    "Dropbox-links skal begynde med https://www.dropbox.com/",
+    "Knuden ”{name}” kan ikke forbindes til jord",
+    "Elementet ”{name}” henviser til en knude uden for markeringen",
+    "Knuden ”{name}” bruges ikke!"
   ],
   "nb": [
     "Vis egenskaper ved opprettelse",
@@ -308,7 +347,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Mus: ",
     "Unntak: se konsollen",
     "Filen er for stor!",
-    "Dropbox-lenker må begynne med https://www.dropbox.com/"
+    "Dropbox-lenker må begynne med https://www.dropbox.com/",
+    "Noden «{name}» kan ikke kobles til jord",
+    "Elementet «{name}» viser til en node utenfor utvalget",
+    "Noden «{name}» er ikke i bruk!"
   ],
   "fi": [
     "Näytä ominaisuudet luotaessa",
@@ -330,7 +372,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Hiiri: ",
     "Poikkeus: tarkista konsoli",
     "Tiedosto on liian suuri!",
-    "Dropbox-linkkien on alettava osoitteella https://www.dropbox.com/"
+    "Dropbox-linkkien on alettava osoitteella https://www.dropbox.com/",
+    "Solmua ”{name}” ei voi kytkeä maahan",
+    "Komponentti ”{name}” viittaa valinnan ulkopuoliseen solmuun",
+    "Solmu ”{name}” ei ole käytössä!"
   ],
   "pl": [
     "Pokaż właściwości przy tworzeniu",
@@ -352,7 +397,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Mysz: ",
     "Wyjątek: sprawdź konsolę",
     "Plik jest zbyt duży!",
-    "Łącza Dropbox muszą zaczynać się od https://www.dropbox.com/"
+    "Łącza Dropbox muszą zaczynać się od https://www.dropbox.com/",
+    "Węzła „{name}” nie można połączyć z masą",
+    "Element „{name}” odwołuje się do węzła spoza zaznaczenia",
+    "Węzeł „{name}” nie jest używany!"
   ],
   "csx": [
     "Zobrazit vlastnosti při vytvoření",
@@ -374,7 +422,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Myš: ",
     "Výjimka: viz konzole",
     "Soubor je příliš velký!",
-    "Odkazy Dropbox musí začínat na https://www.dropbox.com/"
+    "Odkazy Dropbox musí začínat na https://www.dropbox.com/",
+    "Uzel „{name}“ nelze připojit k zemi",
+    "Prvek „{name}“ odkazuje na uzel mimo výběr",
+    "Uzel „{name}“ se nepoužívá!"
   ],
   "ru": [
     "Показывать свойства при создании",
@@ -396,7 +447,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Мышь: ",
     "Исключение: см. консоль",
     "Файл слишком большой!",
-    "Ссылки Dropbox должны начинаться с https://www.dropbox.com/"
+    "Ссылки Dropbox должны начинаться с https://www.dropbox.com/",
+    "Узел «{name}» нельзя соединять с землёй",
+    "Элемент «{name}» ссылается на узел за пределами выделения",
+    "Узел «{name}» не используется!"
   ],
   "ja": [
     "作成時にプロパティを表示",
@@ -418,7 +472,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "マウス: ",
     "例外: コンソールを確認",
     "ファイルが大きすぎます！",
-    "Dropbox のリンクは https://www.dropbox.com/ で始まる必要があります"
+    "Dropbox のリンクは https://www.dropbox.com/ で始まる必要があります",
+    "ノード「{name}」は接地できません",
+    "要素「{name}」は選択範囲外のノードを参照しています",
+    "ノード「{name}」は使用されていません！"
   ],
   "kr": [
     "만들 때 속성 표시",
@@ -440,7 +497,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "마우스: ",
     "예외: 콘솔 확인",
     "파일이 너무 큽니다!",
-    "Dropbox 링크는 https://www.dropbox.com/ 로 시작해야 합니다"
+    "Dropbox 링크는 https://www.dropbox.com/ 로 시작해야 합니다",
+    "노드 \"{name}\"를 접지에 연결할 수 없습니다",
+    "요소 \"{name}\"가 선택 영역 밖의 노드를 참조합니다",
+    "노드 \"{name}\"가 사용되지 않습니다!"
   ],
   "zh": [
     "创建时显示属性",
@@ -462,7 +522,10 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "鼠标：",
     "异常：请查看控制台",
     "文件过大！",
-    "Dropbox 链接必须以 https://www.dropbox.com/ 开头"
+    "Dropbox 链接必须以 https://www.dropbox.com/ 开头",
+    "节点“{name}”不能连接到地",
+    "元件“{name}”引用了选区外的节点",
+    "节点“{name}”未被使用！"
   ],
   "zh-tw": [
     "建立時顯示屬性",
@@ -484,6 +547,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "滑鼠：",
     "例外：請查看主控台",
     "檔案太大！",
-    "Dropbox 連結必須以 https://www.dropbox.com/ 開頭"
+    "Dropbox 連結必須以 https://www.dropbox.com/ 開頭",
+    "節點「{name}」不可接地",
+    "元件「{name}」參照了選取範圍外的節點",
+    "節點「{name}」未使用！"
   ]
 };
