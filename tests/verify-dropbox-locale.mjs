@@ -18,6 +18,11 @@ for(const key of english){
   assert(own||official,"Sin traducción Dropbox en "+lang+": "+key);
  }
 }
-for(const lang of ["es","ca-es-valencia"])
- for(const key of english)assert(labTranslation(lang,key),"Falta traducción en "+lang+": "+key);
+// El castellano es una capa de menús; el valenciano carga su catálogo propio.
+const valencian=readFileSync(join(dir,"public/locale/locale_ca-es-valencia.txt"),"utf8");
+for(const key of english){
+ assert(labTranslation("es",key),"Falta corrección castellana de: "+key);
+ assert(valencian.split(/\r?\n/).some(line=>line.startsWith(JSON.stringify(key)+"=")),
+  "El catálogo valenciano no incluye el aviso de Dropbox: "+key);
+}
 console.log("OK: avisos de Dropbox localizados en 15 catálogos originales y valenciano.");
