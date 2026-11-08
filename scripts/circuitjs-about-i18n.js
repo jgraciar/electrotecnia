@@ -114,7 +114,26 @@
   const baseVersion={
     en:"Original CircuitJS1, version ",
     es:"CircuitJS1 original, versión ",
-    "ca-es-valencia":"CircuitJS1 original, versió "
+    "ca-es-valencia":"CircuitJS1 original, versió ",
+    ca:"CircuitJS1 original, versió ",
+    gl:"CircuitJS1 orixinal, versión ",
+    eu:"Jatorrizko CircuitJS1, bertsioa ",
+    csx:"Původní CircuitJS1, verze ",
+    da:"Oprindelig CircuitJS1, version ",
+    de:"Ursprüngliches CircuitJS1, Version ",
+    fi:"Alkuperäinen CircuitJS1, versio ",
+    fr:"CircuitJS1 d’origine, version ",
+    it:"CircuitJS1 originale, versione ",
+    nb:"Opprinnelig CircuitJS1, versjon ",
+    pl:"Oryginalny CircuitJS1, wersja ",
+    pt:"CircuitJS1 original, versão ",
+    ru:"Исходный CircuitJS1, версия ",
+    zh:"原始 CircuitJS1 版本 ",
+    "zh-tw":"原始 CircuitJS1 版本 ",
+    ja:"元の CircuitJS1 バージョン ",
+    kr:"원본 CircuitJS1 버전 ",
+    nl:"Oorspronkelijke CircuitJS1, versie ",
+    sv:"Ursprungliga CircuitJS1, version "
   };
   document.documentElement.lang = lang === "ca-es-valencia" ? "ca-ES-valencia" : lang === "csx" ? "cs" : lang === "kr" ? "ko" : lang;
   const p = [...document.querySelectorAll("div > p")];
