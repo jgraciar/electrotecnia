@@ -44,7 +44,12 @@ export const uiSpanish: Record<string,string> = {
   "Make Global": "Hacer global",
   "Make Persistent": "Hacer persistente",
   "Save Subcircuits": "Guardar subcircuitos",
-  "Can't delete subcircuits in use in the current circuit: ": "No se pueden eliminar los subcircuitos utilizados en el circuito actual: "
+  "Can't delete subcircuits in use in the current circuit: ": "No se pueden eliminar los subcircuitos utilizados en el circuito actual: ",
+  "Min Value": "Valor mínimo",
+  "Max Value": "Valor máximo",
+  "Step (0=continuous)": "Paso (0 = continuo)",
+  "Logarithmic": "Logarítmico",
+  "Label": "Etiqueta"
 };
 
 export const uiValencian: Record<string,string> = {
