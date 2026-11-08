@@ -45,7 +45,7 @@ export function circuitJsDrawLabel(sourceKey: string, localized: string, languag
     // En estas lenguas los catálogos ponen la acción después del componente,
     // no antes. Se limita el tratamiento a los nombres del menú de Dibujo.
     if (base === "de") label = label.replace(/\s+einfügen(?=\s|$)/gi, " ");
-    if (base === "ja") label = label.replace(/を追加|を挿入|を加える/g, "");
-    if (base === "kr") label = label.replace(/\s*추가\s*$/g, "");
+    if (base === "ja") label = label.replace(/(?:を)?追加|を挿入|を加える/g, "");
+    if (base === "kr") label = label.replace(/\s*추가(?=\s|\(|$)/g, "");
     return label.replace(/\s{2,}/g, " ").trim() || localized;
 }
