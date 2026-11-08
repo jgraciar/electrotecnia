@@ -57,7 +57,9 @@ jobs:
           test -f site-root/circuitjs/about.html
           test -f site-root/LICENSE-GPLv3.txt
           test -f site-root/COPYING-CircuitJS.txt
-          ! test -f site-root/index.html
+          test -f site-root/index.html
+          grep -Fq 'href="./circuitjgr.html"' site-root/index.html
+          grep -Fq 'href="./electrotecnia/"' site-root/index.html
 
       - name: Instalar navegador de pruebas
         working-directory: adaptacion/tests
