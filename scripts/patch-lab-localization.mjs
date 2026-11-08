@@ -10,6 +10,7 @@ copyFileSync(join(dirname(translations),"LabTranslationsMenus.ts"),join(dir,"Lab
 copyFileSync(join(dirname(translations),"LabTranslationsNativeMenus.ts"),join(dir,"LabTranslationsNativeMenus.ts"));
 copyFileSync(join(dirname(translations),"CircuitJsDrawLabels.ts"),join(dir,"CircuitJsDrawLabels.ts"));
 copyFileSync(join(dirname(translations),"CircuitJsSupplementalUi.ts"),join(dir,"CircuitJsSupplementalUi.ts"));
+copyFileSync(join(dirname(translations),"CircuitJsUiCompleteness.ts"),join(dir,"CircuitJsUiCompleteness.ts"));
 function once(path,oldText,newText){
  const src=readFileSync(path,"utf8");
  if(src.split(oldText).length!==2)
@@ -137,6 +138,22 @@ writeFileSync(uiManager,uiSource.split(runningHtml).join(runningLocalized));
 once(uiManager,
  "            this.runStopButton.innerHTML = 'Run&nbsp;/&nbsp;<strong>STOP</strong>';",
  "            this.runStopButton.innerHTML = Locale.LS(\"Run\") + '&nbsp;/&nbsp;<strong>' + Locale.LS(\"Stop\") + '</strong>';");
+// Textos de la pantalla inicial y leyendas de los osciloscopios.
+const scopeOverlays=join(dir,"ScopeOverlays.ts");
+for(const [oldText,newText] of [
+ ['("Plot " + (i + 1))','(Locale.LS("Plot ") + (i + 1))'],
+ ['"Max=" + plot.getUnitText(this.scope.maxValue)','Locale.LS("Max=") + plot.getUnitText(this.scope.maxValue)'],
+ ['"Min=" + plot.getUnitText(this.scope.minValue)','Locale.LS("Min=") + plot.getUnitText(this.scope.minValue)'],
+ ['"P-P=" + plot.getUnitText(this.scope.maxValue - this.scope.minValue)','Locale.LS("P-P=") + plot.getUnitText(this.scope.maxValue - this.scope.minValue)']
+])once(scopeOverlays,oldText,newText);
+const scopeProperties=join(dir,"ScopePropertiesDialog.ts");
+once(scopeProperties,"('Plot ' + (i + 1))","(Locale.LS('Plot ') + (i + 1))");
+once(scopeProperties,"'CH ' + (this.plotSelection + 1)","Locale.LS('CH ') + (this.plotSelection + 1)");
+const scopePropertiesContent=readFileSync(scopeProperties,"utf8");
+if(scopePropertiesContent.includes("'CH ' + (this.plotSelection + 1)"))
+ throw Error("Queda un canal sin traducir en las propiedades del osciloscopio");
+const uiPanel=join(dir,"UIManager.ts");
+once(uiPanel,'this.titleLabel.textContent = "Label";','this.titleLabel.textContent = Locale.LS("Label");');
 // El cuadro Acerca de se carga en un iframe independiente: pasar el idioma
 // efectivo y traducir su texto sin perder créditos ni los originales legales.
 const aboutBox=join(dir,"AboutBox.ts");
