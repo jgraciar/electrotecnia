@@ -1,6 +1,6 @@
 import {uiSpanish,uiValencian} from "./LabTranslationsMenus.ts";
 import {nativeMenuExtensions} from "./LabTranslationsNativeMenus.ts";
-import {componentKeys,componentLanguages,otherMenuKeys,otherMenuLanguages} from "./LabTranslationsOtherComponents.ts";
+import {componentKeys,componentLanguages,otherMenuKeys,otherMenuLanguages,dialogKeys,dialogLanguages} from "./LabTranslationsOtherComponents.ts";
 // Traducciones añadidas para los componentes propios del Laboratorio.
 // Las claves originales de CircuitJS se conservan en sus catálogos oficiales.
 // Catálogos adicionales incorporados directamente para compatibilidad con Node y TypeScript.
@@ -111,9 +111,10 @@ for(const [code,translations] of Object.entries(nativeMenuExtensions))
  }
 // Menús y componentes nativos traducidos a las cinco lenguas añadidas.
 for(const code of ["ca","gl","eu","nl","sv"]){
- const components=componentLanguages[code],commands=otherMenuLanguages[code];
+ const components=componentLanguages[code],commands=otherMenuLanguages[code],dialogs=dialogLanguages[code];
  if(!components || components.length!==componentKeys.length ||
-    !commands || commands.length!==otherMenuKeys.length)
+    !commands || commands.length!==otherMenuKeys.length ||
+    !dialogs || dialogs.length!==dialogKeys.length)
   throw Error("Catálogo de componentes incompleto: "+code);
  for(const [index,key] of componentKeys.entries()){
   const value=components[index];if(!value?.trim())throw Error("Componente sin traducir: "+code+" "+key);
@@ -121,6 +122,10 @@ for(const code of ["ca","gl","eu","nl","sv"]){
  }
  for(const [index,key] of otherMenuKeys.entries()){
   const value=commands[index];if(!value?.trim())throw Error("Comando sin traducir: "+code+" "+key);
+  dictionaries[code].set(key,value);
+ }
+ for(const [index,key] of dialogKeys.entries()){
+  const value=dialogs[index];if(!value?.trim())throw Error("Diálogo sin traducir: "+code+" "+key);
   dictionaries[code].set(key,value);
  }
 }
