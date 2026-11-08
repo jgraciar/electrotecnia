@@ -69,5 +69,31 @@ for(const [file,key] of expectedExamples){
    "Ejemplo CCS/CVS sin localizar: "+lang+" "+key);
  }
 }
+// Auditar todas las entradas de Ejemplos de circuitos. Se usan las claves
+// originales del índice: nunca los nombres de archivo traducidos.
+const allExampleTitles=[...new Set(exampleLines.filter(line=>/^\\S+\\.txt /.test(line))
+ .map(line=>line.slice(line.indexOf(" ")+1).trim()))];
+assert(allExampleTitles.length>=350,
+ "El índice de ejemplos está incompleto: "+allExampleTitles.length);
+for(const lang of nativeCodes){
+ const catalogSource=readFileSync(join(tsDir,"public/locale/locale_"+lang+".txt"),"utf8");
+ const official=new Map([...catalogSource.matchAll(/^"(.*?)"="(.*)"$/gm)]
+  .map(m=>[m[1],m[2]]));
+ const missing=allExampleTitles.filter(key=>labTranslation(lang,key)==null&&!official.has(key));
+ assert.deepEqual(missing,[],
+  "Ejemplos sin traducción en "+lang+" (cambios en setuplist.txt o catálogos originales)");
+}
+for(const [lang,key,expected] of [
+ ["es","LRC Circuit","Circuito RLC"],
+ ["ca","LRC Circuit","Circuit RLC"],
+ ["ca-es-valencia","LRC Circuit","Circuit RLC"],
+ ["gl","LRC Circuit","Circuíto RLC"],
+ ["eu","LRC Circuit","RLC zirkuitua"],
+ ["da","Phase-Sequence Network","Fasefølgenetværk"],
+ ["kr","Gray Code Counter","그레이 코드 카운터"]
+]){
+ assert.equal(labTranslation(lang,key),expected,
+  "Ejemplo pendiente de localización: "+lang+" / "+key);
+}
 console.log("OK: "+keys.length+" claves de menús originales con español cubierto; "+
  components.length+" componentes con traducción valenciana y comandos principales comprobados.");
