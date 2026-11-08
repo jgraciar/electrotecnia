@@ -161,6 +161,27 @@
     "本軟體以「現狀」提供，不附帶任何明示或默示保證，包括適銷性、特定用途適用性及不侵權保證。作者及著作權人對因本軟體、其使用或其他交易所生之契約、侵權或其他法律依據下的任何索賠、損害或其他責任，均不承擔責任。"
   ]
 };
+  const creditHeadings={
+  "ru": "Благодарности",
+  "fr": "Remerciements",
+  "de": "Dank an",
+  "it": "Ringraziamenti",
+  "pt": "Agradecimentos",
+  "ca": "Agraïments",
+  "gl": "Agradecementos",
+  "eu": "Eskerrak",
+  "nl": "Met dank aan",
+  "sv": "Tack till",
+  "da": "Tak til",
+  "nb": "Takk til",
+  "fi": "Kiitokset",
+  "pl": "Podziękowania",
+  "csx": "Poděkování",
+  "ja": "謝辞",
+  "kr": "감사의 말",
+  "zh": "致谢",
+  "zh-tw": "致謝"
+};
   const creditContributors=["Edward Calver","Rodrigo Hausen","J. Mike Rollins","Julius Schmidt","Dustin Soodak","Jacob Calvert","Ben Hayden","Francisco Campos","Bill Collis","Mark McGarry","Uri Shaked","Johannes Bauer","Thomas Reitinger, Krystian Sławiński, Usevalad Khatkevich, Lucio Sciamanna, Mauro Hemerly Gazzani, J. Miguel Silva, Kristian Keilen, Linhart Jiří, Karel Kupa, Franck Viard, David Chen, Taisuke Fukuno, 肖国栋 (Gordon Shaw), 王逸伦, Pablo Sanz Martin","Andre Adrian","Felthry","Colin Howell"];
   const creditDescriptions={
   "ru": [
@@ -514,8 +535,7 @@
   const contributions=creditDescriptions[lang];
   if(contributions && paragraphs[4]){
     if(contributions.length!==creditContributors.length)throw Error("Créditos incompletos: "+lang);
-    paragraphs[4].textContent=(lang==="ru"?"Благодарности":"") +
-      (lang==="ru"?": ":"") +
+    paragraphs[4].textContent=creditHeadings[lang]+": "+
       creditContributors.map((name,i)=>name+" — "+contributions[i]).join("; ") +
       ". LZString (c) 2013 pieroxy.";
   }
