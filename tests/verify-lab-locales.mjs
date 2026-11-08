@@ -3,6 +3,11 @@ import {chromium} from "playwright";
 
 const browser=await chromium.launch({headless:true});
 const cases=[
+ {"browser":"en-US","mode":"manual","saved":"ca","expected":"ca","input":"Entrades i fonts","passive":"Components passius","blocks":"Blocs funcionals actius","element":"Inversor fotovoltaic (CA)"},
+ {"browser":"en-US","mode":"manual","saved":"gl","expected":"gl","input":"Entradas e fontes","passive":"Compoñentes pasivos","blocks":"Bloques funcionais activos","element":"Inversor fotovoltaico (CA)"},
+ {"browser":"en-US","mode":"manual","saved":"eu","expected":"eu","input":"Sarrerak eta iturriak","passive":"Osagai pasiboak","blocks":"Bloke funtzional aktiboak","element":"Inbertsore fotovoltaikoa (AC)"},
+ {"browser":"en-US","mode":"manual","saved":"nl","expected":"nl","input":"Ingangen en bronnen","passive":"Passieve componenten","blocks":"Actieve bouwblokken","element":"PV-omvormer (AC)"},
+ {"browser":"en-US","mode":"manual","saved":"sv","expected":"sv","input":"Ingångar och källor","passive":"Passiva komponenter","blocks":"Aktiva funktionsblock","element":"Solcellsväxelriktare (AC)"},
  {browser:"es-ES",mode:"auto",saved:null,expected:"es",
   input:"Entradas y fuentes",passive:"Componentes pasivos",blocks:"Bloques funcionales activos",
   element:"Inversor fotovoltaico FV (CA)"},
@@ -92,6 +97,13 @@ const nativeControlled={
   "zh-tw": "受控電壓源（雙端）",
   "zh": "受控电压源（双端）"
 };
+const addedControlledVoltages={
+  "ca": "Font de tensió controlada (2 terminals)",
+  "gl": "Fonte de tensión controlada (2 terminais)",
+  "eu": "Tentsio-iturri kontrolatua (2 borne)",
+  "nl": "Gestuurde spanningsbron (2 aansluitingen)",
+  "sv": "Styrd spänningskälla (2 anslutningar)"
+};
 try{
  for(const c of cases){
   const context=await browser.newContext({locale:c.browser,
@@ -155,6 +167,9 @@ try{
    if(nativeControlled[c.expected])
     assert(current.labels.some(x=>x===nativeControlled[c.expected]),
      "La fuente de tensión controlada aparece en inglés: "+c.expected);
+   if(addedControlledVoltages[c.expected])
+    assert(current.labels.some(label=>label===addedControlledVoltages[c.expected]),
+     "CircuitJS sigue mostrando componentes ingleses en "+c.expected);
    if(c.expected==="es"||c.expected==="ca-es-valencia"){
     const expected=c.expected==="es"
      ?["Fuente de tensión controlada (2 terminales)","Fuente de corriente controlada (2 terminales)",
