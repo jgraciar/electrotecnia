@@ -34,7 +34,7 @@ assert(about.includes("circuits-jgr-identity")&&
  about.includes("GPLv3"),"Acerca de no conserva identidad, créditos y licencia");
 // La portada de la web personal es independiente de la del laboratorio:
 // su única función es permitir elegir entre ambos destinos.
-const index=\`<!doctype html>
+const index=`<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
@@ -74,7 +74,7 @@ const index=\`<!doctype html>
     <footer>Desarrollo y adaptación: Jesús Gracia Ruiz · 2026</footer>
   </main>
 </body>
-</html>\`;
+</html>`;
 assert(!existsSync(join(site,"index.html")),
  "No se debe sobrescribir una portada existente del sitio del simulador");
 writeFileSync(join(site,"index.html"),index);
