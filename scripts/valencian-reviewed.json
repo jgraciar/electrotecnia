@@ -440,5 +440,15 @@
   "Loading...": "Carregant...",
   "Save Changes": "Guarda els canvis",
   "Mode: ": "Mode: ",
-  "Model Name": "Nom del model"
+  "Model Name": "Nom del model",
+  "Device has no external inputs/outputs!": "El dispositiu no té entrades ni eixides externes.",
+  "Need to ground transmission line!": "Cal connectar a terra la línia de transmissió.",
+  "No path for current source!": "No hi ha cap camí per al corrent de la font.",
+  "capacitor exceeded max reverse voltage": "El condensador ha superat la tensió inversa màxima admissible.",
+  "nan/infinite matrix!": "La matriu del circuit conté valors no numèrics (NaN) o infinits.",
+  "File Error Response": "Error en la resposta del fitxer.",
+  "File too large!": "El fitxer és massa gran.",
+  "Path to ground with no resistance!": "Hi ha un camí a terra sense resistència; comprova si hi ha un curtcircuit.",
+  "File too large": "El fitxer és massa gran",
+  "Must restart to set language.  Restart now?": "Cal reiniciar el simulador per a canviar d'idioma. Vols reiniciar-lo ara?"
 }
