@@ -81,6 +81,11 @@ once(slider,"opt0.textContent = \"New Slider\";","opt0.textContent = Locale.LS(\
 once(slider,"opt.textContent = \"Share Slider: \" + adji.sliderText;","opt.textContent = Locale.LS(\"Share Slider: \") + adji.sliderText;");
 once(slider,"logLabel.appendChild(document.createTextNode(\"Logarithmic\"));","logLabel.appendChild(document.createTextNode(Locale.LS(\"Logarithmic\")));");
 once(slider,"el.textContent = text;","el.textContent = Locale.LS(text);");
+// Las dos advertencias del importador Dropbox estaban fijadas en inglés.
+// Usar las mismas claves de los 15 catálogos oficiales y de las lenguas añadidas.
+const dropbox=join(dir,"ImportFromDropboxDialog.ts");
+once(dropbox,"label.textContent = \"This site, or your browser doesn't support the Dropbox chooser so you can't pick a file from your dropbox account.\";","label.textContent = Locale.LS(\"This site, or your browser doesn't support the Dropbox chooser so you can't pick a file from your dropbox account.\");");
+once(dropbox,"la.textContent = \"You can open a shared Dropbox file if you have a link. Paste the Dropbox link below...\";","la.textContent = Locale.LS(\"You can open a shared Dropbox file if you have a link. Paste the Dropbox link below...\");");
 // Extender «Otras opciones > Cambiar idioma» con las lenguas cooficiales.
 // Mantener los índices 1..16 existentes para evitar alterar su semántica.
 const options=join(dir,"EditOptions.ts");
