@@ -328,6 +328,20 @@ for (const code of labLanguageCodes) {
   throw Error("Traducciones CCS/CVS y marcha/parada incompletas: "+code);
  circuitJsSupplementKeys.forEach((key,index)=>dictionaries[code].set(key,translations[index]));
 }
+// Completar las entradas ausentes en los catálogos originales de ejemplos.
+// Se mantienen intactos los nombres de archivo y las traducciones oficiales.
+const originalExampleGaps: Record<string,Record<string,string>> = {
+ es: {"LRC Circuit":"Circuito RLC"},
+ ca: {"LRC Circuit":"Circuit RLC"},
+ "ca-es-valencia": {"LRC Circuit":"Circuit RLC"},
+ gl: {"LRC Circuit":"Circuíto RLC"},
+ eu: {"LRC Circuit":"RLC zirkuitua"},
+ da: {"Phase-Sequence Network":"Fasefølgenetværk"},
+ kr: {"Gray Code Counter":"그레이 코드 카운터"}
+};
+for(const [code,values] of Object.entries(originalExampleGaps))
+ for(const [key,value] of Object.entries(values))dictionaries[code].set(key,value);
+
 export function labTranslation(language:string,key:string):string|null{
  const normalized=language.toLowerCase().replace(/_/g,"-");
  const base=normalized.split("-")[0];
