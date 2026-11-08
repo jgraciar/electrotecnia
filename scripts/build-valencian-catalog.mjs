@@ -51,6 +51,13 @@ for(const line of es.split(/\r?\n/)){
  out.push('"'+key+'"="'+value+'"');unique.add(key);
  if(value===original)unaltered++;else changed++;
 }
+// Añadir también los comandos nuevos de CircuitJS ausentes del fichero español original.
+for(const [key,value] of Object.entries(specific)){
+ if(unique.has(key))continue;
+ if(!key||!value)throw Error("Entrada adicional sin clave o traducción");
+ out.push('"'+key+'"="'+value+'"');
+ unique.add(key);
+}
 writeFileSync(join(tsDir,"public/locale/locale_ca-es-valencia.txt"),out.join("\n")+"\n");
 console.log("Catálogo valenciano: "+unique.size+" claves; "+changed+
  " traducciones adaptadas y "+unaltered+" equivalentes sin cambios (siglas/cognados o pendientes de revisión lingüística).");
