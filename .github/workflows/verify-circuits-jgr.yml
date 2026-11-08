@@ -1,4 +1,4 @@
-name: Verificar versión independiente Circuits JGR 1.0
+name: Verificar versión independiente Circuit JGR 1.0
 
 on:
   push:
@@ -10,10 +10,10 @@ permissions:
 
 jobs:
   verify:
-    name: Compilar Circuits JGR y verificar URL raíz
+    name: Compilar Circuit JGR y verificar URL raíz
     runs-on: ubuntu-24.04
     steps:
-      - name: Obtener adaptación Circuits JGR
+      - name: Obtener adaptación Circuit JGR
         uses: actions/checkout@v4
         with:
           path: adaptacion
@@ -74,5 +74,5 @@ jobs:
       - name: Publicar paquete verificable sin modificar el laboratorio
         uses: actions/upload-artifact@v4
         with:
-          name: Circuits-JGR-1.0-sitio-raiz
+          name: Circuit-JGR-1.0-sitio-raiz
           path: site-root/

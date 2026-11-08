@@ -17,7 +17,7 @@ mkdirSync(site,{recursive:true});
 cpSync(dist,site,{recursive:true,force:true});
 const target=join(site,"circuitjgr.html");
 const html=readFileSync(target,"utf8");
-assert(html.includes("Circuits JGR 1.0"),"El título de la versión propia no aparece");
+assert(html.includes("Circuit JGR 1.0"),"El título de la versión propia no aparece");
 assert(/<script\b[^>]*\btype=["']module["'][^>]*\.js["']/i.test(html),
  "No se encuentra el script del simulador compilado");
 assert(html.includes("</head>"),"No se reconoce la cabecera HTML");

@@ -1,4 +1,4 @@
-// Preparar Circuits JGR 1.0 como entrada REAL de Vite, no como copia ni
+// Preparar Circuit JGR 1.0 como entrada REAL de Vite, no como copia ni
 // redirección de la versión compilada de circuitjs.html.
 // Ejecutar tras los parches del motor y las traducciones, antes de npm run build.
 import assert from "node:assert/strict";
@@ -13,8 +13,8 @@ const src=readFileSync(htmlPath,"utf8");
 assert(src.includes("<title>CircuitJS</title>") && src.includes('src="/main.ts"'),
  "La página de origen ya no tiene la estructura esperada");
 const branded=src
- .replace("<title>CircuitJS</title>","<title>Circuits JGR 1.0</title>")
- .replace("<head>","<head>\n  <meta name=\"application-name\" content=\"Circuits JGR\">");
+ .replace("<title>CircuitJS</title>","<title>Circuit JGR 1.0</title>")
+ .replace("<head>","<head>\n  <meta name=\"application-name\" content=\"Circuit JGR\">");
 writeFileSync(join(dir,"circuitjgr.html"),branded);
 const viteFile=join(dir,"vite.config.ts");
 const vite=readFileSync(viteFile,"utf8");
@@ -23,7 +23,7 @@ assert(vite.split(entry).length===2,"No se encuentra una única entrada Vite de 
 writeFileSync(viteFile,vite.replace(entry,"circuitjgr: 'circuitjgr.html',"));
 
 // Los ejemplos públicos de la distribución original se conservan,
-// pero su iframe apunta ahora a la página específica de Circuits JGR.
+// pero su iframe apunta ahora a la página específica de Circuit JGR.
 for(const name of ["iframe.html","jsinterface.html"]){
  const target=join(dir,name);
  if(!existsSync(target))continue;
@@ -45,7 +45,7 @@ assert(html.includes("<div>") && html.includes("Original by Paul Falstad."),
  "No se reconoce la página original Acerca de");
 const identity=`
 <section id="circuits-jgr-identity" style="padding:8px 10px;margin-bottom:12px;border-bottom:1px solid #888">
-  <h2 style="margin:0 0 6px">Circuits JGR 1.0</h2>
+  <h2 style="margin:0 0 6px">Circuit JGR 1.0</h2>
   <p style="margin:3px 0"><span id="jgr-development">Desarrollo y adaptación</span>:
     <strong>Jesús Gracia Ruiz</strong> · 2026</p>
   <p style="margin:3px 0"><span id="jgr-based">Basado en</span>
@@ -93,4 +93,4 @@ const identity=`
 `;
 assert(!html.includes("circuits-jgr-identity"),"La identidad se ha insertado dos veces");
 writeFileSync(about,html.replace("<div>","<div>\n"+identity));
-console.log("OK: entrada Vite circuitjgr.html, Circuits JGR 1.0 y Acerca de conservando todos los créditos.");
+console.log("OK: entrada Vite circuitjgr.html, Circuit JGR 1.0 y Acerca de conservando todos los créditos.");
