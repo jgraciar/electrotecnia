@@ -38,6 +38,16 @@ try {
  assert.equal(await page.evaluate(()=>localStorage.getItem("labGroupingSeparator")),",");
  // Una preferencia anterior fija (p. ej., kilo) debe migrarse a automático.
  await page.evaluate(()=>localStorage.setItem("labDisplayUnitScale","kilo"));
+ // Los enlaces antiguos deben conservar query y fragmento, incluidas las
+ // prácticas con startCircuit y los enlaces a simuladores compartidos.
+ await page.goto("http://127.0.0.1:8765/circuitjs/circuitjs.html?legacy=1#probe",
+  {waitUntil:"domcontentloaded"});
+ await page.waitForURL("http://127.0.0.1:8765/circuitjs/circuitjgr.html?legacy=1#probe");
+ assert.equal(new URL(page.url()).pathname,"/circuitjs/circuitjgr.html");
+ await page.goto("http://127.0.0.1:8765/circuitjgr.html?legacy=2#shortcut",
+  {waitUntil:"domcontentloaded"});
+ await page.waitForURL("http://127.0.0.1:8765/circuitjs/circuitjgr.html?legacy=2#shortcut");
+ assert.equal(new URL(page.url()).pathname,"/circuitjs/circuitjgr.html");
  await page.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
  assert.equal(await page.evaluate(()=>localStorage.getItem("labDisplayUnitScale")),"auto",
   "No se restauró el prefijo de unidad automático");
@@ -70,6 +80,7 @@ try {
  assert.equal(await page.evaluate(()=>localStorage.getItem("labDecimalSeparator")),",");
  assert.equal(await page.evaluate(()=>localStorage.getItem("labGroupingSeparator")),".");
  console.log("OK: migración de configuración personalizada anterior al formato europeo");
+ console.log("OK: circuitjgr.html y redirecciones desde las rutas anteriores");
  console.log("OK: configuración de CircuitJS independiente e integrado, 22 idiomas, "+
   "solo formatos europeo/anglosajón y preferencias regionales compartidas.");
  await context.close();
