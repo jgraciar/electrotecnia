@@ -80,6 +80,9 @@ jobs:
             test -f "circuitjs-src/ts/$class.ts" || { echo "::error::Falta $class.ts"; exit 1; }
           done
 
+      - name: Auditar traducciones españolas y valencianas del menú real
+        run: node --experimental-strip-types laboratorio/tests/verify-interface-menu-coverage.mjs circuitjs-src/ts
+
       - name: Incorporar circuito original de Aron al código de CircuitJS
         run: |
           node laboratorio/scripts/embed-default-aron.mjs circuitjs-src/ts/CirSim.ts laboratorio/tests/fixtures/sistema-iii-n-startup.xml
