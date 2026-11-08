@@ -92,7 +92,26 @@ const identity=`
  const contributors={
    en:"Paul Falstad, Iain Sharp and contributors",
    es:"Paul Falstad, Iain Sharp y colaboradores",
-   "ca-es-valencia":"Paul Falstad, Iain Sharp i col·laboradors"
+   "ca-es-valencia":"Paul Falstad, Iain Sharp i col·laboradors",
+   ca:"Paul Falstad, Iain Sharp i col·laboradors",
+   gl:"Paul Falstad, Iain Sharp e colaboradores",
+   eu:"Paul Falstad, Iain Sharp eta laguntzaileak",
+   csx:"Paul Falstad, Iain Sharp a přispěvatelé",
+   da:"Paul Falstad, Iain Sharp og bidragydere",
+   de:"Paul Falstad, Iain Sharp und Mitwirkende",
+   fi:"Paul Falstad, Iain Sharp ja muut kehittäjät",
+   fr:"Paul Falstad, Iain Sharp et les contributeurs",
+   it:"Paul Falstad, Iain Sharp e collaboratori",
+   nb:"Paul Falstad, Iain Sharp og bidragsytere",
+   pl:"Paul Falstad, Iain Sharp i współtwórcy",
+   pt:"Paul Falstad, Iain Sharp e colaboradores",
+   ru:"Paul Falstad, Iain Sharp и участники проекта",
+   zh:"Paul Falstad、Iain Sharp 及其他贡献者",
+   "zh-tw":"Paul Falstad、Iain Sharp 及其他貢獻者",
+   ja:"Paul Falstad、Iain Sharp と貢献者",
+   kr:"Paul Falstad, Iain Sharp 및 기여자",
+   nl:"Paul Falstad, Iain Sharp en bijdragers",
+   sv:"Paul Falstad, Iain Sharp och medverkande"
  };
  const t=languages[lang]||languages[code]||languages.en;
  ["jgr-development","jgr-based","jgr-license","jgr-code","jgr-credits"]
