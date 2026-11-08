@@ -88,6 +88,30 @@ for(const [key,value] of [
  assert.equal(labTranslation("ca-ES-valencia",key),value,
   "Falta traducción de controles valencianos: "+key);
 }
+// Las siglas normalizadas se conservan en castellano y valenciano.
+for(const [key,spanish,valencian] of [
+ ["Add Switch","Interruptor unipolar (SPST)","Interruptor unipolar (SPST)"],
+ ["Add Push Switch","Pulsador unipolar (SPST)","Polsador unipolar (SPST)"],
+ ["Add SPDT Switch","Conmutador unipolar de dos posiciones (SPDT)","Commutador unipolar de dos posicions (SPDT)"],
+ ["Add DPDT Switch","Conmutador bipolar de dos posiciones (DPDT)","Commutador bipolar de dos posicions (DPDT)"],
+ ["Add Analog Switch (SPST)","Interruptor analógico unipolar (SPST)","Interruptor analògic unipolar (SPST)"],
+ ["Add Analog Switch (SPDT)","Conmutador analógico unipolar de dos posiciones (SPDT)","Commutador analògic unipolar de dos posicions (SPDT)"]
+]){
+ assert.equal(labTranslation("es-ES",key),spanish,"Nomenclatura incorrecta en español: "+key);
+ assert.equal(labTranslation("ca-ES-valencia",key),valencian,"Nomenclatura incorrecta en valenciano: "+key);
+}
+for(const [key,spanish,valencian] of [
+ ["Add Sliders","Añadir controles deslizantes","Afig controls lliscants"],
+ ["New Slider","Nuevo control deslizante","Control lliscant nou"],
+ ["Share Slider: ","Compartir control deslizante: ","Compartix el control lliscant: "],
+ ["Make Local","Hacer local","Fes local"],
+ ["Make Global","Hacer global","Fes global"],
+ ["Make Persistent","Hacer persistente","Fes persistent"],
+ ["Save Subcircuits","Guardar subcircuitos","Guarda els subcircuits"]
+]){
+ assert.equal(labTranslation("es-ES",key),spanish,"Deslizadores o subcircuitos sin traducir al español: "+key);
+ assert.equal(labTranslation("ca-ES-valencia",key),valencian,"Deslizadores o subcircuitos sin traducir al valenciano: "+key);
+}
 assert.equal(labTranslation("zz","Tipo de inversor"),null);
 console.log("OK: "+keys.length+" etiquetas añadidas en "+labLanguageCodes.length+
  " idiomas, menús e información incluidos");

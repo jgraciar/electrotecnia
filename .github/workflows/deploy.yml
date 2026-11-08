@@ -103,6 +103,9 @@ jobs:
         run: |
           node laboratorio/scripts/patch-lab-localization.mjs circuitjs-src/ts laboratorio/scripts/LabTranslations.ts
 
+      - name: Comprobar traduccion efectiva del dialogo de deslizadores
+        run: node --experimental-strip-types laboratorio/tests/verify-slider-dialog-locale.mjs circuitjs-src/ts
+
       - name: Instalar dependencias y compilar CircuitJS
         working-directory: circuitjs-src/ts
         run: |

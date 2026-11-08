@@ -134,9 +134,15 @@ try{
    if(c.expected==="es"||c.expected==="ca-es-valencia"){
     const expected=c.expected==="es"
      ?["Fuente de tensión controlada (2 terminales)","Fuente de corriente controlada (2 terminales)",
-       "Transformador","Punto de prueba","Vatímetro"]
+       "Transformador","Punto de prueba","Vatímetro",
+       "Interruptor unipolar (SPST)","Conmutador unipolar de dos posiciones (SPDT)",
+       "Conmutador bipolar de dos posiciones (DPDT)",
+       "Interruptor analógico unipolar (SPST)"]
      :["Font de tensió controlada (2 terminals)","Font d'intensitat controlada (2 terminals)",
-       "Transformador","Punt de prova","Vatímetre"];
+       "Transformador","Punt de prova","Vatímetre",
+       "Interruptor unipolar (SPST)","Commutador unipolar de dos posicions (SPDT)",
+       "Commutador bipolar de dos posicions (DPDT)",
+       "Interruptor analògic unipolar (SPST)"];
     for(const value of expected)
      assert(current.labels.some(x=>x===value),
       "Elemento del menú sin traducir: "+c.expected+"/"+value);

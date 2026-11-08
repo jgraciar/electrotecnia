@@ -62,6 +62,19 @@ once(dialog,'                cbLabel.appendChild(document.createTextNode(ei.chec
  '                cbLabel.appendChild(document.createTextNode(Locale.LS(ei.checkbox.name)));');
 once(dialog,'                btn.textContent = ei.button.label ?? ei.button.textContent ?? String(ei.button);',
  '                btn.textContent = Locale.LS(ei.button.label ?? ei.button.textContent ?? String(ei.button));');
+// Todos los controles visibles de «Añadir deslizadores» deben utilizar Locale.LS.
+// Los textos suministrados por el usuario (por ejemplo, el nombre del deslizador) no se traducen.
+const slider=join(dir,"SliderDialog.ts");
+once(slider,"import { Checkbox } from \"./Checkbox\";","import { Checkbox } from \"./Checkbox\";\nimport { Locale } from \"./Locale\";");
+once(slider,"title.textContent = \"Add Sliders\";","title.textContent = Locale.LS(\"Add Sliders\");");
+once(slider,"applyButton.textContent = \"Apply\";","applyButton.textContent = Locale.LS(\"Apply\");");
+once(slider,"okButton.textContent = \"OK\";","okButton.textContent = Locale.LS(\"OK\");");
+once(slider,"cancelButton.textContent = \"Cancel\";","cancelButton.textContent = Locale.LS(\"Cancel\");");
+once(slider,"let name = ei.name.replace(/<[^>]*>/g, \"\");","let name = Locale.LS(ei.name.replace(/<[^>]*>/g, \"\"));");
+once(slider,"opt0.textContent = \"New Slider\";","opt0.textContent = Locale.LS(\"New Slider\");");
+once(slider,"opt.textContent = \"Share Slider: \" + adji.sliderText;","opt.textContent = Locale.LS(\"Share Slider: \") + adji.sliderText;");
+once(slider,"logLabel.appendChild(document.createTextNode(\"Logarithmic\"));","logLabel.appendChild(document.createTextNode(Locale.LS(\"Logarithmic\")));");
+once(slider,"el.textContent = text;","el.textContent = Locale.LS(text);");
 // Extender «Otras opciones > Cambiar idioma» con las lenguas cooficiales.
 // Mantener los índices 1..16 existentes para evitar alterar su semántica.
 const options=join(dir,"EditOptions.ts");
