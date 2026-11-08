@@ -150,6 +150,174 @@ const displayOptions: Record<string,Record<string,string>> = {
 for (const [code,translations] of Object.entries(displayOptions))
  for (const [key,value] of Object.entries(translations))
   dictionaries[code].set(key,value);
+// Textos añadidos junto a los campos numéricos. Se guardan como frases
+// completas para respetar el orden gramatical de cada idioma.
+const numericHintKeys = [
+ "European number format","Anglo-American number format","Custom number format",
+ "Decimal digits: integer from 0 to 10","Decimal and grouping separators must differ"
+];
+const numericHints: Record<string,string[]> = {
+ "en": [
+  "European number format",
+  "Anglo-American number format",
+  "Custom number format",
+  "Decimal digits: integer from 0 to 10",
+  "Decimal and grouping separators must differ"
+ ],
+ "es": [
+  "formato europeo",
+  "formato anglosajón",
+  "formato personalizado",
+  "Decimales: número entero entre 0 y 10",
+  "Los separadores decimal y de miles deben ser distintos"
+ ],
+ "ca-es-valencia": [
+  "format europeu",
+  "format anglosaxó",
+  "format personalitzat",
+  "Decimals: nombre enter entre 0 i 10",
+  "Els separadors decimal i de milers han de ser diferents"
+ ],
+ "ca": [
+  "format europeu",
+  "format anglosaxó",
+  "format personalitzat",
+  "Decimals: nombre enter entre 0 i 10",
+  "Els separadors decimal i de milers han de ser diferents"
+ ],
+ "gl": [
+  "formato europeo",
+  "formato anglosaxón",
+  "formato personalizado",
+  "Decimais: número enteiro entre 0 e 10",
+  "Os separadores decimal e de milleiros deben ser distintos"
+ ],
+ "eu": [
+  "Europako formatua",
+  "formatu angloamerikarra",
+  "formatu pertsonalizatua",
+  "Hamartarrak: 0 eta 10 arteko zenbaki osoa",
+  "Hamartarren eta milakoen bereizleek desberdinak izan behar dute"
+ ],
+ "fr": [
+  "format européen",
+  "format anglo-américain",
+  "format personnalisé",
+  "Décimales : entier compris entre 0 et 10",
+  "Les séparateurs décimal et des milliers doivent être différents"
+ ],
+ "de": [
+  "europäisches Zahlenformat",
+  "angloamerikanisches Zahlenformat",
+  "benutzerdefiniertes Zahlenformat",
+  "Dezimalstellen: Ganzzahl zwischen 0 und 10",
+  "Dezimal- und Tausendertrennzeichen müssen unterschiedlich sein"
+ ],
+ "it": [
+  "formato europeo",
+  "formato angloamericano",
+  "formato personalizzato",
+  "Cifre decimali: numero intero da 0 a 10",
+  "I separatori decimale e delle migliaia devono essere diversi"
+ ],
+ "pt": [
+  "formato europeu",
+  "formato anglo-americano",
+  "formato personalizado",
+  "Casas decimais: número inteiro entre 0 e 10",
+  "Os separadores decimal e dos milhares têm de ser diferentes"
+ ],
+ "nl": [
+  "Europees getalformaat",
+  "Anglo-Amerikaans getalformaat",
+  "aangepast getalformaat",
+  "Decimalen: geheel getal van 0 tot 10",
+  "Decimaal- en duizendtalscheidingsteken moeten verschillen"
+ ],
+ "pl": [
+  "europejski format liczb",
+  "angloamerykański format liczb",
+  "niestandardowy format liczb",
+  "Miejsca po przecinku: liczba całkowita od 0 do 10",
+  "Separatory dziesiętny i tysięcy muszą być różne"
+ ],
+ "csx": [
+  "evropský formát čísel",
+  "angloamerický formát čísel",
+  "vlastní formát čísel",
+  "Desetinná místa: celé číslo od 0 do 10",
+  "Oddělovače desetinných míst a tisíců se musí lišit"
+ ],
+ "da": [
+  "europæisk talformat",
+  "angloamerikansk talformat",
+  "brugerdefineret talformat",
+  "Decimaler: heltal fra 0 til 10",
+  "Decimal- og tusindtalsseparator skal være forskellige"
+ ],
+ "fi": [
+  "eurooppalainen lukumuoto",
+  "angloamerikkalainen lukumuoto",
+  "mukautettu lukumuoto",
+  "Desimaalit: kokonaisluku väliltä 0–10",
+  "Desimaali- ja tuhaterottimien on oltava erilaiset"
+ ],
+ "nb": [
+  "europeisk tallformat",
+  "angloamerikansk tallformat",
+  "egendefinert tallformat",
+  "Desimaler: heltall fra 0 til 10",
+  "Desimal- og tusenskilletegn må være forskjellige"
+ ],
+ "sv": [
+  "europeiskt talformat",
+  "angloamerikanskt talformat",
+  "anpassat talformat",
+  "Decimaler: heltal mellan 0 och 10",
+  "Decimal- och tusentalsavgränsare måste vara olika"
+ ],
+ "ru": [
+  "европейский числовой формат",
+  "англо-американский числовой формат",
+  "пользовательский числовой формат",
+  "Десятичные разряды: целое число от 0 до 10",
+  "Десятичный разделитель и разделитель тысяч должны различаться"
+ ],
+ "ja": [
+  "ヨーロッパ式の数値形式",
+  "英米式の数値形式",
+  "カスタム数値形式",
+  "小数点以下の桁数: 0～10の整数",
+  "小数点記号と桁区切り記号は異なるものを指定してください"
+ ],
+ "kr": [
+  "유럽식 숫자 형식",
+  "영미식 숫자 형식",
+  "사용자 지정 숫자 형식",
+  "소수 자릿수: 0에서 10 사이의 정수",
+  "소수점 구분 기호와 천 단위 구분 기호는 달라야 합니다"
+ ],
+ "zh": [
+  "欧洲数字格式",
+  "英美数字格式",
+  "自定义数字格式",
+  "小数位数：0 到 10 之间的整数",
+  "小数分隔符和千位分隔符必须不同"
+ ],
+ "zh-tw": [
+  "歐洲數字格式",
+  "英美數字格式",
+  "自訂數字格式",
+  "小數位數：0 至 10 的整數",
+  "小數分隔符與千分位符號不得相同"
+ ]
+};
+for(const language of labLanguageCodes){
+ const translated=numericHints[language];
+ if(!translated||translated.length!==numericHintKeys.length)
+  throw Error("Formato numérico sin traducción: "+language);
+ numericHintKeys.forEach((key,index)=>dictionaries[language].set(key,translated[index]));
+}
 export function labTranslation(language:string,key:string):string|null{
  const normalized=language.toLowerCase().replace(/_/g,"-");
  const base=normalized.split("-")[0];
