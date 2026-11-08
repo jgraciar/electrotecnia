@@ -1,6 +1,6 @@
 // Etiquetas de opciones, menús y valores superpuestos en osciloscopios.
 // Los identificadores de configuración y símbolos eléctricos no se traducen.
-export const circuitJsUiCompletenessKeys=["Show Properties on Create","Show Properties on Click","Export Image...","default"," average","Plot ","Max=","Min=","P-P=","CH ","/div","Framerate: ","Steprate: ","Steprate/iter: ","iterc: ","Frames: ","Mouse: ","exception, see console!"] as const;
+export const circuitJsUiCompletenessKeys=["Show Properties on Create","Show Properties on Click","Export Image...","default"," average","Plot ","Max=","Min=","P-P=","CH ","/div","Framerate: ","Steprate: ","Steprate/iter: ","iterc: ","Frames: ","Mouse: ","exception, see console!","File too large!","Dropbox links must start https://www.dropbox.com/"] as const;
 export const circuitJsUiCompleteness: Record<string,string[]> = {
   "en": [
     "Show Properties on Create",
@@ -20,7 +20,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "iterc: ",
     "Frames: ",
     "Mouse: ",
-    "exception, see console!"
+    "exception, see console!",
+    "File too large!",
+    "Dropbox links must start https://www.dropbox.com/"
   ],
   "es": [
     "Mostrar propiedades al crear",
@@ -40,7 +42,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iteraciones: ",
     "Fotogramas: ",
     "Ratón: ",
-    "Excepción: consulta la consola"
+    "Excepción: consulta la consola",
+    "¡El archivo es demasiado grande!",
+    "Los enlaces de Dropbox deben empezar por https://www.dropbox.com/"
   ],
   "ca-es-valencia": [
     "Mostra les propietats en crear",
@@ -60,7 +64,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iteracions: ",
     "Fotogrames: ",
     "Ratolí: ",
-    "Excepció: consulta la consola"
+    "Excepció: consulta la consola",
+    "El fitxer és massa gran!",
+    "Els enllaços de Dropbox han de començar per https://www.dropbox.com/"
   ],
   "ca": [
     "Mostra les propietats en crear",
@@ -80,7 +86,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iteracions: ",
     "Fotogrames: ",
     "Ratolí: ",
-    "Excepció: consulta la consola"
+    "Excepció: consulta la consola",
+    "El fitxer és massa gran!",
+    "Els enllaços de Dropbox han de començar per https://www.dropbox.com/"
   ],
   "gl": [
     "Mostrar as propiedades ao crear",
@@ -100,7 +108,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iteracións: ",
     "Fotogramas: ",
     "Rato: ",
-    "Excepción: consulta a consola"
+    "Excepción: consulta a consola",
+    "O ficheiro é demasiado grande!",
+    "As ligazóns de Dropbox deben comezar por https://www.dropbox.com/"
   ],
   "eu": [
     "Erakutsi propietateak sortzean",
@@ -120,7 +130,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iterazioak: ",
     "Fotogramak: ",
     "Sagua: ",
-    "Salbuespena: ikusi kontsola"
+    "Salbuespena: ikusi kontsola",
+    "Fitxategia handiegia da!",
+    "Dropbox estekek https://www.dropbox.com/ helbidearekin hasi behar dute"
   ],
   "fr": [
     "Afficher les propriétés à la création",
@@ -140,7 +152,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Itérations : ",
     "Images : ",
     "Souris : ",
-    "Exception : consultez la console"
+    "Exception : consultez la console",
+    "Le fichier est trop volumineux !",
+    "Les liens Dropbox doivent commencer par https://www.dropbox.com/"
   ],
   "de": [
     "Eigenschaften beim Erstellen anzeigen",
@@ -160,7 +174,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iterationen: ",
     "Bilder: ",
     "Maus: ",
-    "Ausnahme: Konsole prüfen"
+    "Ausnahme: Konsole prüfen",
+    "Die Datei ist zu groß!",
+    "Dropbox-Links müssen mit https://www.dropbox.com/ beginnen"
   ],
   "it": [
     "Mostra proprietà alla creazione",
@@ -180,7 +196,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iterazioni: ",
     "Fotogrammi: ",
     "Mouse: ",
-    "Eccezione: controlla la console"
+    "Eccezione: controlla la console",
+    "Il file è troppo grande!",
+    "I collegamenti Dropbox devono iniziare con https://www.dropbox.com/"
   ],
   "pt": [
     "Mostrar propriedades ao criar",
@@ -200,7 +218,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iterações: ",
     "Fotogramas: ",
     "Rato: ",
-    "Exceção: consulte a consola"
+    "Exceção: consulte a consola",
+    "O ficheiro é demasiado grande!",
+    "As ligações do Dropbox devem começar por https://www.dropbox.com/"
   ],
   "nl": [
     "Eigenschappen tonen bij aanmaken",
@@ -220,7 +240,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iteraties: ",
     "Beelden: ",
     "Muis: ",
-    "Uitzondering: raadpleeg de console"
+    "Uitzondering: raadpleeg de console",
+    "Het bestand is te groot!",
+    "Dropbox-links moeten beginnen met https://www.dropbox.com/"
   ],
   "sv": [
     "Visa egenskaper vid skapande",
@@ -240,7 +262,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iterationer: ",
     "Bildrutor: ",
     "Mus: ",
-    "Undantag: se konsolen"
+    "Undantag: se konsolen",
+    "Filen är för stor!",
+    "Dropbox-länkar måste börja med https://www.dropbox.com/"
   ],
   "da": [
     "Vis egenskaber ved oprettelse",
@@ -260,7 +284,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iterationer: ",
     "Billeder: ",
     "Mus: ",
-    "Undtagelse: se konsollen"
+    "Undtagelse: se konsollen",
+    "Filen er for stor!",
+    "Dropbox-links skal begynde med https://www.dropbox.com/"
   ],
   "nb": [
     "Vis egenskaper ved opprettelse",
@@ -280,7 +306,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iterasjoner: ",
     "Bilder: ",
     "Mus: ",
-    "Unntak: se konsollen"
+    "Unntak: se konsollen",
+    "Filen er for stor!",
+    "Dropbox-lenker må begynne med https://www.dropbox.com/"
   ],
   "fi": [
     "Näytä ominaisuudet luotaessa",
@@ -300,7 +328,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iteraatiot: ",
     "Kehykset: ",
     "Hiiri: ",
-    "Poikkeus: tarkista konsoli"
+    "Poikkeus: tarkista konsoli",
+    "Tiedosto on liian suuri!",
+    "Dropbox-linkkien on alettava osoitteella https://www.dropbox.com/"
   ],
   "pl": [
     "Pokaż właściwości przy tworzeniu",
@@ -320,7 +350,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iteracje: ",
     "Klatki: ",
     "Mysz: ",
-    "Wyjątek: sprawdź konsolę"
+    "Wyjątek: sprawdź konsolę",
+    "Plik jest zbyt duży!",
+    "Łącza Dropbox muszą zaczynać się od https://www.dropbox.com/"
   ],
   "csx": [
     "Zobrazit vlastnosti při vytvoření",
@@ -340,7 +372,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Iterace: ",
     "Snímky: ",
     "Myš: ",
-    "Výjimka: viz konzole"
+    "Výjimka: viz konzole",
+    "Soubor je příliš velký!",
+    "Odkazy Dropbox musí začínat na https://www.dropbox.com/"
   ],
   "ru": [
     "Показывать свойства при создании",
@@ -360,7 +394,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "Итерации: ",
     "Кадры: ",
     "Мышь: ",
-    "Исключение: см. консоль"
+    "Исключение: см. консоль",
+    "Файл слишком большой!",
+    "Ссылки Dropbox должны начинаться с https://www.dropbox.com/"
   ],
   "ja": [
     "作成時にプロパティを表示",
@@ -380,7 +416,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "反復回数: ",
     "フレーム: ",
     "マウス: ",
-    "例外: コンソールを確認"
+    "例外: コンソールを確認",
+    "ファイルが大きすぎます！",
+    "Dropbox のリンクは https://www.dropbox.com/ で始まる必要があります"
   ],
   "kr": [
     "만들 때 속성 표시",
@@ -400,7 +438,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "반복 횟수: ",
     "프레임: ",
     "마우스: ",
-    "예외: 콘솔 확인"
+    "예외: 콘솔 확인",
+    "파일이 너무 큽니다!",
+    "Dropbox 링크는 https://www.dropbox.com/ 로 시작해야 합니다"
   ],
   "zh": [
     "创建时显示属性",
@@ -420,7 +460,9 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "迭代次数：",
     "帧数：",
     "鼠标：",
-    "异常：请查看控制台"
+    "异常：请查看控制台",
+    "文件过大！",
+    "Dropbox 链接必须以 https://www.dropbox.com/ 开头"
   ],
   "zh-tw": [
     "建立時顯示屬性",
@@ -440,6 +482,8 @@ export const circuitJsUiCompleteness: Record<string,string[]> = {
     "迭代次數：",
     "影格數：",
     "滑鼠：",
-    "例外：請查看主控台"
+    "例外：請查看主控台",
+    "檔案太大！",
+    "Dropbox 連結必須以 https://www.dropbox.com/ 開頭"
   ]
 };
