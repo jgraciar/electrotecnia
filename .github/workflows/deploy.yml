@@ -31,6 +31,8 @@ jobs:
 
       - name: Comprobar sintaxis y cálculo del vatímetro
         run: |
+          node --check laboratorio/host-valencian.js
+          node laboratorio/tests/host-valencian.test.js
           node --check laboratorio/bridge.js
           node --check laboratorio/wulflemm-xml.js
           node --check laboratorio/wulflemm-ui.js
