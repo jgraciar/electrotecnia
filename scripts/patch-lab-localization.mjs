@@ -11,6 +11,8 @@ copyFileSync(join(dirname(translations),"LabTranslationsNativeMenus.ts"),join(di
 copyFileSync(join(dirname(translations),"CircuitJsDrawLabels.ts"),join(dir,"CircuitJsDrawLabels.ts"));
 copyFileSync(join(dirname(translations),"CircuitJsSupplementalUi.ts"),join(dir,"CircuitJsSupplementalUi.ts"));
 copyFileSync(join(dirname(translations),"CircuitJsUiCompleteness.ts"),join(dir,"CircuitJsUiCompleteness.ts"));
+copyFileSync(join(dirname(translations),"CircuitJsScopeOptions.ts"),join(dir,"CircuitJsScopeOptions.ts"));
+copyFileSync(join(dirname(translations),"CircuitJsGeneralOptions.ts"),join(dir,"CircuitJsGeneralOptions.ts"));
 function once(path,oldText,newText){
  const src=readFileSync(path,"utf8");
  if(src.split(oldText).length!==2)
