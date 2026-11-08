@@ -111,7 +111,12 @@
     if (node) node.nodeValue = value;
   };
   lead(0,t[0]); lead(1,t[1]); lead(2,t[2]); lead(3,t[3]);
-  lead(4,t[4]); lead(5,t[5]);
+  // En los otros idiomas se conserva íntegra la relación original de autores.
+  // El crédito es un único nodo de texto: no sustituirlo por el encabezado.
+  const creditNode = p[4]?.firstChild;
+  if (creditNode?.nodeType === Node.TEXT_NODE)
+    creditNode.nodeValue = creditNode.nodeValue.replace(/^Thanks to:\s*/, t[4]);
+  lead(5,t[5]);
   const icons = p[5]?.querySelector("a");
   if (icons) icons.textContent = t[6];
   lead(8,t[7]); lead(9,t[8]); lead(10,t[9]);
