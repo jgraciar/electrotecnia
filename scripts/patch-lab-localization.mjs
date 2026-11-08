@@ -72,16 +72,18 @@ once(locale,
  '        const originalLang = ["gl","eu"].includes(lang)?"es":lang;\n'+
  '        const url = moduleBaseURL + "locale/locale_" + originalLang + ".txt";');
 const dialog=join(dir,"EditDialog.ts");
- // El título «Edit resistor» se formaba de forma dinámica. Buscar la frase
- // completa en el catálogo falla para todos los idiomas.
- // Localizar de forma independiente la acción y el nombre del componente.
+once(dialog,
+ 'import { Locale } from "./Locale";',
+ 'import { Locale } from "./Locale";\nimport { localizedComponentEditTitle } from "./CircuitJsEditDialogTitles";');
+ // El título «Edit resistor» se formaba de forma dinámica. Traducir el nombre
+ // del componente y componer la frase con la plantilla del idioma activo.
 once(dialog,
  '        titleEl.textContent = Locale.LS(title);',
  '        const customTitle = !!ce.getEditTitle;\n'+
  '        const componentName = !customTitle && ce instanceof CircuitElm\n'+
  '            ? ce.getElmType() : null;\n'+
  '        titleEl.textContent = componentName\n'+
- '            ? Locale.LS("Edit Component") + ": " + Locale.LS(componentName)\n'+
+ '            ? localizedComponentEditTitle(Locale.activeLanguage, Locale.LS(componentName))\n'+
  '            : Locale.LS(title);');
 
 once(dialog,'                    opt.textContent = ei.choice.items[j];',
