@@ -109,6 +109,9 @@ jobs:
       - name: Comprobar traduccion efectiva del dialogo de deslizadores
         run: node --experimental-strip-types laboratorio/tests/verify-slider-dialog-locale.mjs circuitjs-src/ts
 
+      - name: Auditar toda la interfaz rusa de CircuitJS
+        run: node --experimental-strip-types laboratorio/tests/verify-russian-interface.mjs circuitjs-src/ts
+
       - name: Auditar osciloscopios y Opciones en los 22 idiomas
         run: node --experimental-strip-types laboratorio/tests/verify-scope-options-translations.mjs circuitjs-src/ts
 
