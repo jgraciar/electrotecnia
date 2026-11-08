@@ -65,7 +65,9 @@ let changed=0;
 for(const line of original.split(/\r?\n/)){
  const m=line.match(/^"(.*?)"="(.*)"$/);
  if(!m){if(line.trim())out.push(line);continue;}
- const key=m[1];if(seen.has(key))throw Error("Clave duplicada: "+key);
+ // El catálogo valenciano heredado puede repetir claves: conservar el orden
+ // y todas sus líneas; el lector de CircuitJS aplica la última aparición.
+ const key=m[1];
  seen.add(key);
  const value=reviewed[key]??adapt(m[2]);
  if(!value.trim()&&m[2].trim())throw Error("Traducción vacía: "+key);
