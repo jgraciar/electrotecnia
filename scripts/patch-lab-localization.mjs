@@ -8,6 +8,7 @@ if(!dir||!translations)throw Error("Uso: patch-lab-localization.mjs ts-dir LabTr
 copyFileSync(translations,join(dir,"LabTranslations.ts"));
 copyFileSync(join(dirname(translations),"LabTranslationsMenus.ts"),join(dir,"LabTranslationsMenus.ts"));
 copyFileSync(join(dirname(translations),"LabTranslationsNativeMenus.ts"),join(dir,"LabTranslationsNativeMenus.ts"));
+copyFileSync(join(dirname(translations),"LabTranslationsOtherComponents.ts"),join(dir,"LabTranslationsOtherComponents.ts"));
 function once(path,oldText,newText){
  const src=readFileSync(path,"utf8");
  if(src.split(oldText).length!==2)
