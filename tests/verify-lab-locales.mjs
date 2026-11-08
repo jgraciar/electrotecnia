@@ -201,6 +201,8 @@ try{
      });
      assert(!details.version.includes("Circuit Simulator version"),
       "Acerca de conserva cabecera inglesa: "+c.expected);
+     assert(details.credits.includes("Edward Calver"),
+      "Acerca de ha perdido los créditos: "+c.expected);
      if(["es","ca-es-valencia"].includes(c.expected)){
       assert(details.credits.includes("Edward Calver"),"Faltan créditos de origen");
       assert(details.legal.includes(c.expected==="es"?"software libre":"programari lliure"),
