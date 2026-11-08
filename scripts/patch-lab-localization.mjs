@@ -173,5 +173,6 @@ once(aboutBox,
  '        okButton.textContent = Locale.LS("OK");');
 const about=join(dir,"circuitjs","about.html");
 const aboutSource=readFileSync(join(repoRoot,"scripts/circuitjs-about-i18n.js"),"utf8");
-once(about,"</script>",aboutSource+"\n</script>");
+const aboutLegal=readFileSync(join(repoRoot,"scripts/circuitjs-about-legal.js"),"utf8");
+once(about,"</script>",aboutSource+"\n"+aboutLegal+"\n</script>");
 console.log("Traducciones activadas: menús, nombres de componentes y Acerca de en 22 idiomas");
