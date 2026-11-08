@@ -123,7 +123,6 @@ replaceOnce(opts,'        if (n === 11)\n            CircuitElm.setDecimalDigits
             const decimal=ei.choice!.getSelectedIndex()===0?",":".";
             const grouping=NumberFormat.groupingSeparator===decimal?(decimal===","?".":","):NumberFormat.groupingSeparator;
             NumberFormat.setSeparators(decimal,grouping);ei.newDialog=true;
-        }
         }`);
 replaceOnce(opts,'    setEditValue(n: number, ei: EditInfo): void {',
 `    setEditValue(n: number, ei: EditInfo): void {
