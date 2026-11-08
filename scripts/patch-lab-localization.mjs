@@ -113,4 +113,30 @@ once(options,
  '            stor.setItem("language", langString);',
  '            stor.setItem("language", langString);\n'+
  '            stor.setItem("labLanguageMode", "manual");');
-console.log("Traducciones activadas: menús y controles de edición en 22 idiomas");
+// Las etiquetas de Dibujo no deben incluir un verbo de inserción. El comando
+// técnico («Add Resistor» y su identificador de clase) permanece intacto.
+const menus=join(dir,"Menus.ts");
+once(menus,
+ '            menu.addCheckboxItem(this.getClassCheckItem(Locale.LS(items[i]), items[i + 1]));',
+ '            const translated = Locale.LS(items[i]);\n'+
+ '            const action = Locale.LS("Add ").trim();\n'+
+ '            const label = action && translated.toLocaleLowerCase().startsWith(action.toLocaleLowerCase())\n'+
+ '                ? translated.slice(action.length).trimStart() : translated;\n'+
+ '            menu.addCheckboxItem(this.getClassCheckItem(label || translated, items[i + 1]));');
+// El cuadro Acerca de se carga en un iframe independiente: pasar el idioma
+// efectivo y traducir su texto sin perder créditos ni los originales legales.
+const aboutBox=join(dir,"AboutBox.ts");
+once(aboutBox,
+ 'import { moduleBaseURL } from "./ModuleBase";',
+ 'import { moduleBaseURL } from "./ModuleBase";\nimport { Locale } from "./Locale";');
+once(aboutBox,
+ '        iframe.src = import.meta.env.DEV ? "circuitjs/about.html" : moduleBaseURL + "about.html";',
+ '        const aboutURL = import.meta.env.DEV ? "circuitjs/about.html" : moduleBaseURL + "about.html";\n'+
+ '        iframe.src = aboutURL + "?lang=" + encodeURIComponent(Locale.activeLanguage);');
+once(aboutBox,
+ '        okButton.textContent = "OK";',
+ '        okButton.textContent = Locale.LS("OK");');
+const about=join(dir,"circuitjs","about.html");
+const aboutSource=readFileSync(join(repoRoot,"scripts/circuitjs-about-i18n.js"),"utf8");
+once(about,"</script>",aboutSource+"\\n</script>");
+console.log("Traducciones activadas: menús, nombres de componentes y Acerca de en 22 idiomas");
