@@ -213,6 +213,39 @@ try{
      console.log("Acerca de traducido:",c.expected,details.language);
     }finally{await about.close();}
    }
+   // Las doce entradas CCS/CVS se construyen con los títulos de setuplist;
+   // el archivo y la simulación asociados no deben cambiar con el idioma.
+   if(c.expected==="es"||c.expected==="ca-es-valencia"){
+    const expect=c.expected==="es"?
+     ["Resistencia (CCS)","Amplificador operacional (CVS)","Sumador de corrientes (CCS)"]:
+     ["Resistència (CCS)","Amplificador operacional (CVS)","Sumador d'intensitats (CCS)"];
+    await page.waitForFunction(terms=>{
+     const doc=document.querySelector("#circuit-frame")?.contentDocument;
+     const names=[...doc?.querySelectorAll("li")??[]].map(li=>li.textContent?.trim());
+     return terms.every(term=>names.some(name=>name===term));
+    },expect,{timeout:90000});
+    const runState=await page.evaluate(()=>{
+     const doc=document.querySelector("#circuit-frame")?.contentDocument;
+     const buttons=[...doc.querySelectorAll("button")];
+     const button=buttons.find(b=>b.textContent?.includes("Iniciar")&&
+      b.textContent?.includes("Deten"));
+     if(!button)return {initial:null,stopped:null,resumed:null};
+     const initial=button.textContent?.replace(/\\s+/g," ").trim();
+     button.click();
+     const stopped=button.textContent?.replace(/\\s+/g," ").trim();
+     const stoppedClass=button.className;
+     button.click();
+     const resumed=button.textContent?.replace(/\\s+/g," ").trim();
+     return {initial,stopped,resumed,stoppedClass};
+    });
+    const expectedStop=c.expected==="es"?"Detener":"Detindre";
+    assert(runState.initial?.includes(expectedStop)&&runState.initial?.includes("Iniciar"),
+     "Botón lateral sin traducir: "+c.expected+" "+JSON.stringify(runState));
+    assert(runState.stoppedClass==="topButton-red",
+     "El botón no pasó al estado de parada: "+c.expected);
+    assert.equal(runState.stopped,runState.resumed,
+     "No se conservan los nombres en los estados de marcha y parada");
+   }
    if(c.expected==="ca-es-valencia")
     assert(localeResponses.some(url=>url.includes("/locale/locale_ca-es-valencia.txt")),
      "El valencià s'ha de carregar del seu catàleg, no del fitxer espanyol");
