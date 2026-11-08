@@ -3,7 +3,7 @@
 // y se modifica únicamente su rótulo visible.
 export function circuitJsDrawLabel(sourceKey: string, localized: string, language: string): string {
     // Los accesos de arrastre y las acciones ajenas a «Add» no se cambian.
-    if (!sourceKey.startsWith("Add ") || !localized) return localized;
+    if (!/^(?:Add |Añadir |Afegir |Afig |Engadir )/i.test(sourceKey) || !localized) return localized;
 
     const code = language.toLowerCase().replace(/_/g, "-");
     const base = code.startsWith("ca-es-valencia") ? "ca-es-valencia"
