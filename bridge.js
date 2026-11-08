@@ -148,7 +148,8 @@
     scope.setCircuitRecords(record);
   }
   function attach(instance){
-    if(!instance || sim===instance)return;
+    if(!instance || sim===instance || typeof instance.getElements!=="function" ||
+       typeof instance.importCircuit!=="function")return;
     sim=instance;
     sim.ontimestep=capture;
     sim.onupdate=update;
@@ -477,7 +478,9 @@
     getWulflemmComponents,
     updateWulflemmAttribute,
     getCompatibilityDiagnostics,
-    isIntegrated:()=>localAvailable,
+    // Estar publicado no implica que el motor ya esté conectado.
+    isIntegrated:()=>localAvailable && !!sim &&
+      frame.contentWindow?.CircuitJS1===sim,
     currentExample:()=>selectedExample
   };
   selector.addEventListener("change",clear);
@@ -505,6 +508,15 @@
         else w.oncircuitjsloaded=()=>attach(w.CircuitJS1);
       }catch(err){message("No se puede establecer comunicación con CircuitJS: "+err.message);}
     });
+    // En algunas compilaciones, el callback oncircuitjsloaded se ejecuta
+    // antes de que termine de cargar el iframe. Recuperar la instancia si
+    // la notificación se ha perdido, también al cambiar de circuito.
+    setInterval(()=>{
+      try{
+        const current=frame.contentWindow?.CircuitJS1;
+        if(localAvailable && current && current!==sim)attach(current);
+      }catch(_){/* El iframe puede estar navegando. */}
+    },250);
     // El XML original de Aron está incorporado en el propio CircuitJS compilado.
     // No se descarga ni se importa ningún archivo durante el arranque.
     frame.src=localUrl.href;
