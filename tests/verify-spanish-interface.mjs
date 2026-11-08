@@ -62,7 +62,7 @@ for(const [key,value] of reviewed)
   "Se ha perdido la traducción española de "+key);
 // Detectar anglicismos residuales también en entradas antiguas que sí
 // existen en locale_es.txt pero conservaban su valor en inglés.
-const anglicisms=/\\b(?:flip[- ]?flop|driver|display|offset|trigger|default|click|load|buffer|vs|scope|zoom|open|close|run|stop|view|input|output|back|editing disabled)\\b/i;
+const anglicisms=/\b(?:flip[- ]?flop|driver|display|offset|trigger|default|click|load|buffer|vs|scope|zoom|open|close|run|stop|view|input|output|back|editing disabled)\b/i;
 const mixed=[...official].filter(([key,value])=>
  anglicisms.test(labTranslation("es",key)??value))
  .map(([key,value])=>key+" => "+(labTranslation("es",key)??value));
