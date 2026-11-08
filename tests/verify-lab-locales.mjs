@@ -131,6 +131,24 @@ try{
     "Submenú Bloques activos sin traducir: "+c.expected);
    assert(current.labels.some(x=>x.includes(c.element)),
     "Inversor sin traducir: "+c.expected);
+   if(c.expected==="es"||c.expected==="ca-es-valencia"){
+    const expected=c.expected==="es"
+     ?["Fuente de tensión controlada (2 terminales)","Fuente de corriente controlada (2 terminales)",
+       "Transformador","Punto de prueba","Vatímetro"]
+     :["Font de tensió controlada (2 terminals)","Font d'intensitat controlada (2 terminals)",
+       "Transformador","Punt de prova","Vatímetre"];
+    for(const value of expected)
+     assert(current.labels.some(x=>x===value),
+      "Elemento del menú sin traducir: "+c.expected+"/"+value);
+    const menuText=await page.evaluate(()=>{
+     const doc=document.querySelector("#circuit-frame").contentDocument;
+     return [...doc.querySelectorAll("li")].map(x=>x.textContent?.trim());
+    });
+    for(const english of ["Export As Image...","Export As SVG...","Find Component/Command..."]){
+     assert(!menuText.some(x=>x===english),
+      "Comando del menú aún en inglés: "+english);
+    }
+   }
    assert.deepEqual(errors,[],"Errores JS para "+c.expected);
   }finally{await context.close();}
  }
