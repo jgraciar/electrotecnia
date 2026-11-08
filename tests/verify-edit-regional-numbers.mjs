@@ -13,7 +13,10 @@ for(const fragment of [
  "formatCircuitEditValue(this.unitString(ei), Locale.activeLanguage)",
  "formatCircuitEditValue(EditDialog.unitStringVal(ei, next), Locale.activeLanguage)",
  "normalizeCircuitEditInput((ei.textf as HTMLInputElement).value, Locale.activeLanguage)",
- "ei.setError(circuitEditNumberError(Locale.activeLanguage))"
+ "ei.setError(circuitEditNumberError(Locale.activeLanguage))",
+ "const field = Locale.LS(ei.errorFieldName ?? ei.name)",
+ "inp.addEventListener(\"input\"",
+ 'this.errorLabel.style.display = "none"'
 ])assert(source.includes(fragment),"El editor no utiliza la conversión regional: "+fragment);
 assert(formatter.includes("labRegionalFormat")&&formatter.includes("labGroupingSeparator"));
 
@@ -42,6 +45,10 @@ for(const [source,expected] of [
  ["1e-3","1e-3"],["2.4rms","2,4rms"],
  ["1.23456789012","1,23456789012"],["2.2u","2,2u"]
 ])assert.equal(formatCircuitEditValue(source,"es",eu),expected,"Visualización EU "+source);
+// Reproducción del umbral de salida lógica mostrado en la captura.
+assert.equal(formatCircuitEditValue("2.5","es",eu),"2,5");
+assert.equal(normalizeCircuitEditInput("2,5","es",eu),"2.5");
+assert.equal(Number(normalizeCircuitEditInput("2,5","es",eu)),2.5);
 assert.equal(formatCircuitEditValue("1234567.89","es",uk),"1,234,567.89");
 assert.equal(formatCircuitEditValue("1234567.89","es",custom),"1234567,89");
 assert.equal(formatCircuitEditValue("1234567.89","es",custom2),"1234567.89");
