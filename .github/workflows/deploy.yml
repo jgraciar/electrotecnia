@@ -112,6 +112,9 @@ jobs:
       - name: Auditar toda la interfaz española de CircuitJS
         run: node --experimental-strip-types laboratorio/tests/verify-spanish-interface.mjs circuitjs-src/ts
 
+      - name: Auditar títulos de edición en los 22 idiomas
+        run: node --experimental-strip-types laboratorio/tests/verify-edit-dialog-titles.mjs circuitjs-src/ts
+
       - name: Auditar toda la interfaz rusa de CircuitJS
         run: node --experimental-strip-types laboratorio/tests/verify-russian-interface.mjs circuitjs-src/ts
 
