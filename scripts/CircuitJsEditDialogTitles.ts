@@ -161,3 +161,38 @@ export const componentEditDialogLabels: Record<string, Record<string,string>> = 
     "ground": "jord"
   }
 };
+
+
+// Plantillas de título para las ventanas de edición, con orden de palabras
+// adecuado al idioma. Los nombres se obtienen de Locale.LS y se conservan
+// las cabeceras específicas aportadas por getEditTitle().
+export const componentEditTitleTemplates: Record<string,string> = {
+  "csx": "Upravit: {component}",
+  "da": "Rediger {component}",
+  "de": "{component} bearbeiten",
+  "en": "Edit {component}",
+  "es": "Editar {component}",
+  "fi": "Muokkaa: {component}",
+  "fr": "Modifier : {component}",
+  "it": "Modifica: {component}",
+  "nb": "Rediger {component}",
+  "pl": "Edytuj: {component}",
+  "pt": "Editar {component}",
+  "ru": "Редактировать: {component}",
+  "zh": "编辑：{component}",
+  "zh-tw": "編輯：{component}",
+  "ja": "{component}を編集",
+  "kr": "{component} 편집",
+  "ca": "Editar {component}",
+  "ca-es-valencia": "Editar {component}",
+  "gl": "Editar {component}",
+  "eu": "{component} editatu",
+  "nl": "{component} bewerken",
+  "sv": "Redigera {component}"
+};
+
+export function localizedComponentEditTitle(lang: string, translatedComponentName: string): string {
+  const pattern = componentEditTitleTemplates[lang.toLowerCase()] ??
+    componentEditTitleTemplates.en;
+  return pattern.replace("{component}", translatedComponentName);
+}
