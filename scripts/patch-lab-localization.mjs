@@ -117,12 +117,15 @@ once(options,
 // técnico («Add Resistor» y su identificador de clase) permanece intacto.
 const menus=join(dir,"Menus.ts");
 once(menus,
+ '        for (let i = 0; i < items.length; i += 2)\n'+
  '            menu.addCheckboxItem(this.getClassCheckItem(Locale.LS(items[i]), items[i + 1]));',
+ '        for (let i = 0; i < items.length; i += 2) {\n'+
  '            const translated = Locale.LS(items[i]);\n'+
  '            const action = Locale.LS("Add ");\n'+
  '            const label = action && translated.startsWith(action)\n'+
  '                ? translated.slice(action.length).trimStart() : translated;\n'+
- '            menu.addCheckboxItem(this.getClassCheckItem(label || translated, items[i + 1]));');
+ '            menu.addCheckboxItem(this.getClassCheckItem(label || translated, items[i + 1]));\n'+
+ '        }');
 // El cuadro Acerca de se carga en un iframe independiente: pasar el idioma
 // efectivo y traducir su texto sin perder créditos ni los originales legales.
 const aboutBox=join(dir,"AboutBox.ts");
