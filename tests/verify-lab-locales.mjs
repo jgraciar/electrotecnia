@@ -63,6 +63,9 @@ const cases=[
  {browser:"ca-ES",mode:"auto",saved:null,expected:"ca",
   input:"Entrades i fonts",passive:"Components passius",
   blocks:"Blocs funcionals actius",element:"Inversor fotovoltaic (CA)"},
+ {browser:"ca-ES-valencia",mode:"auto",saved:null,expected:"ca-es-valencia",
+  input:"Entrades i fonts",passive:"Components passius",
+  blocks:"Blocs funcionals actius",element:"Inversor fotovoltaic (CA)"},
  {browser:"es-ES",mode:"manual",saved:"ca-es-valencia",expected:"ca-es-valencia",
   input:"Entrades i fonts",passive:"Components passius",
   blocks:"Blocs funcionals actius",element:"Inversor fotovoltaic (CA)"},
@@ -81,6 +84,8 @@ try{
    const page=await context.newPage();
    const errors=[];
    page.on("pageerror",error=>errors.push(error.message));
+   const localeResponses=[];
+   page.on("response",response=>{if(response.url().includes("/locale/locale_"))localeResponses.push(response.url());});
    await page.addInitScript((pref)=>{
     // La misma página contiene CircuitJS en un iframe del mismo origen:
     // preparar las preferencias SOLO en el documento principal para que
@@ -155,6 +160,9 @@ try{
       "Comando del menú aún en inglés: "+english);
     }
    }
+   if(c.expected==="ca-es-valencia")
+    assert(localeResponses.some(url=>url.includes("/locale/locale_ca-es-valencia.txt")),
+     "El valencià s'ha de carregar del seu catàleg, no del fitxer espanyol");
    assert.deepEqual(errors,[],"Errores JS para "+c.expected);
   }finally{await context.close();}
  }
