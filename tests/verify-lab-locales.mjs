@@ -179,6 +179,38 @@ try{
       "Comando del menú aún en inglés: "+english);
     }
    }
+   // Verificar en navegador real que Dibujo no muestra el prefijo de inserción.
+   if(c.expected==="es"||c.expected==="ca-es-valencia"){
+    const prefix=c.expected==="es"?/^Añadir\\s/i:/^(?:Afig|Afegir)\\s/i;
+    assert(!current.labels.some(x=>prefix.test(x)),
+     "Dibujo conserva el prefijo de inserción: "+c.expected);
+   }
+   // Acerca de se carga como una página independiente dentro del iframe.
+   if(["es","ca-es-valencia","fr"].includes(c.expected)){
+    const about=await context.newPage();
+    try{
+     const aboutURL="http://127.0.0.1:8765/circuitjs/circuitjs/about.html?lang="+
+      encodeURIComponent(c.expected);
+     const response=await about.goto(aboutURL,{waitUntil:"domcontentloaded"});
+     assert(response?.ok(),"No se publica Acerca de: "+aboutURL);
+     const details=await about.evaluate(()=>{
+      const ps=[...document.querySelectorAll("div > p")];
+      return {version:ps[0]?.textContent??"",credits:ps[4]?.textContent??"",
+       legal:ps[6]?.textContent??"",notice:ps[12]?.textContent??"",
+       language:document.documentElement.lang};
+     });
+     assert(!details.version.includes("Circuit Simulator version"),
+      "Acerca de conserva cabecera inglesa: "+c.expected);
+     if(["es","ca-es-valencia"].includes(c.expected)){
+      assert(details.credits.includes("Edward Calver"),"Faltan créditos de origen");
+      assert(details.legal.includes(c.expected==="es"?"software libre":"programari lliure"),
+       "Aviso GPL sin traducir: "+c.expected);
+      assert(details.notice.length>160 && !details.notice.includes("IN NO EVENT SHALL"),
+       "Aviso legal sin traducir: "+c.expected);
+     }
+     console.log("Acerca de traducido:",c.expected,details.language);
+    }finally{await about.close();}
+   }
    if(c.expected==="ca-es-valencia")
     assert(localeResponses.some(url=>url.includes("/locale/locale_ca-es-valencia.txt")),
      "El valencià s'ha de carregar del seu catàleg, no del fitxer espanyol");
