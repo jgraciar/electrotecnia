@@ -9,6 +9,7 @@ copyFileSync(translations,join(dir,"LabTranslations.ts"));
 copyFileSync(join(dirname(translations),"LabTranslationsMenus.ts"),join(dir,"LabTranslationsMenus.ts"));
 copyFileSync(join(dirname(translations),"LabTranslationsNativeMenus.ts"),join(dir,"LabTranslationsNativeMenus.ts"));
 copyFileSync(join(dirname(translations),"CircuitJsDrawLabels.ts"),join(dir,"CircuitJsDrawLabels.ts"));
+copyFileSync(join(dirname(translations),"CircuitJsSupplementalUi.ts"),join(dir,"CircuitJsSupplementalUi.ts"));
 function once(path,oldText,newText){
  const src=readFileSync(path,"utf8");
  if(src.split(oldText).length!==2)
@@ -124,6 +125,18 @@ once(menus,
  '            menu.addCheckboxItem(this.getClassCheckItem(Locale.LS(items[i]), items[i + 1]));',
  '            menu.addCheckboxItem(this.getClassCheckItem(\n'+
  '                circuitJsDrawLabel(items[i], Locale.LS(items[i]), Locale.activeLanguage), items[i + 1]));');
+// Botón lateral Run / Stop: traducir ambos estados, sin tocar el indicador
+// de velocidad de simulación, que ya utiliza Locale.LS.
+const uiManager=join(dir,"UIManager.ts");
+const runningHtml="        this.runStopButton.innerHTML = '<strong>RUN</strong>&nbsp;/&nbsp;Stop';";
+const runningLocalized='        this.runStopButton.innerHTML = \'<strong>\' + Locale.LS("Run") + \'</strong>&nbsp;/&nbsp;\' + Locale.LS("Stop");';
+const uiSource=readFileSync(uiManager,"utf8");
+if(uiSource.split(runningHtml).length!==3)
+ throw Error("Han cambiado las etiquetas RUN/Stop en UIManager.ts");
+writeFileSync(uiManager,uiSource.split(runningHtml).join(runningLocalized));
+once(uiManager,
+ "            this.runStopButton.innerHTML = 'Run&nbsp;/&nbsp;<strong>STOP</strong>';",
+ "            this.runStopButton.innerHTML = Locale.LS(\"Run\") + '&nbsp;/&nbsp;<strong>' + Locale.LS(\"Stop\") + '</strong>';");
 // El cuadro Acerca de se carga en un iframe independiente: pasar el idioma
 // efectivo y traducir su texto sin perder créditos ni los originales legales.
 const aboutBox=join(dir,"AboutBox.ts");
