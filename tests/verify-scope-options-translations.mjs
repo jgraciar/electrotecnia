@@ -11,9 +11,24 @@ if(!dir)throw Error("Uso: verify-scope-options-translations.mjs <ts-dir>");
 const sources={
  overlay:readFileSync(join(dir,"ScopeOverlays.ts"),"utf8"),
  properties:readFileSync(join(dir,"ScopePropertiesDialog.ts"),"utf8"),
+ popup:readFileSync(join(dir,"ScopePopupMenu.ts"),"utf8"),
  options:readFileSync(join(dir,"EditOptions.ts"),"utf8"),
  ui:readFileSync(join(dir,"UIManager.ts"),"utf8")
 };
+// Detectar también futuras etiquetas visibles que añada CircuitJS upstream.
+const scopeLabels=new Set();
+for(const match of sources.properties.matchAll(/Locale\\.LS\\(\\s*['"]([^'"]+)['"]\\s*\\)/g))
+ scopeLabels.add(match[1]);
+for(const pattern of [
+ /(?:new ScopeCheckBox|new ExpandingSection|makeXYSelect)\\(\\s*['"]([^'"]+)['"]/g,
+ /\\.makeRadio\\(\\s*['"][^'"]+['"]\\s*,\\s*['"]([^'"]+)['"]/g
+])for(const match of sources.properties.matchAll(pattern))scopeLabels.add(match[1]);
+for(const match of sources.popup.matchAll(/addPlain\\(\\s*['"]([^'"]+)['"]/g))
+ scopeLabels.add(match[1]);
+scopeLabels.add("Max Scale");
+const extraScopeLabels=[...scopeLabels].filter(key=>!scopeOptionKeys.includes(key));
+assert.deepEqual(extraScopeLabels,[],
+ "CircuitJS ha añadido etiquetas de osciloscopio sin traducir");
 for(const key of ["Plot ","Max=","Min=","P-P="])
  assert(sources.overlay.includes('Locale.LS("'+key+'")'),
   "Texto de osciloscopio sin localización: "+key);
