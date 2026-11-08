@@ -8,6 +8,7 @@ if(!dir||!translations)throw Error("Uso: patch-lab-localization.mjs ts-dir LabTr
 copyFileSync(translations,join(dir,"LabTranslations.ts"));
 copyFileSync(join(dirname(translations),"LabTranslationsMenus.ts"),join(dir,"LabTranslationsMenus.ts"));
 copyFileSync(join(dirname(translations),"LabTranslationsNativeMenus.ts"),join(dir,"LabTranslationsNativeMenus.ts"));
+copyFileSync(join(dirname(translations),"CircuitJsDrawLabels.ts"),join(dir,"CircuitJsDrawLabels.ts"));
 function once(path,oldText,newText){
  const src=readFileSync(path,"utf8");
  if(src.split(oldText).length!==2)
@@ -117,15 +118,12 @@ once(options,
 // técnico («Add Resistor» y su identificador de clase) permanece intacto.
 const menus=join(dir,"Menus.ts");
 once(menus,
- '        for (let i = 0; i < items.length; i += 2)\n'+
+ 'import { Locale } from "./Locale";',
+ 'import { Locale } from "./Locale";\nimport { circuitJsDrawLabel } from "./CircuitJsDrawLabels";');
+once(menus,
  '            menu.addCheckboxItem(this.getClassCheckItem(Locale.LS(items[i]), items[i + 1]));',
- '        for (let i = 0; i < items.length; i += 2) {\n'+
- '            const translated = Locale.LS(items[i]);\n'+
- '            const action = Locale.LS("Add ");\n'+
- '            const label = action && translated.startsWith(action)\n'+
- '                ? translated.slice(action.length).trimStart() : translated;\n'+
- '            menu.addCheckboxItem(this.getClassCheckItem(label || translated, items[i + 1]));\n'+
- '        }');
+ '            menu.addCheckboxItem(this.getClassCheckItem(\n'+
+ '                circuitJsDrawLabel(items[i], Locale.LS(items[i]), Locale.activeLanguage), items[i + 1]));');
 // El cuadro Acerca de se carga en un iframe independiente: pasar el idioma
 // efectivo y traducir su texto sin perder créditos ni los originales legales.
 const aboutBox=join(dir,"AboutBox.ts");
