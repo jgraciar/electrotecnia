@@ -4,6 +4,7 @@ import {circuitJsSupplementKeys,circuitJsSupplement} from "./CircuitJsSupplement
 import {circuitJsUiCompletenessKeys,circuitJsUiCompleteness} from "./CircuitJsUiCompleteness.ts";
 import {scopeOptionKeys,scopeOptionTranslations} from "./CircuitJsScopeOptions.ts";
 import {generalOptionKeys,generalOptionTranslations} from "./CircuitJsGeneralOptions.ts";
+import {componentEditDialogLabels} from "./CircuitJsEditDialogTitles.ts";
 // Traducciones añadidas para los componentes propios del Laboratorio.
 // Las claves originales de CircuitJS se conservan en sus catálogos oficiales.
 // Catálogos adicionales incorporados directamente para compatibilidad con Node y TypeScript.
@@ -415,6 +416,11 @@ const russianSourceCorrections:Record<string,string>={
 };
 for(const [key,value]of Object.entries(russianSourceCorrections))
  dictionaries.ru.set(key,value);
+// Cabeceras y tipos de componentes: las seis lenguas añadidas carecen de
+// catálogo oficial, así que no deben heredar nombres castellanos o ingleses.
+for(const [code,labels] of Object.entries(componentEditDialogLabels)){
+ for(const [key,value] of Object.entries(labels))dictionaries[code].set(key,value);
+}
 export function labTranslation(language:string,key:string):string|null{
  const normalized=language.toLowerCase().replace(/_/g,"-");
  const base=normalized.split("-")[0];
