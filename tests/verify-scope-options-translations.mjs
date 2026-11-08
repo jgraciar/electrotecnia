@@ -17,13 +17,13 @@ const sources={
 };
 // Detectar también futuras etiquetas visibles que añada CircuitJS upstream.
 const scopeLabels=new Set();
-for(const match of sources.properties.matchAll(/Locale\\.LS\\(\\s*['"]([^'"]+)['"]\\s*\\)/g))
+for(const match of sources.properties.matchAll(/Locale\.LS\(\s*['"]([^'"]+)['"]\s*\)/g))
  scopeLabels.add(match[1]);
 for(const pattern of [
- /(?:new ScopeCheckBox|new ExpandingSection|makeXYSelect)\\(\\s*['"]([^'"]+)['"]/g,
- /\\.makeRadio\\(\\s*['"][^'"]+['"]\\s*,\\s*['"]([^'"]+)['"]/g
+ /(?:new ScopeCheckBox|new ExpandingSection|makeXYSelect)\(\s*['"]([^'"]+)['"]/g,
+ /\.makeRadio\(\s*['"][^'"]+['"]\s*,\s*['"]([^'"]+)['"]/g
 ])for(const match of sources.properties.matchAll(pattern))scopeLabels.add(match[1]);
-for(const match of sources.popup.matchAll(/addPlain\\(\\s*['"]([^'"]+)['"]/g))
+for(const match of sources.popup.matchAll(/addPlain\(\s*['"]([^'"]+)['"]/g))
  scopeLabels.add(match[1]);
 scopeLabels.add("Max Scale");
 const extraScopeLabels=[...scopeLabels].filter(key=>!scopeOptionKeys.includes(key));
