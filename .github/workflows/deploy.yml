@@ -106,6 +106,9 @@ jobs:
       - name: Comprobar traduccion del importador Dropbox en todos los idiomas
         run: node --experimental-strip-types laboratorio/tests/verify-dropbox-locale.mjs circuitjs-src/ts
 
+      - name: Comprobar selector manual de los 22 idiomas de CircuitJS
+        run: node --experimental-strip-types laboratorio/tests/verify-circuitjs-manual-languages.mjs circuitjs-src/ts
+
       - name: Comprobar traduccion efectiva del dialogo de deslizadores
         run: node --experimental-strip-types laboratorio/tests/verify-slider-dialog-locale.mjs circuitjs-src/ts
 
