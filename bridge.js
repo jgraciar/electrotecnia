@@ -10,7 +10,7 @@
   const quantity=document.getElementById("elementQuantity");
   const scope=window.LabScope;
   if(!frame || !selector || !scope)return;
-  const defaultCircuit=new URL("./circuitjs/circuitjgr.html",location.href).href;
+  const defaultCircuit=new URL("./circuitjs/circuitjs.html",location.href).href;
   let sim=null,eligible=[],record=[],lastSample=-Infinity,lastPaint=0;
   let localAvailable=false;
   let selectedExample=null;
@@ -276,7 +276,7 @@
     const option=document.createElement("option");
     option.value="";option.textContent="Cargando práctica…";selector.append(option);
     selectedExample=filename;
-    const address=new URL("./circuitjs/circuitjgr.html",location.href);
+    const address=new URL("./circuitjs/circuitjs.html",location.href);
     address.searchParams.set("startCircuit",filename);
     frame.src=address.href;
     message("Cargando "+filename+" en CircuitJS…");
@@ -492,8 +492,8 @@
     frame.removeAttribute("src");
   }
   // Para que las API compartan origen, el sitio desplegado mediante Actions
-  // tiene que incluir ./circuitjs/circuitjgr.html y sus recursos compilados.
-  const localUrl=new URL("./circuitjs/circuitjgr.html",location.href);
+  // tiene que incluir ./circuitjs/circuitjs.html y sus recursos compilados.
+  const localUrl=new URL("./circuitjs/circuitjs.html",location.href);
   fetch(localUrl.href,{cache:"no-store"}).then(async res=>{
     if(!res.ok)return false;
     const html=await res.text();
