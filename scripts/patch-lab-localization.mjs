@@ -8,6 +8,7 @@ if(!dir||!translations)throw Error("Uso: patch-lab-localization.mjs ts-dir LabTr
 copyFileSync(translations,join(dir,"LabTranslations.ts"));
 copyFileSync(join(dirname(translations),"LabTranslationsMenus.ts"),join(dir,"LabTranslationsMenus.ts"));
 copyFileSync(join(dirname(translations),"LabTranslationsNativeMenus.ts"),join(dir,"LabTranslationsNativeMenus.ts"));
+copyFileSync(join(dirname(translations),"LabTranslationsOtherComponents.ts"),join(dir,"LabTranslationsOtherComponents.ts"));
 function once(path,oldText,newText){
  const src=readFileSync(path,"utf8");
  if(src.split(oldText).length!==2)
@@ -22,6 +23,9 @@ const repoRoot=join(dirname(translations),"..");
 const valencianBuild=spawnSync(process.execPath,[join(repoRoot,"scripts/build-valencian-catalog.mjs"),dir,repoRoot],
  {stdio:"inherit"});
 if(valencianBuild.status!==0)throw Error("Error al generar el catálogo valenciano");
+const catalanBuild=spawnSync(process.execPath,[join(repoRoot,"scripts/build-catalan-catalog.mjs"),dir],
+ {stdio:"inherit"});
+if(catalanBuild.status!==0)throw Error("Error al generar el catálogo catalán");
 const locale=join(dir,"Locale.ts");
 once(locale,'import { moduleBaseURL } from "./ModuleBase";',
  'import { moduleBaseURL } from "./ModuleBase";\nimport { labTranslation } from "./LabTranslations";');
@@ -60,7 +64,7 @@ once(locale,
 // pero mantener el idioma cooficial en todos los elementos del laboratorio.
 once(locale,
  '        const url = moduleBaseURL + "locale/locale_" + lang + ".txt";',
- '        const originalLang = ["ca","gl","eu"].includes(lang)?"es":lang;\n'+
+ '        const originalLang = ["gl","eu"].includes(lang)?"es":lang;\n'+
  '        const url = moduleBaseURL + "locale/locale_" + originalLang + ".txt";');
 const dialog=join(dir,"EditDialog.ts");
 once(dialog,'                    opt.textContent = ei.choice.items[j];',
