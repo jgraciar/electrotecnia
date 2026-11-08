@@ -60,6 +60,14 @@ const reviewed=[
 for(const [key,value] of reviewed)
  assert.equal(labTranslation("es",key),value,
   "Se ha perdido la traducción española de "+key);
+// Detectar anglicismos residuales también en entradas antiguas que sí
+// existen en locale_es.txt pero conservaban su valor en inglés.
+const anglicisms=/\\b(?:flip[- ]?flop|driver|display|offset|trigger|default|click|load|buffer|vs|scope|zoom|open|close|run|stop|view|input|output|back|editing disabled)\\b/i;
+const mixed=[...official].filter(([key,value])=>
+ anglicisms.test(labTranslation("es",key)??value))
+ .map(([key,value])=>key+" => "+(labTranslation("es",key)??value));
+assert.deepEqual(mixed,[],
+ "Las cadenas del catálogo oficial todavía mezclan inglés y español");
 for(const key of ["Scope Properties","Vertical Scale","Horizontal Scale",
  "DC Coupled","AC Coupled","Show Phase Angle",
  "Show RMS Average","Matrix Solver","Show Spectrum","Run","Stop",
