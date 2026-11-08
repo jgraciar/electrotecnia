@@ -90,6 +90,8 @@ once(slider,"el.textContent = text;","el.textContent = Locale.LS(text);");
 // Las dos advertencias del importador Dropbox estaban fijadas en inglés.
 // Usar las mismas claves de los 15 catálogos oficiales y de las lenguas añadidas.
 const dropbox=join(dir,"ImportFromDropboxDialog.ts");
+once(dropbox,'window.alert("Dropbox links must start https://www.dropbox.com/");',
+ 'window.alert(Locale.LS("Dropbox links must start https://www.dropbox.com/"));');
 once(dropbox,"label.textContent = \"This site, or your browser doesn't support the Dropbox chooser so you can't pick a file from your dropbox account.\";","label.textContent = Locale.LS(\"This site, or your browser doesn't support the Dropbox chooser so you can't pick a file from your dropbox account.\");");
 once(dropbox,"la.textContent = \"You can open a shared Dropbox file if you have a link. Paste the Dropbox link below...\";","la.textContent = Locale.LS(\"You can open a shared Dropbox file if you have a link. Paste the Dropbox link below...\");");
 // Extender «Otras opciones > Cambiar idioma» con las lenguas cooficiales.
@@ -170,6 +172,7 @@ const scopePropertiesContent=readFileSync(scopeProperties,"utf8");
 if(scopePropertiesContent.includes("'CH ' + (this.plotSelection + 1)"))
  throw Error("Queda un canal sin traducir en las propiedades del osciloscopio");
 const uiPanel=join(dir,"UIManager.ts");
+once(uiPanel,"alert('File too large!');","alert(Locale.LS('File too large!'));");
 once(uiPanel,'this.titleLabel.textContent = "Label";','this.titleLabel.textContent = Locale.LS("Label");');
 // Los indicadores del modo desarrollador también forman parte de la interfaz.
 for(const key of ["Framerate: ","Steprate: ","Steprate/iter: ","iterc: ","Frames: "])
