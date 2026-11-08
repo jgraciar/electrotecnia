@@ -77,7 +77,8 @@ const dialog=join(dir,"EditDialog.ts");
  // Localizar de forma independiente la acción y el nombre del componente.
 once(dialog,
  '        titleEl.textContent = Locale.LS(title);',
- '        const componentName = ce instanceof CircuitElm && !ce.getEditTitle\n'+
+ '        const customTitle = !!ce.getEditTitle;\n'+
+ '        const componentName = !customTitle && ce instanceof CircuitElm\n'+
  '            ? ce.getElmType() : null;\n'+
  '        titleEl.textContent = componentName\n'+
  '            ? Locale.LS("Edit Component") + ": " + Locale.LS(componentName)\n'+
