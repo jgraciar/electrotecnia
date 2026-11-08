@@ -171,6 +171,12 @@ if(scopePropertiesContent.includes("'CH ' + (this.plotSelection + 1)"))
  throw Error("Queda un canal sin traducir en las propiedades del osciloscopio");
 const uiPanel=join(dir,"UIManager.ts");
 once(uiPanel,'this.titleLabel.textContent = "Label";','this.titleLabel.textContent = Locale.LS("Label");');
+// Los indicadores del modo desarrollador también forman parte de la interfaz.
+for(const key of ["Framerate: ","Steprate: ","Steprate/iter: ","iterc: ","Frames: "])
+ once(uiPanel,'"'+key+'" +','Locale.LS("'+key+'") +');
+once(uiPanel,'"Mouse: (" +','Locale.LS("Mouse: ") + "(" +');
+once(uiPanel,'g.drawString("exception, see console!",','g.drawString(Locale.LS("exception, see console!"),');
+
 // El cuadro Acerca de se carga en un iframe independiente: pasar el idioma
 // efectivo y traducir su texto sin perder créditos ni los originales legales.
 const aboutBox=join(dir,"AboutBox.ts");
