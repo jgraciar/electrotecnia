@@ -42,6 +42,18 @@ try {
  const embeddedModes=await simulator.locator('input[name="lab-start-format"]').evaluateAll(
   nodes=>nodes.map(node=>node.value));
  assert.deepEqual(embeddedModes,["eu","uk"]);
+ // Preferencias antiguas "Personalizado": migración a formato europeo.
+ await page.evaluate(()=>{
+  localStorage.setItem("labRegionalFormat","custom");
+  localStorage.setItem("labDecimalSeparator",",");
+  localStorage.setItem("labGroupingSeparator","");
+ });
+ await page.goto("http://127.0.0.1:8765/circuitjs/circuitjs.html",
+  {waitUntil:"domcontentloaded"});
+ await page.waitForFunction(()=>localStorage.getItem("labRegionalFormat")==="eu");
+ assert.equal(await page.evaluate(()=>localStorage.getItem("labDecimalSeparator")),",");
+ assert.equal(await page.evaluate(()=>localStorage.getItem("labGroupingSeparator")),".");
+ console.log("OK: migración de configuración personalizada anterior al formato europeo");
  console.log("OK: configuración de CircuitJS independiente e integrado, 22 idiomas, "+
   "solo formatos europeo/anglosajón y preferencias regionales compartidas.");
  await context.close();
