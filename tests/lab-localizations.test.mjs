@@ -112,6 +112,38 @@ for(const [key,spanish,valencian] of [
  assert.equal(labTranslation("es-ES",key),spanish,"Deslizadores o subcircuitos sin traducir al español: "+key);
  assert.equal(labTranslation("ca-ES-valencia",key),valencian,"Deslizadores o subcircuitos sin traducir al valenciano: "+key);
 }
+// Ejemplos de Fuentes controladas: CCS/CVS son etiquetas de circuitos
+// originales y deben localizarse sin cambiar archivos ni siglas técnicas.
+const exampleTitles=[
+ "CCS Resistor","CCS Varying Resistor","CVS Op-Amp",
+ "VCVS Op-Amp With Rails","VCVS Multiplier","CVS Full Rectifier",
+ "CVS Voltage Ramp","CCS Current Adder","CVS Integrator",
+ "CVS Differentiator","CCS Variable Inductor","CCS Variable Capacitor"
+];
+for(const code of labLanguageCodes){
+ for(const key of [...exampleTitles,"Run","Stop"]){
+  const translated=labTranslation(code,key);
+  assert(translated?.trim(),code+" sin traducción de "+key);
+  if(code!=="en")assert.notEqual(translated,key,code+" conserva inglés: "+key);
+ }
+ assert.notEqual(labTranslation(code,"Run"),labTranslation(code,"Stop"),
+  "Marcha y parada deben tener etiquetas distintas: "+code);
+}
+for(const [language,key,expected] of [
+ ["es-ES","CCS Resistor","Resistencia (CCS)"],
+ ["es-ES","CVS Op-Amp","Amplificador operacional (CVS)"],
+ ["es-ES","CCS Current Adder","Sumador de corrientes (CCS)"],
+ ["ca-ES-valencia","CCS Resistor","Resistència (CCS)"],
+ ["ca-ES-valencia","CVS Op-Amp","Amplificador operacional (CVS)"],
+ ["ca-ES-valencia","CCS Current Adder","Sumador d'intensitats (CCS)"],
+ ["es-ES","Run","Iniciar"],
+ ["es-ES","Stop","Detener"],
+ ["ca-ES-valencia","Run","Iniciar"],
+ ["ca-ES-valencia","Stop","Detindre"]
+]){
+ assert.equal(labTranslation(language,key),expected,
+ "Error de fuente CCS/CVS o marcha/parada: "+language+"/"+key);
+}
 assert.equal(labTranslation("zz","Tipo de inversor"),null);
 console.log("OK: "+keys.length+" etiquetas añadidas en "+labLanguageCodes.length+
  " idiomas, menús e información incluidos");
