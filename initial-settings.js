@@ -157,17 +157,17 @@ let decimal=get("labDecimalSeparator")||",";
 let grouping=get("labGroupingSeparator")??".";
 const inSimulator=location.pathname.endsWith("/circuitjs.html") || location.pathname.endsWith("/circuitjgr.html");
 const simulatorAccept={
- en:"Save and open CircuitJS",es:"Guardar y abrir CircuitJS",
- fr:"Enregistrer et ouvrir CircuitJS",de:"Speichern und CircuitJS öffnen",
- it:"Salva e apri CircuitJS",pt:"Guardar e abrir CircuitJS",
- ca:"Desa i obre CircuitJS","ca-es-valencia":"Guarda i obri CircuitJS",
- gl:"Gardar e abrir CircuitJS",eu:"Gorde eta ireki CircuitJS",
- nl:"Opslaan en CircuitJS openen",sv:"Spara och öppna CircuitJS",
- da:"Gem og åbn CircuitJS",fi:"Tallenna ja avaa CircuitJS",
- nb:"Lagre og åpne CircuitJS",pl:"Zapisz i otwórz CircuitJS",
- csx:"Uložit a otevřít CircuitJS",ru:"Сохранить и открыть CircuitJS",
- zh:"保存并打开 CircuitJS","zh-tw":"儲存並開啟 CircuitJS",
- ja:"保存して CircuitJS を開く",kr:"저장하고 CircuitJS 열기"
+ en:"Save and open Circuits JGR",es:"Guardar y abrir Circuits JGR",
+ fr:"Enregistrer et ouvrir Circuits JGR",de:"Speichern und Circuits JGR öffnen",
+ it:"Salva e apri Circuits JGR",pt:"Guardar e abrir Circuits JGR",
+ ca:"Desa i obre Circuits JGR","ca-es-valencia":"Guarda i obri Circuits JGR",
+ gl:"Gardar e abrir Circuits JGR",eu:"Gorde eta ireki Circuits JGR",
+ nl:"Opslaan en Circuits JGR openen",sv:"Spara och öppna Circuits JGR",
+ da:"Gem og åbn Circuits JGR",fi:"Tallenna ja avaa Circuits JGR",
+ nb:"Lagre og åpne Circuits JGR",pl:"Zapisz i otwórz Circuits JGR",
+ csx:"Uložit a otevřít Circuits JGR",ru:"Сохранить и открыть Circuits JGR",
+ zh:"保存并打开 Circuits JGR","zh-tw":"儲存並開啟 Circuits JGR",
+ ja:"保存して Circuits JGR を開く",kr:"저장하고 Circuits JGR 열기"
 };
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function render(){
