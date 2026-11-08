@@ -1,5 +1,6 @@
 import {uiSpanish,uiValencian} from "./LabTranslationsMenus.ts";
 import {nativeMenuExtensions} from "./LabTranslationsNativeMenus.ts";
+import {circuitJsSupplementKeys,circuitJsSupplement} from "./CircuitJsSupplementalUi.ts";
 // Traducciones añadidas para los componentes propios del Laboratorio.
 // Las claves originales de CircuitJS se conservan en sus catálogos oficiales.
 // Catálogos adicionales incorporados directamente para compatibilidad con Node y TypeScript.
@@ -317,6 +318,15 @@ for(const language of labLanguageCodes){
  if(!translated||translated.length!==numericHintKeys.length)
   throw Error("Formato numérico sin traducción: "+language);
  numericHintKeys.forEach((key,index)=>dictionaries[language].set(key,translated[index]));
+}
+// Las claves del menú de ejemplos se toman literalmente de setuplist.txt;
+// no modificar filenames ni identificadores, solo las etiquetas mostradas.
+// Los textos Run/Stop se consultan en cada cambio del estado de simulación.
+for (const code of labLanguageCodes) {
+ const translations=circuitJsSupplement[code];
+ if(!translations||translations.length!==circuitJsSupplementKeys.length)
+  throw Error("Traducciones CCS/CVS y marcha/parada incompletas: "+code);
+ circuitJsSupplementKeys.forEach((key,index)=>dictionaries[code].set(key,translations[index]));
 }
 export function labTranslation(language:string,key:string):string|null{
  const normalized=language.toLowerCase().replace(/_/g,"-");
