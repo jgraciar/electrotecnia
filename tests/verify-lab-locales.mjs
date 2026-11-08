@@ -181,7 +181,7 @@ try{
    }
    // Verificar en navegador real que Dibujo no muestra el prefijo de inserción.
    if(c.expected==="es"||c.expected==="ca-es-valencia"){
-    const prefix=c.expected==="es"?/^Añadir\\s/i:/^(?:Afig|Afegir)\\s/i;
+    const prefix=c.expected==="es"?/^Añadir\s/i:/^(?:Afig|Afegir)\s/i;
     assert(!current.labels.some(x=>prefix.test(x)),
      "Dibujo conserva el prefijo de inserción: "+c.expected);
    }
@@ -228,14 +228,14 @@ try{
      const doc=document.querySelector("#circuit-frame")?.contentDocument;
      const buttons=[...doc.querySelectorAll("button")];
      const button=buttons.find(b=>b.textContent?.includes("Iniciar")&&
-      b.textContent?.includes("Deten"));
+      b.textContent?.includes("Det"));
      if(!button)return {initial:null,stopped:null,resumed:null};
-     const initial=button.textContent?.replace(/\\s+/g," ").trim();
+     const initial=button.textContent?.replace(/\s+/g," ").trim();
      button.click();
-     const stopped=button.textContent?.replace(/\\s+/g," ").trim();
+     const stopped=button.textContent?.replace(/\s+/g," ").trim();
      const stoppedClass=button.className;
      button.click();
-     const resumed=button.textContent?.replace(/\\s+/g," ").trim();
+     const resumed=button.textContent?.replace(/\s+/g," ").trim();
      return {initial,stopped,resumed,stoppedClass};
     });
     const expectedStop=c.expected==="es"?"Detener":"Detindre";
