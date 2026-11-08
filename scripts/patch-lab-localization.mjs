@@ -119,8 +119,8 @@ const menus=join(dir,"Menus.ts");
 once(menus,
  '            menu.addCheckboxItem(this.getClassCheckItem(Locale.LS(items[i]), items[i + 1]));',
  '            const translated = Locale.LS(items[i]);\n'+
- '            const action = Locale.LS("Add ").trim();\n'+
- '            const label = action && translated.toLocaleLowerCase().startsWith(action.toLocaleLowerCase())\n'+
+ '            const action = Locale.LS("Add ");\n'+
+ '            const label = action && translated.startsWith(action)\n'+
  '                ? translated.slice(action.length).trimStart() : translated;\n'+
  '            menu.addCheckboxItem(this.getClassCheckItem(label || translated, items[i + 1]));');
 // El cuadro Acerca de se carga en un iframe independiente: pasar el idioma
