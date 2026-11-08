@@ -119,7 +119,7 @@ for(const code of labLanguageCodes){
   });
   if(code!=="es"&&code!=="ca-es-valencia"){
    for(const index of [6,7,11,12,13,15])
-    assert(labels[index].textContent.length>70,
+    assert(labels[index].textContent.length>(["ja","kr","zh","zh-tw"].includes(code)?25:70),
      "Aviso legal sin traducir en "+code+" párrafo "+index);
    assert(labels[4].textContent.includes("Edward Calver")&&
     labels[4].textContent.includes("Colin Howell")&&
