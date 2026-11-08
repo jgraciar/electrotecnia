@@ -39,6 +39,8 @@ for(const [key,translated,language,expected] of [
  ["Add Resistor","Inserir Resistor","pt","Resistor"],
  ["Add Resistor","抵抗器を追加","ja","抵抗器"],
  ["Add Resistor","저항 추가","kr","저항"],
+ ["Add Resistor","커패시터 추가 (극성)","kr","커패시터 (극성)"],
+ ["Add Custom Logic","カスタムロジック追加","ja","カスタムロジック"],
  ["Add Resistor","加入電阻器","zh-tw","電阻器"],
  ["Add Resistor","添加电阻器","zh","电阻器"],
  ["Añadir impedancia Z (CA, RLC serie)","Añadir impedancia Z (CA, RLC serie)","es","impedancia Z (CA, RLC serie)"],
