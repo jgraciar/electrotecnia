@@ -2,6 +2,7 @@
 // oficiales y añadiendo las traducciones propias del laboratorio en los 16 idiomas de CircuitJS.
 import {readFileSync,writeFileSync,copyFileSync} from "node:fs";
 import {join,dirname} from "node:path";
+import {spawnSync} from "node:child_process";
 const [dir,translations]=process.argv.slice(2);
 if(!dir||!translations)throw Error("Uso: patch-lab-localization.mjs ts-dir LabTranslations.ts");
 copyFileSync(translations,join(dir,"LabTranslations.ts"));
@@ -15,6 +16,11 @@ function once(path,oldText,newText){
 // TypeScript 6 permite imports .ts explícitos para el cargador nativo de Node.
 once(join(dir,"tsconfig.json"),'    "noEmit": true,',
  '    "noEmit": true,\n    "allowImportingTsExtensions": true,');
+// Generar el catálogo valenciano completo con las mismas claves originales.
+const repoRoot=join(dirname(translations),"..");
+const valencianBuild=spawnSync(process.execPath,[join(repoRoot,"scripts/build-valencian-catalog.mjs"),dir,repoRoot],
+ {stdio:"inherit"});
+if(valencianBuild.status!==0)throw Error("Error al generar el catálogo valenciano");
 const locale=join(dir,"Locale.ts");
 once(locale,'import { moduleBaseURL } from "./ModuleBase";',
  'import { moduleBaseURL } from "./ModuleBase";\nimport { labTranslation } from "./LabTranslations";');
@@ -53,7 +59,7 @@ once(locale,
 // pero mantener el idioma cooficial en todos los elementos del laboratorio.
 once(locale,
  '        const url = moduleBaseURL + "locale/locale_" + lang + ".txt";',
- '        const originalLang = ["ca","ca-es-valencia","gl","eu"].includes(lang)?"es":lang;\n'+
+ '        const originalLang = ["ca","gl","eu"].includes(lang)?"es":lang;\n'+
  '        const url = moduleBaseURL + "locale/locale_" + originalLang + ".txt";');
 const dialog=join(dir,"EditDialog.ts");
 once(dialog,'                    opt.textContent = ei.choice.items[j];',
