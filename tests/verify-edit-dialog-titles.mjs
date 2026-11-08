@@ -1,6 +1,6 @@
 // Auditoría de los títulos de edición en los 22 idiomas de CircuitJS.
-// El encabezado de un componente se forma con dos claves independientes:
-// «Edit Component» + getElmType(); nunca se busca «Edit resistor».
+// El encabezado se genera con el nombre traducido del componente y una
+// plantilla sintáctica propia del idioma; nunca se busca «Edit resistor».
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {join} from "node:path";
@@ -56,23 +56,32 @@ for(const lang of extra){
  }
 }
 assert.equal(labTranslation("en","Edit Component")??"Edit Component","Edit Component");
+// Comprobar el título final, no solo la presencia de palabras aisladas.
+const sampleNames=["resistor",...examples.filter(name=>name!=="resistor")];
+let checkedTitles=0;
 for(const code of labLanguageCodes){
- const name=code==="en"?"resistor":
-   labTranslation(code,"resistor") ??
-   new Map([...readFileSync(join(dir,"public/locale/locale_"+code+".txt"),"utf8")
-    .matchAll(/^"(.*?)"="(.*)"$/gm)].map(m=>[m[1],m[2]])).get("resistor");
- assert(name?.trim(), "Nombre de resistencia sin traducir: "+code);
+ const nativeDictionary=native.includes(code)
+  ? new Map([...readFileSync(join(dir,"public/locale/locale_"+code+".txt"),"utf8")
+    .matchAll(/^"(.*?)"="(.*)"$/gm)].map(m=>[m[1],m[2]]))
+  : new Map();
+ const names=extra.includes(code)?Object.keys(componentEditDialogLabels[code])
+  .filter(key=>key!=="Edit Component"):sampleNames;
  assert(componentEditTitleTemplates[code].includes("{component}"),
   "Plantilla sin marcador de componente: "+code);
- const header=localizedComponentEditTitle(code,name);
- assert(header.includes(name)&&!header.includes("{component}"),
-  "El título no incorpora el nombre traducido: "+code);
- assert(code==="en" || header!=="Edit resistor",
-  "El encabezado aparece en inglés en "+code);
+ for(const key of names){
+  const name=code==="en"?key:labTranslation(code,key)??nativeDictionary.get(key);
+  assert(name?.trim(),"Componente sin traducir: "+code+" / "+key);
+  const title=localizedComponentEditTitle(code,name);
+  assert(title.includes(name) && !title.includes("{component}") && title!==name,
+   "Título de edición incompleto: "+code+" / "+key+" = "+title);
+  if(code!=="en" && key==="resistor")
+   assert(title!=="Edit resistor","Título de resistencia en inglés: "+code);
+  checkedTitles++;
+ }
 }
 assert.equal(localizedComponentEditTitle("es","resistencia"), "Editar resistencia");
 assert.equal(localizedComponentEditTitle("ca","resistència"), "Editar resistència");
 assert.equal(localizedComponentEditTitle("ca-es-valencia","resistència"), "Editar resistència");
 assert.equal(localizedComponentEditTitle("en","resistor"), "Edit resistor");
 console.log("OK: encabezados de edición de los 22 idiomas, "+
- checks+" traducciones de componentes y títulos específicos preservados.");
+ checks+" traducciones de componentes y "+checkedTitles+" títulos finales verificados.");
