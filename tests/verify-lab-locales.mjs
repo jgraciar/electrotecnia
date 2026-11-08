@@ -186,7 +186,7 @@ try{
      "Dibujo conserva el prefijo de inserción: "+c.expected);
    }
    // Acerca de se carga como una página independiente dentro del iframe.
-   if(["es","ca-es-valencia","fr"].includes(c.expected)){
+   if(c.expected!=="en"){
     const about=await context.newPage();
     try{
      const aboutURL="http://127.0.0.1:8765/circuitjs/circuitjs/about.html?lang="+
@@ -209,6 +209,21 @@ try{
        "Aviso GPL sin traducir: "+c.expected);
       assert(details.notice.length>160 && !details.notice.includes("IN NO EVENT SHALL"),
        "Aviso legal sin traducir: "+c.expected);
+     }
+     assert(!details.credits.includes("for 15 new components"),
+      "Créditos aún en inglés: "+c.expected);
+     if(c.expected!=="es"&&c.expected!=="ca-es-valencia"){
+      assert(details.legal.length>25&&!details.legal.includes("This program is free software"),
+       "GPL sin traducir: "+c.expected);
+      assert(details.notice.length>25&&!details.notice.includes("IN NO EVENT SHALL"),
+       "Exención legal sin traducir: "+c.expected);
+      const legalText=await about.locator("div > p").allTextContents();
+      for(const i of [6,7,11,12,13,15])
+       assert(legalText[i]?.length>25,
+        "Aviso legal ausente: "+c.expected+" / "+i);
+      assert(!legalText.some(x=>x.startsWith("THE SOFTWARE IS PROVIDED")||
+       x.startsWith("THE UNIVERSITY OF CALIFORNIA")),
+       "Avisos legales en inglés: "+c.expected);
      }
      console.log("Acerca de traducido:",c.expected,details.language);
     }finally{await about.close();}
