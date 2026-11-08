@@ -99,14 +99,18 @@ replaceOnce(opts,'return new EditInfo("# of Decimal Digits (long format)", Circu
             ei.choice=new Choice();ei.choice.add("Coma (,)");ei.choice.add("Punto (.)");
             ei.choice.select(NumberFormat.decimalSeparator==="."?1:0);return ei;
         }`);
-replaceOnce(opts,'        // add new options here (before the adjustTimeStep conditional below)',
-`        if(n===21){
+// El índice original 20 era un ajuste condicional del paso temporal: insertar
+// un campo después lo oculta hasta activar el ajuste automático. Colocar
+// siempre los separadores juntos y desplazar el resto, sin cambiar su lógica.
+replaceOnce(opts,'    getEditInfo(n: number): EditInfo | null {',
+`    getEditInfo(n: number): EditInfo | null {
+        if(n===13){
             const ei=new EditInfo("Separador de miles",0,-1,-1);
             ei.choice=new Choice();ei.choice.add("Punto (.)");ei.choice.add("Coma (,)");ei.choice.add("Ninguno");
             ei.choice.select(NumberFormat.groupingSeparator==="."?0:NumberFormat.groupingSeparator===","?1:2);
             return ei;
         }
-        // add new options here (before the adjustTimeStep conditional below)`);
+        if(n>=14)n--;`);
 replaceOnce(opts,'        if (n === 11)\n            CircuitElm.setDecimalDigits(Math.trunc(ei.value), true, true);\n        if (n === 12)\n            CircuitElm.setDecimalDigits(Math.trunc(ei.value), false, true);',
 `        if(n===11){
             if(!Number.isInteger(ei.value)||ei.value<0||ei.value>10){
@@ -120,14 +124,19 @@ replaceOnce(opts,'        if (n === 11)\n            CircuitElm.setDecimalDigits
             const grouping=NumberFormat.groupingSeparator===decimal?(decimal===","?".":","):NumberFormat.groupingSeparator;
             NumberFormat.setSeparators(decimal,grouping);ei.newDialog=true;
         }
-        if(n===21){
+        }`);
+replaceOnce(opts,'    setEditValue(n: number, ei: EditInfo): void {',
+`    setEditValue(n: number, ei: EditInfo): void {
+        if(n===13){
             const idx=ei.choice!.getSelectedIndex();
             const grouping=idx===0?".":idx===1?",":"";
             if(grouping && grouping===NumberFormat.decimalSeparator){
                 ei.setError(Locale.LS("Decimal and grouping separators must differ"));return;
             }
             NumberFormat.setSeparators(NumberFormat.decimalSeparator,grouping);
-        }`);
+            return;
+        }
+        if(n>=14)n--;`);
 console.log("Opciones generales: cuatro decimales y separadores numéricos");
 
 const editDialog=join(dir,"EditDialog.ts");
