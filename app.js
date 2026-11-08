@@ -27,7 +27,7 @@
     const box = document.createElement("div");
     box.className = "metric";
     const key = document.createElement("small");
-    key.textContent = label;
+    key.textContent = window.LabHostI18n?.t(label)??label;
     const content = document.createElement("strong");
     content.textContent = value;
     box.append(key,content);
