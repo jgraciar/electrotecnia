@@ -8,7 +8,14 @@ const dir=process.argv[2];
 if(!dir)throw Error("Uso: verify-about-and-draw-locales.mjs <ts-dir>");
 const menus=readFileSync(join(dir,"Menus.ts"),"utf8");
 const aboutBox=readFileSync(join(dir,"AboutBox.ts"),"utf8");
+const editDialog=readFileSync(join(dir,"EditDialog.ts"),"utf8");
+const options=readFileSync(join(dir,"EditOptions.ts"),"utf8");
 const aboutHtml=readFileSync(join(dir,"circuitjs/about.html"),"utf8");
+for(const key of ["European number format","Anglo-American number format","Custom number format"])
+ assert(editDialog.includes('Locale.LS("'+key+'")'),"Ejemplo numérico sin localizar: "+key);
+for(const key of ["Decimal digits: integer from 0 to 10","Decimal and grouping separators must differ"])
+ assert(options.includes('Locale.LS("'+key+'")'),"Error de formato sin localizar: "+key);
+
 const script=readFileSync(new URL("../scripts/circuitjs-about-i18n.js",import.meta.url),"utf8");
 assert(menus.includes('const action = Locale.LS("Add ");'));
 assert(menus.includes('translated.startsWith(action)'));
@@ -26,10 +33,16 @@ const sampleNames=[["Add Resistor","Add ","Resistor"],["Adder","Add ","Adder"],
  ["Vatímetro","Añadir ","Vatímetro"]];
 for (const [translated,action,expected] of sampleNames)
  assert.equal(action&&translated.startsWith(action)?translated.slice(action.length).trimStart():translated,expected);
+assert.equal(labTranslation("es","European number format"),"formato europeo");
+assert.equal(labTranslation("ca-es-valencia","European number format"),"format europeu");
 assert.equal(labTranslation("ca","European Resistors"),"Símbols europeus per a resistències");
 assert.equal(labTranslation("gl","European Resistors"),"Símbolos europeos para resistencias");
 assert.equal(labTranslation("eu","European Resistors"),"Erresistentzien Europako sinboloak");
 for(const code of labLanguageCodes){
+ for(const key of ["European number format","Anglo-American number format","Custom number format",
+  "Decimal digits: integer from 0 to 10","Decimal and grouping separators must differ"])
+  assert(labTranslation(code,key)?.trim(),"Falta formato numérico "+code+" "+key);
+
  const labels=Array.from({length:16},(_,index)=>({
   childNodes:[{nodeType:3,nodeValue:index===0?"Circuit Simulator version ":"Original by "}],
   textContent:"",querySelector:()=>({textContent:"list of authors and licenses"})
