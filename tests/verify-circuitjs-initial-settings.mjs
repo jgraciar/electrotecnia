@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import {chromium} from "playwright";
 
 // Validación real de la misma configuración al abrir CircuitJS directamente.
-// El navegador comparte localStorage entre / y /circuitjs/circuitjgr.html.
+// El navegador comparte localStorage entre / y /circuitjs/circuitjs.html.
 const browser=await chromium.launch({headless:true});
 try {
  const context=await browser.newContext({locale:"es-ES",viewport:{width:1280,height:800}});
  const page=await context.newPage();
  page.on("pageerror",error=>console.error("Error de configuración:",error.message));
- await page.goto("http://127.0.0.1:8765/circuitjs/circuitjgr.html",
+ await page.goto("http://127.0.0.1:8765/circuitjs/circuitjs.html",
   {waitUntil:"domcontentloaded"});
  const modal=page.locator("#lab-start-modal");
  await modal.waitFor({state:"visible",timeout:30000});
@@ -38,16 +38,6 @@ try {
  assert.equal(await page.evaluate(()=>localStorage.getItem("labGroupingSeparator")),",");
  // Una preferencia anterior fija (p. ej., kilo) debe migrarse a automático.
  await page.evaluate(()=>localStorage.setItem("labDisplayUnitScale","kilo"));
- // Los enlaces antiguos deben conservar query y fragmento, incluidas las
- // prácticas con startCircuit y los enlaces a simuladores compartidos.
- await page.goto("http://127.0.0.1:8765/circuitjs/circuitjs.html?legacy=1#probe",
-  {waitUntil:"domcontentloaded"});
- await page.waitForURL("http://127.0.0.1:8765/circuitjs/circuitjgr.html?legacy=1#probe");
- assert.equal(new URL(page.url()).pathname,"/circuitjs/circuitjgr.html");
- await page.goto("http://127.0.0.1:8765/circuitjgr.html?legacy=2#shortcut",
-  {waitUntil:"domcontentloaded"});
- await page.waitForURL("http://127.0.0.1:8765/circuitjs/circuitjgr.html?legacy=2#shortcut");
- assert.equal(new URL(page.url()).pathname,"/circuitjs/circuitjgr.html");
  await page.goto("http://127.0.0.1:8765/",{waitUntil:"domcontentloaded"});
  assert.equal(await page.evaluate(()=>localStorage.getItem("labDisplayUnitScale")),"auto",
   "No se restauró el prefijo de unidad automático");
@@ -74,13 +64,12 @@ try {
   localStorage.setItem("labDecimalSeparator",",");
   localStorage.setItem("labGroupingSeparator","");
  });
- await page.goto("http://127.0.0.1:8765/circuitjs/circuitjgr.html",
+ await page.goto("http://127.0.0.1:8765/circuitjs/circuitjs.html",
   {waitUntil:"domcontentloaded"});
  await page.waitForFunction(()=>localStorage.getItem("labRegionalFormat")==="eu");
  assert.equal(await page.evaluate(()=>localStorage.getItem("labDecimalSeparator")),",");
  assert.equal(await page.evaluate(()=>localStorage.getItem("labGroupingSeparator")),".");
  console.log("OK: migración de configuración personalizada anterior al formato europeo");
- console.log("OK: circuitjgr.html y redirecciones desde las rutas anteriores");
  console.log("OK: configuración de CircuitJS independiente e integrado, 22 idiomas, "+
   "solo formatos europeo/anglosajón y preferencias regionales compartidas.");
  await context.close();

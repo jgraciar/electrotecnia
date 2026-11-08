@@ -167,7 +167,6 @@ jobs:
           # Cargar el script desde el nivel superior, sin modificar el motor Vite.
           sed -i 's#</head>#<script defer src="../initial-settings.js"></script></head>#' public/circuitjs/circuitjs.html
           grep -Fq 'src="../initial-settings.js"' public/circuitjs/circuitjs.html
-          node laboratorio/scripts/migrate-circuitjgr.mjs public
           test -f public/index.html
           test -f public/initial-settings.js
           test -f public/practices.js
@@ -183,11 +182,8 @@ jobs:
           test -f public/curriculum.js
           test -f public/networks-solar-curriculum.js
           test -f public/networks-solar-practices.js
-          test -f public/circuitjs/circuitjgr.html
           test -f public/circuitjs/circuitjs.html
-          test -f public/circuitjgr.html
-          grep -Fq 'circuitjgr.html' public/circuitjs/circuitjs.html
-          grep -Fq 'type="module"' public/circuitjs/circuitjgr.html
+          test -f public/circuitjs/index.html || test -f public/circuitjs/circuitjs.html
 
       - name: Instalar navegador para prueba eléctrica real
         working-directory: laboratorio/tests
