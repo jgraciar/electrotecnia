@@ -41,6 +41,8 @@ assert.deepEqual(missing,[],"Cadenas visibles sin traducción al español");
 // Comprobar traducciones de ventanas que no figuraban en el catálogo español.
 const reviewed=[
  ["Export Image","Exportar imagen"],
+ ["File too large!","¡El archivo es demasiado grande!"],
+ ["Dropbox links must start https://www.dropbox.com/","Los enlaces de Dropbox deben empezar por https://www.dropbox.com/"],
  ["Transparent Background","Fondo transparente"],
  ["Type a command...","Escribe un comando..."],
  ["Recent","Recientes"],
@@ -97,5 +99,11 @@ for(const [key,expected] of [
 }
 assert(readFileSync(join(dir,"ScopePropertiesDialog.ts"),"utf8")
  .includes("Locale.LS('CH ')"));
+assert(readFileSync(join(dir,"UIManager.ts"),"utf8")
+ .includes("alert(Locale.LS('File too large!'))"),
+ "La advertencia de archivo grande se sigue mostrando en inglés");
+assert(readFileSync(join(dir,"ImportFromDropboxDialog.ts"),"utf8")
+ .includes('window.alert(Locale.LS("Dropbox links must start https://www.dropbox.com/"))'),
+ "La advertencia del enlace Dropbox sigue en inglés");
 console.log("OK español: "+files.length+" archivos, "+found.size+
  " etiquetas visibles y "+reviewed.length+" traducciones revisadas.");
