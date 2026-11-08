@@ -2,6 +2,8 @@ import {uiSpanish,uiValencian} from "./LabTranslationsMenus.ts";
 import {nativeMenuExtensions} from "./LabTranslationsNativeMenus.ts";
 import {circuitJsSupplementKeys,circuitJsSupplement} from "./CircuitJsSupplementalUi.ts";
 import {circuitJsUiCompletenessKeys,circuitJsUiCompleteness} from "./CircuitJsUiCompleteness.ts";
+import {scopeOptionKeys,scopeOptionTranslations} from "./CircuitJsScopeOptions.ts";
+import {generalOptionKeys,generalOptionTranslations} from "./CircuitJsGeneralOptions.ts";
 // Traducciones añadidas para los componentes propios del Laboratorio.
 // Las claves originales de CircuitJS se conservan en sus catálogos oficiales.
 // Catálogos adicionales incorporados directamente para compatibilidad con Node y TypeScript.
@@ -349,6 +351,18 @@ for(const code of labLanguageCodes){
  if(!row||row.length!==circuitJsUiCompletenessKeys.length)
   throw Error("Interfaz incompleta: "+code);
  circuitJsUiCompletenessKeys.forEach((key,index)=>dictionaries[code].set(key,row[index]));
+}
+// Revisar todas las etiquetas de osciloscopios y Opciones en las seis
+// lenguas añadidas. Para estos paneles no se permite respaldo en español.
+for(const [source,keys] of [
+ [scopeOptionTranslations,scopeOptionKeys],
+ [generalOptionTranslations,generalOptionKeys]
+] as const){
+ for(const [code,row] of Object.entries(source)){
+  if(!dictionaries[code]||row.length!==keys.length)
+   throw Error("Faltan traducciones de controles CircuitJS: "+code);
+  keys.forEach((key,index)=>dictionaries[code].set(key,row[index]));
+ }
 }
 export function labTranslation(language:string,key:string):string|null{
  const normalized=language.toLowerCase().replace(/_/g,"-");
