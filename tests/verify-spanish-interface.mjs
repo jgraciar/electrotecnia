@@ -51,6 +51,8 @@ const reviewed=[
  ["dur = ","duración = "],
  ["ext","externo"],
  ["Export Image...","Exportar imagen..."],
+ ["Scroll Speed","Velocidad de desplazamiento"],
+ ["JK\\q01: Reset","JK\\q01: Reposición"],
  ["Show Properties on Create","Mostrar propiedades al crear"],
  ["Show Properties on Click","Mostrar propiedades al pulsar"],
  ["Plot ","Gráfica "],
@@ -62,7 +64,7 @@ for(const [key,value] of reviewed)
   "Se ha perdido la traducción española de "+key);
 // Detectar anglicismos residuales también en entradas antiguas que sí
 // existen en locale_es.txt pero conservaban su valor en inglés.
-const anglicisms=/\b(?:flip[- ]?flop|driver|display|offset|trigger|default|click|load|buffer|vs|scope|zoom|open|close|run|stop|view|input|output|back|editing disabled)\b/i;
+const anglicisms=/\b(?:flip[- ]?flop|driver|display|offset|trigger|default|click|load|scroll|buffer|vs|scope|zoom|open|close|run|stop|view|input|output|back|editing disabled)\b/i;
 const mixed=[...official].filter(([key,value])=>
  anglicisms.test(labTranslation("es",key)??value))
  .map(([key,value])=>key+" => "+(labTranslation("es",key)??value));
