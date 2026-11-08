@@ -180,6 +180,21 @@ for(const key of ["Framerate: ","Steprate: ","Steprate/iter: ","iterc: ","Frames
 once(uiPanel,'"Mouse: (" +','Locale.LS("Mouse: ") + "(" +');
 once(uiPanel,'g.drawString("exception, see console!",','g.drawString(Locale.LS("exception, see console!"),');
 
+// Los avisos de creación de subcircuitos contienen nombres elegidos por el
+// usuario: localizar el texto y conservar sin cambios cada identificador.
+const subcircuitImport=join(dir,"GetCircuitAsSubcircuit.ts");
+once(subcircuitImport,
+ "import { ChipElm } from \"./ChipElm\";",
+ "import { ChipElm } from \"./ChipElm\";\nimport { Locale } from \"./Locale\";");
+once(subcircuitImport,
+ "window.alert('Node \"' + lne.text + '\" can\\'t be connected to ground');",
+ "window.alert(Locale.LS(\"Node {name} cannot be connected to ground\").replace(\"{name}\", lne.text));");
+once(subcircuitImport,
+ "window.alert('Element \"' + ce.getElmType() +\n                    '\" refers to a node outside the selection');",
+ "window.alert(Locale.LS(\"Element {name} refers to a node outside the selection\").replace(\"{name}\", ce.getElmType()));");
+once(subcircuitImport,
+ "window.alert('Node \"' + ent.name + '\" is not used!');",
+ "window.alert(Locale.LS(\"Node {name} is not used!\").replace(\"{name}\", ent.name));");
 // El cuadro Acerca de se carga en un iframe independiente: pasar el idioma
 // efectivo y traducir su texto sin perder créditos ni los originales legales.
 const aboutBox=join(dir,"AboutBox.ts");
