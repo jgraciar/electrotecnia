@@ -213,6 +213,20 @@ try{
      console.log("Acerca de traducido:",c.expected,details.language);
     }finally{await about.close();}
    }
+   // Las entradas ausentes de los catálogos oficiales deben aparecer
+   // traducidas en el menú real, no solo en el diccionario.
+   const reviewedExamples={
+    es:"Circuito RLC",ca:"Circuit RLC","ca-es-valencia":"Circuit RLC",
+    gl:"Circuíto RLC",eu:"RLC zirkuitua",
+    da:"Fasefølgenetværk",kr:"그레이 코드 카운터"
+   };
+   if(reviewedExamples[c.expected]){
+    await page.waitForFunction(expected=>{
+     const doc=document.querySelector("#circuit-frame")?.contentDocument;
+     return [...doc?.querySelectorAll("li")??[]]
+      .some(item=>item.textContent?.trim()===expected);
+    },reviewedExamples[c.expected],{timeout:90000});
+   }
    // Las doce entradas CCS/CVS se construyen con los títulos de setuplist;
    // el archivo y la simulación asociados no deben cambiar con el idioma.
    if(c.expected==="es"||c.expected==="ca-es-valencia"){
