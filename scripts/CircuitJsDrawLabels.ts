@@ -47,5 +47,5 @@ export function circuitJsDrawLabel(sourceKey: string, localized: string, languag
     if (base === "de") label = label.replace(/\s+einfügen(?=\s|$)/gi, " ");
     if (base === "ja") label = label.replace(/を追加|を挿入|を加える/g, "");
     if (base === "kr") label = label.replace(/\s*추가\s*$/g, "");
-    return label.trim() || localized;
+    return label.replace(/\s{2,}/g, " ").trim() || localized;
 }
