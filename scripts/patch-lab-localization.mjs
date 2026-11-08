@@ -14,6 +14,7 @@ copyFileSync(join(dirname(translations),"CircuitJsUiCompleteness.ts"),join(dir,"
 copyFileSync(join(dirname(translations),"CircuitJsScopeOptions.ts"),join(dir,"CircuitJsScopeOptions.ts"));
 copyFileSync(join(dirname(translations),"CircuitJsGeneralOptions.ts"),join(dir,"CircuitJsGeneralOptions.ts"));
 copyFileSync(join(dirname(translations),"CircuitJsEditDialogTitles.ts"),join(dir,"CircuitJsEditDialogTitles.ts"));
+copyFileSync(join(dirname(translations),"CircuitJsEditNumbers.ts"),join(dir,"CircuitJsEditNumbers.ts"));
 function once(path,oldText,newText){
  const src=readFileSync(path,"utf8");
  if(src.split(oldText).length!==2)
@@ -74,7 +75,7 @@ once(locale,
 const dialog=join(dir,"EditDialog.ts");
 once(dialog,
  'import { Locale } from "./Locale";',
- 'import { Locale } from "./Locale";\nimport { localizedComponentEditTitle } from "./CircuitJsEditDialogTitles";');
+ 'import { Locale } from "./Locale";\nimport { localizedComponentEditTitle } from "./CircuitJsEditDialogTitles";\nimport { formatCircuitEditValue, normalizeCircuitEditInput, circuitEditNumberError } from "./CircuitJsEditNumbers";');
  // El título «Edit resistor» se formaba de forma dinámica. Traducir el nombre
  // del componente y componer la frase con la plantilla del idioma activo.
 once(dialog,
@@ -92,6 +93,22 @@ once(dialog,'                cbLabel.appendChild(document.createTextNode(ei.chec
  '                cbLabel.appendChild(document.createTextNode(Locale.LS(ei.checkbox.name)));');
 once(dialog,'                btn.textContent = ei.button.label ?? ei.button.textContent ?? String(ei.button);',
  '                btn.textContent = Locale.LS(ei.button.label ?? ei.button.textContent ?? String(ei.button));');
+// Los números editables respetan el formato regional elegido en la pantalla inicial.
+// Solo se convierte la representación: los valores internos, XML y unidades SI
+// mantienen la sintaxis original de CircuitJS.
+once(dialog,
+ '                    inp.value = this.unitString(ei);',
+ '                    inp.value = formatCircuitEditValue(this.unitString(ei), Locale.activeLanguage);');
+once(dialog,
+ '        (ei.textf as HTMLInputElement).value = EditDialog.unitStringVal(ei, next);',
+ '        (ei.textf as HTMLInputElement).value = formatCircuitEditValue(EditDialog.unitStringVal(ei, next), Locale.activeLanguage);');
+once(dialog,
+ '        let s = (ei.textf as HTMLInputElement).value.trim();',
+ '        let s = normalizeCircuitEditInput((ei.textf as HTMLInputElement).value, Locale.activeLanguage);');
+once(dialog,
+ '                } catch (ex) { /* ignored */ }',
+ '                } catch (ex) { ei.setError(circuitEditNumberError(Locale.activeLanguage)); }');
+
 // Todos los controles visibles de «Añadir deslizadores» deben utilizar Locale.LS.
 // Los textos suministrados por el usuario (por ejemplo, el nombre del deslizador) no se traducen.
 const slider=join(dir,"SliderDialog.ts");
