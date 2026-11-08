@@ -114,7 +114,8 @@ for(const key of ["Node {name} cannot be connected to ground",
  assert(subcircuitText.includes("Locale.LS("+JSON.stringify(key)+")"),
   "El aviso de subcircuitos sigue en inglés: "+key);
 }
-assert(!/window\\.alert\\('Node "|window\\.alert\\('Element "/.test(subcircuitText),
+assert(!subcircuitText.includes("window.alert('Node ") &&
+ !subcircuitText.includes("window.alert('Element "),
  "Persiste un aviso de subcircuitos sin traducir");
 console.log("OK español: "+files.length+" archivos, "+found.size+
  " etiquetas visibles y "+reviewed.length+" traducciones revisadas.");
