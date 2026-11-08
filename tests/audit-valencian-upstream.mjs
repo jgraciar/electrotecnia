@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import {readFileSync,readdirSync} from "node:fs";
 import {join} from "node:path";
+import {labTranslation} from "../scripts/LabTranslations.ts";
 const dir=process.argv[2];if(!dir)throw Error("Falta el directorio TypeScript");
 const locale=readFileSync(join(dir,"public/locale/locale_ca-es-valencia.txt"),"utf8");
 const translated=new Map([...locale.matchAll(/^"(.*?)"="(.*)"$/gm)].map(m=>[m[1],m[2]]));
@@ -33,7 +34,7 @@ for(const p of files(dir)){
   for(const m of contents.matchAll(re)){
    const key=m[1];if(!key.trim()||key.length<3||/^[\d+\-\s.]+$/.test(key))continue;
    seen++;
-   if(!translated.has(key)&&!intentional.has(key))
+   if(!translated.has(key)&&!intentional.has(key)&&labTranslation("ca-es-valencia",key)===null)
     missing.push({file:p.slice(dir.length+1),key});
   }
  }
