@@ -147,7 +147,7 @@ let unitScale=get("labDisplayUnitScale")||"auto";
 let digits=Math.max(0,Math.min(12,Number(get("labDecimalDigits")??4)||0));
 let decimal=get("labDecimalSeparator")||",";
 let grouping=get("labGroupingSeparator")??".";
-const inSimulator=/(?:\\/)(?:circuitjs|circuitjgr)\\.html$/i.test(location.pathname);
+const inSimulator=location.pathname.endsWith("/circuitjs.html") || location.pathname.endsWith("/circuitjgr.html");
 const simulatorAccept={
  en:"Save and open CircuitJS",es:"Guardar y abrir CircuitJS",
  fr:"Enregistrer et ouvrir CircuitJS",de:"Speichern und CircuitJS öffnen",
