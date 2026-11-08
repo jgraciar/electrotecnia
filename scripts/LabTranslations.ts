@@ -380,6 +380,34 @@ const reviewedNativeLabels:Record<string,Record<string,string>>={
 };
 for(const [code,labels] of Object.entries(reviewedNativeLabels))
  for(const [key,value] of Object.entries(labels))dictionaries[code].set(key,value);
+// Cadenas nativas rusas que permanecían literalmente en inglés.
+// No alterar identificadores eléctricos, nombres de componentes ni teclas.
+const russianSourceCorrections:Record<string,string>={
+  "Need to ground transmission line!": "Необходимо заземлить линию передачи!",
+  "Transmission line delay too large!": "Слишком большая задержка линии передачи!",
+  "Capacitor loop with no resistance!": "Контур конденсаторов без сопротивления!",
+  "Center": "Центр",
+  "control": "управление",
+  "Convergence failed!": "Не удалось добиться сходимости!",
+  "Crossbar Memory": "Матричная память",
+  "Crossover": "Разделительный фильтр",
+  "Singular matrix!": "Вырожденная матрица!",
+  "Termination": "Согласование",
+  "(off)": "(выкл.)",
+  "(on)": "(вкл.)",
+  "high": "высокий уровень",
+  "high ": "высокий уровень ",
+  "low": "низкий уровень",
+  "low ": "низкий уровень ",
+  "wire loop detected": "Обнаружен замкнутый контур проводников",
+  "Operational Transconductance Amplifier (OTA)": "Операционный усилитель крутизны (OTA)",
+  "reset": "сброс",
+  "off": "выкл.",
+  "on": "вкл.",
+  "End": "Конец"
+};
+for(const [key,value]of Object.entries(russianSourceCorrections))
+ dictionaries.ru.set(key,value);
 export function labTranslation(language:string,key:string):string|null{
  const normalized=language.toLowerCase().replace(/_/g,"-");
  const base=normalized.split("-")[0];
