@@ -148,7 +148,11 @@ for(const [oldText,newText] of [
 ])once(scopeOverlays,oldText,newText);
 const scopeProperties=join(dir,"ScopePropertiesDialog.ts");
 once(scopeProperties,"('Plot ' + (i + 1))","(Locale.LS('Plot ') + (i + 1))");
-once(scopeProperties,"'CH ' + (this.plotSelection + 1)","Locale.LS('CH ') + (this.plotSelection + 1)");
+const channelPrefix="'CH ' + (this.plotSelection + 1)";
+const channelSource=readFileSync(scopeProperties,"utf8");
+if(channelSource.split(channelPrefix).length!==3)
+ throw Error("La identificación de los dos canales ha cambiado");
+writeFileSync(scopeProperties,channelSource.split(channelPrefix).join("Locale.LS('CH ') + (this.plotSelection + 1)"));
 const scopePropertiesContent=readFileSync(scopeProperties,"utf8");
 if(scopePropertiesContent.includes("'CH ' + (this.plotSelection + 1)"))
  throw Error("Queda un canal sin traducir en las propiedades del osciloscopio");
