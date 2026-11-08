@@ -52,6 +52,36 @@ for(const [key,translated,language,expected] of [
   "El menú Dibujo conserva verbo de inserción: "+language+" "+translated);
 }
 assert.equal(circuitJsDrawLabel("Adder","Adder","en"),"Adder");
+// Auditar los 147 componentes de Dibujo contra los catálogos oficiales,
+// además de los elementos desarrollados para el laboratorio.
+const menuKeys=[...new Set([...menus.matchAll(/"(Add [^"]+)"\\s*,\\s*"[^"]*Elm(?:[:][^"]*)?"/g)]
+ .map(m=>m[1]))];
+assert(menuKeys.length>=147,"Faltan comandos de los submenús de Dibujo");
+const nativeCodes=["csx","da","de","es","fi","fr","it","ja","kr","nb","pl","pt","ru","zh","zh-tw"];
+const verbs={
+ csx:/^Přidat |^Vložit /i,da:/^Tilføj /i,de:/einfügen|^Hinzufügen /i,
+ es:/^Añadir |^Agregar /i,fi:/^Lisää /i,fr:/^Ajouter /i,
+ it:/^Aggiungi |^Inserisci /i,ja:/追加|を挿入/i,kr:/추가/i,
+ nb:/^Legg til /i,pl:/^Wstaw |^Dodaj /i,pt:/^Inserir|^Adicionar /i,
+ ru:/^Добавить /i,zh:/^添加|^加入/i,"zh-tw":/^新增|^加入|^添加/i
+};
+for(const code of nativeCodes){
+ const filename=join(dir,"public/locale/locale_"+code+".txt");
+ const official=Object.fromEntries([...readFileSync(filename,"utf8")
+  .matchAll(/^"([^"]+)"="([^"]*)"$/gm)].map(m=>[m[1],m[2]]));
+ for(const key of menuKeys){
+  const localized=labTranslation(code,key)??official[key]??key;
+  const name=circuitJsDrawLabel(key,localized,code);
+  assert(name && !verbs[code].test(name),"Dibujo mantiene verbo en "+code+": "+key+" -> "+name);
+ }
+}
+for(const language of labLanguageCodes){
+ const custom="Añadir impedancia Z (CA, RLC serie)";
+ const translated=labTranslation(language,custom)??custom;
+ const name=circuitJsDrawLabel(custom,translated,language);
+ assert(name.trim() && !/^Add |^Añadir |^Afig |^Afegir |^Engadir /i.test(name),
+  "Impedancia con prefijo en "+language+": "+name);
+}
 assert.equal(labTranslation("es","European number format"),"formato europeo");
 assert.equal(labTranslation("ca-es-valencia","European number format"),"format europeu");
 assert.equal(labTranslation("ca","European Resistors"),"Símbols europeus per a resistències");
