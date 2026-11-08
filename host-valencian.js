@@ -280,7 +280,7 @@
  const dynamicParts=[
   "#scope-subtitle","#spectrumInfo","#cursorsToggle","#bridge-status",
   "#practiceStatus","#wulflemmXmlStatus","#elementSelect","#publicationActivityCount",
-  "#textbookScore","#practiceSummary","#metrics"
+  "#textbookScore","#practiceSummary"
  ];
  const dynamicUiSelectors=[
   "button",".practice-subtitle",".practice-curriculum-title",".practice-ce-label",
