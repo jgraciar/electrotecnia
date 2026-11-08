@@ -1,4 +1,5 @@
 import {uiSpanish,uiValencian} from "./LabTranslationsMenus.ts";
+import {nativeMenuExtensions} from "./LabTranslationsNativeMenus.ts";
 // Traducciones añadidas para los componentes propios del Laboratorio.
 // Las claves originales de CircuitJS se conservan en sus catálogos oficiales.
 // Catálogos adicionales incorporados directamente para compatibilidad con Node y TypeScript.
@@ -99,6 +100,12 @@ for(const [code,translations] of Object.entries(extraNative)){
 for(const [code,overrides] of [["es",uiSpanish],["ca-es-valencia",uiValencian]] as const)
  for(const [key,value] of Object.entries(overrides)){
   if(!value.trim())throw Error("Traducción vacía: "+code+" "+key);
+  dictionaries[code].set(key,value);
+ }
+// Añadir exclusivamente los comandos no cubiertos por los catálogos de CircuitJS.
+for(const [code,translations] of Object.entries(nativeMenuExtensions))
+ for(const [key,value] of Object.entries(translations)){
+  if(!value.trim())throw Error("Texto nativo sin traducir: "+code+" "+key);
   dictionaries[code].set(key,value);
  }
 export function labTranslation(language:string,key:string):string|null{
